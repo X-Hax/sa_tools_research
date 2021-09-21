@@ -1,0 +1,18 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/build/bin
+/CommandLine/CompareTool/obj/x86
+/CommandLine/FunctionListGenerator/obj/x86
+/CommandLine/LabelTool/obj/x86
+/CommandLine/MLTExtract/obj/x86
+/CommandLine/NBTool/obj/x86
+/CommandLine/njConvert/obj
+/CommandLine/ObjScan/obj/x86
+/CommandLine/SETCodeGenerator/obj
+/CommandLine/StructExporter/obj/x86
+/CommandLine/USplit/obj/x86
+/CommandLine/VariableListGenerator/obj
+/SA1Tools/VMSEditor/obj/x86
+/.vs
