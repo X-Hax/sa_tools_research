@@ -14,6 +14,7 @@ namespace ObjScan
 		static public Dictionary<uint, string> addresslist;
 		static public Dictionary<uint, uint[]> actionlist;
 		static public bool bigendian;
+        static public bool keepland;
 		static public bool nometa;
 		static public bool keepchild;
 		static public bool reverse;
@@ -725,110 +726,119 @@ namespace ObjScan
 			Console.WriteLine("\r{0} models found", count);
 		}
 
-		static void CleanUpLandtable()
-		{
-			bool delete_basic = false;
-			bool delete_chunk = false;
-			bool delete_gc = false;
-			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
-			string model_extension = ".sa1mdl";
-			string model_dir = "basicmodels";
-			LandTableFormat landfmt = LandTableFormat.SA1;
-			foreach (uint landaddr in landtablelist)
-			{
-				switch (addresslist[landaddr])
-				{
-					case "landtable_SA1":
-						landfmt = LandTableFormat.SA1;
-						delete_basic = true;
-						break;
-					case "landtable_SADX":
-						landfmt = LandTableFormat.SADX;
-						delete_basic = true;
-						break;
-					case "landtable_SA2":
-						landfmt = LandTableFormat.SA2;
-						delete_basic = true;
-						delete_chunk = true;
-						break;
-					case "landtable_SA2B":
-						landfmt = LandTableFormat.SA2B;
-						delete_basic = true;
-						delete_gc = true;
-						delete_chunk = true;
-						break;
-				}
-				//Console.WriteLine("Landtable {0}, {1}, {2}", landaddr.ToString("X"), imageBase.ToString("X"), landfmt.ToString());
-				LandTable land = new LandTable(datafile, (int)landaddr, imageBase, landfmt);
+        static void CleanUpLandtable()
+        {
+            bool delete_basic = false;
+            bool delete_chunk = false;
+            bool delete_gc = false;
+            ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
+            string model_extension = ".sa1mdl";
+            string model_dir = "basicmodels";
+            LandTableFormat landfmt = LandTableFormat.SA1;
+            foreach (uint landaddr in landtablelist)
+            {
+                switch (addresslist[landaddr])
+                {
+                    case "landtable_SA1":
+                        landfmt = LandTableFormat.SA1;
+                        delete_basic = true;
+                        break;
+                    case "landtable_SADX":
+                        landfmt = LandTableFormat.SADX;
+                        delete_basic = true;
+                        break;
+                    case "landtable_SA2":
+                        landfmt = LandTableFormat.SA2;
+                        delete_basic = true;
+                        delete_chunk = true;
+                        break;
+                    case "landtable_SA2B":
+                        landfmt = LandTableFormat.SA2B;
+                        delete_basic = true;
+                        delete_gc = true;
+                        delete_chunk = true;
+                        break;
+                }
+                //Console.WriteLine("Landtable {0}, {1}, {2}", landaddr.ToString("X"), imageBase.ToString("X"), landfmt.ToString());
+                LandTable land = new LandTable(datafile, (int)landaddr, imageBase, landfmt);
                 string landdir = Path.Combine(dir, "levels", land.Name);
                 Directory.CreateDirectory(landdir);
-				if (land.COL.Count > 0)
-				{
-					foreach (COL col in land.COL)
-					{
-						for (int i = 0; i < 3; i++)
-						{
-							if (i == 0 && delete_basic)
-							{
-								model_dir = "basicmodels";
-								model_extension = ".sa1mdl";
-							}
-							else if (i == 1 && delete_chunk)
-							{
-								model_dir = "chunkmodels";
-								model_extension = ".sa2mdl";
-							}
-							else if (i == 2 && delete_gc)
-							{
-								model_dir = "gcmodels";
-								model_extension = ".sa2bmdl";
-							}
-							string col_filename = Path.Combine(dir, model_dir, col.Model.Name.Substring(7, col.Model.Name.Length - 7) + model_extension);
-							if (nodir)
-								col_filename = Path.Combine(dir, col.Model.Name.Substring(7, col.Model.Name.Length - 7) + model_extension);
-							if (File.Exists(col_filename))
-							{
-								uint itemaddr = uint.Parse(col.Model.Name.Substring(7, col.Model.Name.Length - 7), NumberStyles.AllowHexSpecifier);
-								File.Move(col_filename, Path.Combine(landdir, Path.GetFileName(col_filename)));
-								Console.WriteLine("Moving landtable object {0}", Path.GetFileName(col_filename));
-								if (addresslist.ContainsKey(itemaddr)) addresslist.Remove(itemaddr);
-							}
-						}
-					}
-					foreach (GeoAnimData anim in land.Anim)
-					{
-						for (int i = 0; i < 3; i++)
-						{
-							if (i == 0 && delete_basic)
-							{
-								model_dir = "basicmodels";
-								model_extension = ".sa1mdl";
-							}
-							else if (i == 1 && delete_chunk)
-							{
-								model_dir = "chunkmodels";
-								model_extension = ".sa2mdl";
-							}
-							else if (i == 2 && delete_gc)
-							{
-								model_dir = "gcmodels";
-								model_extension = ".sa2bmdl";
-							}
-							string anim_filename = Path.Combine(dir, model_dir, anim.Model.Name.Substring(7, anim.Model.Name.Length - 7) + model_extension);
-							if (nodir)
-								anim_filename = Path.Combine(dir, anim.Model.Name.Substring(7, anim.Model.Name.Length - 7) + model_extension);
-							if (File.Exists(anim_filename))
-							{
-								uint itemaddr = uint.Parse(anim.Model.Name.Substring(7, anim.Model.Name.Length - 7), NumberStyles.AllowHexSpecifier);
-								File.Delete(anim_filename);
-								Console.WriteLine("Deleting landtable GeoAnim object {0}", anim_filename);
-								if (addresslist.ContainsKey(itemaddr)) addresslist.Remove(itemaddr);
-							}
-						}
-					}
-				}
-			}
-		}
+                if (land.COL.Count > 0)
+                {
+                    foreach (COL col in land.COL)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            if (i == 0 && delete_basic)
+                            {
+                                model_dir = "basicmodels";
+                                model_extension = ".sa1mdl";
+                            }
+                            else if (i == 1 && delete_chunk)
+                            {
+                                model_dir = "chunkmodels";
+                                model_extension = ".sa2mdl";
+                            }
+                            else if (i == 2 && delete_gc)
+                            {
+                                model_dir = "gcmodels";
+                                model_extension = ".sa2bmdl";
+                            }
+                            string col_filename = Path.Combine(dir, model_dir, col.Model.Name.Substring(7, col.Model.Name.Length - 7) + model_extension);
+                            if (nodir)
+                                col_filename = Path.Combine(dir, col.Model.Name.Substring(7, col.Model.Name.Length - 7) + model_extension);
+                            if (File.Exists(col_filename))
+                            {
+                                uint itemaddr = uint.Parse(col.Model.Name.Substring(7, col.Model.Name.Length - 7), NumberStyles.AllowHexSpecifier);
+                                File.Move(col_filename, Path.Combine(landdir, Path.GetFileName(col_filename)));
+                                Console.WriteLine("Moving landtable object {0}", Path.GetFileName(col_filename));
+                                if (!keepland)
+                                    if (addresslist.ContainsKey(itemaddr)) 
+                                        addresslist.Remove(itemaddr);
+                            }
+                        }
+                    }
+                    foreach (GeoAnimData anim in land.Anim)
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            if (i == 0 && delete_basic)
+                            {
+                                model_dir = "basicmodels";
+                                model_extension = ".sa1mdl";
+                            }
+                            else if (i == 1 && delete_chunk)
+                            {
+                                model_dir = "chunkmodels";
+                                model_extension = ".sa2mdl";
+                            }
+                            else if (i == 2 && delete_gc)
+                            {
+                                model_dir = "gcmodels";
+                                model_extension = ".sa2bmdl";
+                            }
+                            string anim_filename = Path.Combine(dir, model_dir, anim.Model.Name.Substring(7, anim.Model.Name.Length - 7) + model_extension);
+                            if (nodir)
+                                anim_filename = Path.Combine(dir, anim.Model.Name.Substring(7, anim.Model.Name.Length - 7) + model_extension);
+                            if (File.Exists(anim_filename))
+                            {
+                                uint itemaddr = uint.Parse(anim.Model.Name.Substring(7, anim.Model.Name.Length - 7), NumberStyles.AllowHexSpecifier);
+                                Console.WriteLine("Moving landtable GeoAnim object {0}", anim_filename);
+                                File.Move(anim_filename, Path.Combine(landdir, Path.GetFileName(anim_filename)));
+                                if (File.Exists(Path.ChangeExtension(anim_filename, ".action")))
+                                {
+                                    File.Move(Path.ChangeExtension(anim_filename, ".action"), Path.Combine(landdir, Path.GetFileNameWithoutExtension(anim_filename) + ".action"));
+                                    // TODO: Insert a reference to the parent folder in the action file so that the animation runs correctly
+                                }
+                                if (!keepland)
+                                    if (addresslist.ContainsKey(itemaddr))
+                                        addresslist.Remove(itemaddr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
 		static void ScanMotions()
 		{
@@ -981,7 +991,7 @@ namespace ObjScan
 			if (args.Length == 0)
 			{
 				Console.WriteLine("Object Scanner scans a binary file or memory dump and extracts levels, models and/or motions from it.");
-				Console.WriteLine("Usage: objscan <GAME> <FILENAME> <KEY> <TYPE> [-offset addr] [-file modelfile] [-start addr] [-end addr] [-findall]\n[-noaction] [-nometa] [-keepchild]\n");
+				Console.WriteLine("Usage: objscan <GAME> <FILENAME> <KEY> <TYPE> [-offset addr] [-file modelfile] [-start addr] [-end addr] [-findall]\n[-noaction] [-nometa] [-keepland] [-keepchild]\n");
 				Console.WriteLine("Argument description:");
 				Console.WriteLine("<GAME>: SA1, SADX, SA2, SA2B. Add '_b' (e.g. SADX_b) to set Big Endian, use SADX_g for the Gamecube version of SADX.");
 				Console.WriteLine("<FILENAME>: The name of the binary file, e.g. sonic.exe.");
@@ -996,7 +1006,8 @@ namespace ObjScan
 				Console.WriteLine("-parts: Minimum number of model parts for motions.");
 				Console.WriteLine("-shortrot: Use int16 rotations in motions.");
 				Console.WriteLine("-start and -end: Range of addresses to scan.");
-				Console.WriteLine("-keepchild: Don't clean up child and sibling models.\n");
+                Console.WriteLine("-keepland: Include landtable models in generated split INI.\n");
+                Console.WriteLine("-keepchild: Don't clean up child and sibling models.\n");
 				Console.WriteLine("Press ENTER to exit");
 				Console.ReadLine();
 				return;
@@ -1090,7 +1101,10 @@ namespace ObjScan
 					case "-findall":
 						findall = true;
 						break;
-					case "-nometa":
+                    case "-keepland":
+                        keepland = true;
+                        break;
+                    case "-nometa":
 						nometa = true;
 						break;
 					case "-keepchild":
@@ -1194,9 +1208,9 @@ namespace ObjScan
 					skipactions = true;
 					break;
 			}
-			CleanUpLandtable();
 			if (!skipactions) ScanAnimations(modelfmt);
-			CreateSplitIni(Path.Combine(Environment.CurrentDirectory, Path.GetFileNameWithoutExtension(filename) + ".INI"), scan_sadx_model);
+            CleanUpLandtable();
+            CreateSplitIni(Path.Combine(Environment.CurrentDirectory, Path.GetFileNameWithoutExtension(filename) + ".INI"), scan_sadx_model);
 			//Clean up empty folders
 			bool land = false;
 			bool basicmodel = false;
