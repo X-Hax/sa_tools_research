@@ -15,7 +15,6 @@ namespace ObjScan
 		static public Dictionary<uint, uint[]> actionlist;
 		static public bool bigendian;
 		static public bool nometa;
-		static public bool keepland;
 		static public bool keepchild;
 		static public bool reverse;
 		static public bool skipactions;
@@ -29,6 +28,7 @@ namespace ObjScan
 		static public int modelparts;
 		static public bool shortrot;
 		static public byte[] datafile;
+
 		static void CreateSplitIni(string filename, bool dx)
 		{
 			if (addresslist.Count == 0) return;
@@ -145,6 +145,7 @@ namespace ObjScan
 			sw.Flush();
 			sw.Close();
 		}
+
 		static bool CompareModels(NJS_OBJECT model1, NJS_OBJECT model2)
 		{
 			if (model1.GetFlags() != model2.GetFlags()) return false;
@@ -169,10 +170,11 @@ namespace ObjScan
 			}
 			return true;
 		}
+
 		static uint FindModel(ModelFormat modelfmt, string filename)
 		{
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
-			//Basic only for now
+			// Basic only for now
 			uint result = 0;
 			ModelFile modelFile = new ModelFile(filename);
 			NJS_OBJECT originalmodel = modelFile.Model;
@@ -207,6 +209,7 @@ namespace ObjScan
 			}
 			return result;
 		}
+
 		static bool CheckModel(uint address, bool recursive, ModelFormat modelfmt)
 		{
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
@@ -380,6 +383,7 @@ namespace ObjScan
 			if (recursive) Console.WriteLine("{0} model at {1}", modelfmt.ToString(), address.ToString("X"));
 			return true;
 		}
+
 		static bool CheckLandTable(uint address, LandTableFormat landfmt)
 		{
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
@@ -455,6 +459,7 @@ namespace ObjScan
 			}
 			return true;
 		}
+
 		static void ScanLandtable(LandTableFormat landfmt)
 		{
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
@@ -502,6 +507,7 @@ namespace ObjScan
 			}
 			Console.WriteLine("\r{0} landtables found", landtablelist.Count);
 		}
+
 		static void AddAction(uint objectaddr, uint motionaddr)
 		{
 			string strpath = Path.Combine(dir, "basicmodels", objectaddr.ToString("X8") + ".action");
@@ -518,6 +524,7 @@ namespace ObjScan
 				tw.Close();
 			}
 		}
+
 		static int ScanActions(uint addr, uint nummdl, ModelFormat modelfmt)
 		{
 			int count = 0;
@@ -553,6 +560,7 @@ namespace ObjScan
 			}
 			return count;
 		}
+
 		static void ScanAnimations(ModelFormat modelfmt)
 		{
 			int count = 0;
@@ -655,6 +663,7 @@ namespace ObjScan
 
 		static void ScanModel(ModelFormat modelfmt)
 		{
+            uint scan_end = (end == 0) ? end : (uint)datafile.Length - 52; // 52 for NJS_OBJECT
 			int count = 0;
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
 			Console.WriteLine("Scanning for {0} models", modelfmt);
@@ -682,7 +691,7 @@ namespace ObjScan
 			}
 			if (!nodir)
 				Directory.CreateDirectory(Path.Combine(dir, model_dir));
-			for (uint address = start; address < end; address += 1)
+			for (uint address = start; address < scan_end; address += 1)
 			{
 				if (address % 1000 == 0) Console.Write("\r{0} ", address.ToString("X8"));
 				string fileOutputPath = Path.Combine(dir, model_dir, address.ToString("X8"));
@@ -697,7 +706,7 @@ namespace ObjScan
 					}
 					//else Console.WriteLine("found: {0}", address.ToString("X"));
 					NJS_OBJECT mdl = new NJS_OBJECT(datafile, (int)address, imageBase, modelfmt, new Dictionary<int, Attach>());
-					//Additional checks to prevent false positives with empty nodes
+					// Additional checks to prevent false positives with empty nodes
 					if (CheckForModelData(mdl))
 					{
 						ModelFile.CreateFile(fileOutputPath + model_extension, mdl, null, null, null, null, modelfmt, nometa);
@@ -715,6 +724,7 @@ namespace ObjScan
 			}
 			Console.WriteLine("\r{0} models found", count);
 		}
+
 		static void CleanUpLandtable()
 		{
 			bool delete_basic = false;
@@ -750,6 +760,8 @@ namespace ObjScan
 				}
 				//Console.WriteLine("Landtable {0}, {1}, {2}", landaddr.ToString("X"), imageBase.ToString("X"), landfmt.ToString());
 				LandTable land = new LandTable(datafile, (int)landaddr, imageBase, landfmt);
+                string landdir = Path.Combine(dir, "levels", land.Name);
+                Directory.CreateDirectory(landdir);
 				if (land.COL.Count > 0)
 				{
 					foreach (COL col in land.COL)
@@ -777,8 +789,8 @@ namespace ObjScan
 							if (File.Exists(col_filename))
 							{
 								uint itemaddr = uint.Parse(col.Model.Name.Substring(7, col.Model.Name.Length - 7), NumberStyles.AllowHexSpecifier);
-								File.Delete(col_filename);
-								Console.WriteLine("Deleting landtable object {0}", col_filename);
+								File.Move(col_filename, Path.Combine(landdir, Path.GetFileName(col_filename)));
+								Console.WriteLine("Moving landtable object {0}", Path.GetFileName(col_filename));
 								if (addresslist.ContainsKey(itemaddr)) addresslist.Remove(itemaddr);
 							}
 						}
@@ -817,6 +829,7 @@ namespace ObjScan
 				}
 			}
 		}
+
 		static void ScanMotions()
 		{
 			Console.WriteLine("Scanning for motions with at least {0} model parts... ", modelparts);
@@ -828,9 +841,9 @@ namespace ObjScan
 			for (uint address = start; address < end; address += 1)
 			{
 				if (address % 1000 == 0) Console.Write("\r{0} ", address.ToString("X8"));
-				//Check for a valid MDATA pointer
+				// Check for a valid MDATA pointer
 				uint mdatap = ByteConverter.ToUInt32(datafile, (int)address);
-				if (mdatap < imageBase || mdatap >= datafile.Length - 36 + imageBase || mdatap == 0)
+				if (mdatap < imageBase || mdatap >= datafile.Length - 12 + imageBase || mdatap == 0)
 				{
 					//Console.WriteLine("Mdatap {0} fail", mdatap.ToString("X8"));
 					continue;
@@ -887,7 +900,7 @@ namespace ObjScan
 					{
 						if (lost) continue;
 						uint pointer = ByteConverter.ToUInt32(datafile, (int)(mdatap - imageBase) + mdatasize * u + 4 * m);
-						if (pointer < imageBase || pointer >= datafile.Length - 36 + imageBase)
+						if (pointer < imageBase || pointer >= datafile.Length - 8 + imageBase)
 						{
 							if (pointer != 0)
 							{
@@ -947,6 +960,7 @@ namespace ObjScan
 			}
 			Console.WriteLine("\rFound {0} motions", count);
 		}
+
 		static void Main(string[] args)
 		{
 			bool scan_sa1_land = false;
@@ -967,7 +981,7 @@ namespace ObjScan
 			if (args.Length == 0)
 			{
 				Console.WriteLine("Object Scanner scans a binary file or memory dump and extracts levels, models and/or motions from it.");
-				Console.WriteLine("Usage: objscan <GAME> <FILENAME> <KEY> <TYPE> [-offset addr] [-file modelfile] [-start addr] [-end addr] [-findall]\n[-noaction] [-nometa] [-keepland] [-keepchild]\n");
+				Console.WriteLine("Usage: objscan <GAME> <FILENAME> <KEY> <TYPE> [-offset addr] [-file modelfile] [-start addr] [-end addr] [-findall]\n[-noaction] [-nometa] [-keepchild]\n");
 				Console.WriteLine("Argument description:");
 				Console.WriteLine("<GAME>: SA1, SADX, SA2, SA2B. Add '_b' (e.g. SADX_b) to set Big Endian, use SADX_g for the Gamecube version of SADX.");
 				Console.WriteLine("<FILENAME>: The name of the binary file, e.g. sonic.exe.");
@@ -982,7 +996,6 @@ namespace ObjScan
 				Console.WriteLine("-parts: Minimum number of model parts for motions.");
 				Console.WriteLine("-shortrot: Use int16 rotations in motions.");
 				Console.WriteLine("-start and -end: Range of addresses to scan.");
-				Console.WriteLine("-keepland: Don't clean up landtable models.");
 				Console.WriteLine("-keepchild: Don't clean up child and sibling models.\n");
 				Console.WriteLine("Press ENTER to exit");
 				Console.ReadLine();
@@ -1080,9 +1093,6 @@ namespace ObjScan
 					case "-nometa":
 						nometa = true;
 						break;
-					case "-keepland":
-						keepland = true;
-						break;
 					case "-keepchild":
 						keepchild = true;
 						break;
@@ -1120,7 +1130,7 @@ namespace ObjScan
 				datafile = datafile_new;
 			}
 			else datafile = datafile_temp;
-			if (end == 0) end = (uint)datafile.Length - 52;
+			if (end == 0) end = (uint)datafile.Length - 4;
 			if (imageBase == 0) imageBase = HelperFunctions.SetupEXE(ref datafile) ?? 0;
 			dir = Path.Combine(Environment.CurrentDirectory, Path.GetFileNameWithoutExtension(filename));
 			if (Directory.Exists(dir)) Directory.Delete(dir, true);
@@ -1184,7 +1194,7 @@ namespace ObjScan
 					skipactions = true;
 					break;
 			}
-			if (!keepland) CleanUpLandtable();
+			CleanUpLandtable();
 			if (!skipactions) ScanAnimations(modelfmt);
 			CreateSplitIni(Path.Combine(Environment.CurrentDirectory, Path.GetFileNameWithoutExtension(filename) + ".INI"), scan_sadx_model);
 			//Clean up empty folders
