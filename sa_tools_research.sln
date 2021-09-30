@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VariableListGenerator", "Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitExt", "CommandLine\splitExt\splitExt.csproj", "{2DC86B9B-D691-4D64-9F74-65420B56F6A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaTransfer", "CommandLine\MetaTransfer\MetaTransfer.csproj", "{B7756ECF-1006-4998-BC04-966B3F313E6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -193,6 +195,14 @@ Global
 		{2DC86B9B-D691-4D64-9F74-65420B56F6A7}.Release|Any CPU.Build.0 = Release|x86
 		{2DC86B9B-D691-4D64-9F74-65420B56F6A7}.Release|x86.ActiveCfg = Release|x86
 		{2DC86B9B-D691-4D64-9F74-65420B56F6A7}.Release|x86.Build.0 = Release|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Debug|Any CPU.Build.0 = Debug|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Debug|x86.ActiveCfg = Debug|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Debug|x86.Build.0 = Debug|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|Any CPU.ActiveCfg = Release|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|Any CPU.Build.0 = Release|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|x86.ActiveCfg = Release|x86
+		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
