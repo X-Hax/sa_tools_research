@@ -18,3 +18,8 @@
 /.vs
 /CommandLine/splitExt/obj/x86
 /CommandLine/MetaTransfer/obj/x86
+/CommandLine/RecreatePVM/obj/x86
+/CommandLine/BlockBitTool/obj/x86
+/build/tools
+/SoundBankEditor/obj/x86/Debug
+/SoundBankEditor/obj/x86/Release

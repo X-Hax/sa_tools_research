@@ -43,6 +43,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitExt", "CommandLine\spl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaTransfer", "CommandLine\MetaTransfer\MetaTransfer.csproj", "{B7756ECF-1006-4998-BC04-966B3F313E6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlockBitTool", "CommandLine\BlockBitTool\BlockBitTool.csproj", "{B47DBC13-8CF1-46C7-85AA-1640438D3D73}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecreatePVM", "CommandLine\RecreatePVM\RecreatePVM.csproj", "{E87779B8-0878-4601-A54D-6B00A1882FE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundBankEditor", "SoundBankEditor\SoundBankEditor.csproj", "{9B049A04-35C8-4B63-8095-330DD07E903F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -203,6 +209,30 @@ Global
 		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|Any CPU.Build.0 = Release|x86
 		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|x86.ActiveCfg = Release|x86
 		{B7756ECF-1006-4998-BC04-966B3F313E6A}.Release|x86.Build.0 = Release|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Debug|Any CPU.Build.0 = Debug|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Debug|x86.ActiveCfg = Debug|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Debug|x86.Build.0 = Debug|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Release|Any CPU.ActiveCfg = Release|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Release|Any CPU.Build.0 = Release|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Release|x86.ActiveCfg = Release|x86
+		{B47DBC13-8CF1-46C7-85AA-1640438D3D73}.Release|x86.Build.0 = Release|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Debug|Any CPU.Build.0 = Debug|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Debug|x86.ActiveCfg = Debug|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Debug|x86.Build.0 = Debug|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Release|Any CPU.ActiveCfg = Release|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Release|Any CPU.Build.0 = Release|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Release|x86.ActiveCfg = Release|x86
+		{E87779B8-0878-4601-A54D-6B00A1882FE7}.Release|x86.Build.0 = Release|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Debug|Any CPU.Build.0 = Debug|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Debug|x86.ActiveCfg = Debug|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Debug|x86.Build.0 = Debug|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Release|Any CPU.ActiveCfg = Release|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Release|Any CPU.Build.0 = Release|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Release|x86.ActiveCfg = Release|x86
+		{9B049A04-35C8-4B63-8095-330DD07E903F}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
