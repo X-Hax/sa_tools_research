@@ -126,19 +126,21 @@ namespace CompareTool
             {
                 if (mdl_src.Attach != null)
                     if (CompareAttach((BasicAttach)mdl_src.Attach, (BasicAttach)mdl_dst.Attach)) 
-                        result = true;
+                        return true;
                 if (mdl_src.Children.Count > 0)
                 {
+                    if (mdl_src.Children.Count != mdl_dst.Children.Count)
+                        return true;
                     for (int id = 0; id < mdl_src.Children.Count; id++)
                     {
                         if (mdl_src.Children[id].Attach != null) 
                             if (CompareAttach((BasicAttach)mdl_src.Children[id].Attach, (BasicAttach)mdl_dst.Children[id].Attach))
-                                result = true;
+                                return true;
                     }
                 }
                 if (mdl_src.Sibling != null && mdl_src.Sibling.Attach != null)
                     if (CompareAttach((BasicAttach)mdl_src.Sibling.Attach, (BasicAttach)mdl_dst.Sibling.Attach))
-                        result = true;
+                        return true;
             }
             catch (Exception ex)
             {
@@ -168,6 +170,8 @@ namespace CompareTool
                             Console.WriteLine("Model is different: {0}", files1[u]);
                             results.Add(files1[u]);
                         }
+                        else
+                            Console.WriteLine("Model is identical: {0}", files1[u]);
                         break;
                     }
                 }
