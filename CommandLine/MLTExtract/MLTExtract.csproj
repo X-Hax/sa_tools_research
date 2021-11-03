@@ -39,16 +39,30 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="VGAudio, Version=2.2.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\VGAudio.2.2.1\lib\net45\VGAudio.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dreamcast.cs" />
+    <Compile Include="Gamecube.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\sa_tools\Libraries\ArchiveLib\ArchiveLib.csproj">
+      <Project>{29BD5A4F-1400-471C-BCFC-F1EE2A0EC73A}</Project>
+      <Name>ArchiveLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\sa_tools\Libraries\FraGag.Compression.Prs\FraGag.Compression.Prs.csproj">
       <Project>{ec8bb2b3-1975-41b9-8d59-3a6403271112}</Project>
       <Name>FraGag.Compression.Prs</Name>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\sa_tools\Libraries\SAModel\SAModel.csproj">
+      <Project>{0EE5D36F-CACF-41E9-8C9A-76FFD946B22D}</Project>
+      <Name>SAModel</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\sa_tools\Libraries\SplitTools\SplitTools.csproj">
       <Project>{50847bdb-699d-4a2e-aaf7-1ea58e1ec48e}</Project>
@@ -58,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
