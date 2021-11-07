@@ -996,7 +996,7 @@ namespace ObjScan
 				Console.WriteLine("<GAME>: SA1, SADX, SA2, SA2B. Add '_b' (e.g. SADX_b) to set Big Endian, use SADX_g for the Gamecube version of SADX.");
 				Console.WriteLine("<FILENAME>: The name of the binary file, e.g. sonic.exe.");
 				Console.WriteLine("<KEY>: Binary key, e.g. 400000 for sonic.exe or C900000 for SA1 STG file. Use C900000 for Gamecube REL files.");
-				Console.WriteLine("<TYPE>: model, basicmodel, basicdxmodel, chunkmodel, gcmodel, landtable, all, match, motion");
+				Console.WriteLine("<TYPE>: model, basicmodel, basicdxmodel, chunkmodel, gcmodel, landtable, all, allmotion, match, motion");
 				Console.WriteLine("-offset: Start offset (hexadecimal).");
 				Console.WriteLine("-file: Path to .sa1mdl file to use in match mode.");
 				Console.WriteLine("-noaction: Don't scan for actions.");
@@ -1178,7 +1178,18 @@ namespace ObjScan
 						skipactions = true;
 					}
 					break;
-				case "landtable":
+                case "allmotion":
+                    if (scan_sa1_land) ScanLandtable(LandTableFormat.SA1);
+                    if (scan_sadx_land) ScanLandtable(LandTableFormat.SADX);
+                    if (scan_sa2_land) ScanLandtable(LandTableFormat.SA2);
+                    if (scan_sa2b_land) ScanLandtable(LandTableFormat.SA2B);
+                    if (scan_sa1_model) ScanModel(ModelFormat.Basic);
+                    if (scan_sadx_model) ScanModel(ModelFormat.BasicDX);
+                    if (scan_sa2_model) ScanModel(ModelFormat.Chunk);
+                    if (scan_sa2b_model) ScanModel(ModelFormat.GC);
+                    ScanMotions();
+                    break;
+                case "landtable":
 					if (scan_sa1_land) ScanLandtable(LandTableFormat.SA1);
 					if (scan_sadx_land) ScanLandtable(LandTableFormat.SADX);
 					if (scan_sa2_land) ScanLandtable(LandTableFormat.SA2);
