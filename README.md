@@ -6,7 +6,5 @@ This repository hosts tools that are no longer part of the main [SA Tools](https
 The tools hosted on this repository are for advanced users that know how to use the command line and compile tools manually.
 
 **Building SA Tools (Research)**
-* Clone this repo recursively with submodules.
-* Open the main solution `sa_tools_research.sln` and restore Nuget packages.
-* Open the submodule solution `sa_tools\SA Tools.sln` and restore Nuget packages.
-* Switch back to the main solution. You can now build normally.
+
+Make sure the repository is cloned recursively with the submodule. Open the `sa_tools_research.sln` solution in Visual Studio, wait for Nuget packages to restore and then it is ready to compile.
