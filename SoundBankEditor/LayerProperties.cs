@@ -22,12 +22,12 @@ namespace SoundBankEditor
             InitializeComponent();
             trackBarBendRangeMinus.Value = layer.BendRangeMinus;
             trackBarBendRangePlus.Value = layer.BendRangePlus;
-            trackBarDelay.Value = (int)layer.LayerDelay;
+            trackBarDelay.Value = (int)layer.LayerDelay / 4;
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
         {
-            resultDelay = (uint)trackBarDelay.Value;
+            resultDelay = (uint)trackBarDelay.Value * 4;
             resultBendRangeMinus = trackBarBendRangeMinus.Value;
             resultBendRangePlus = trackBarBendRangePlus.Value;
         }

@@ -94,7 +94,7 @@ namespace MLTExtract
             public bool LoopEnabled; // 0xC, short (1 if true)
             public ushort Format; // 0xE, always 0?
             public uint LoopStart; // 0x10
-            public uint LoopEnd; // 0x14
+            public uint LoopEnd; // 0x14, for PCM waveforms indicates number of samples
             public uint CurrentAddress; // 0x18
             public short[] Coefficients; // 0x1C, 16 shorts
             public ushort Gain; // 0x3C, always 0?
@@ -133,8 +133,10 @@ namespace MLTExtract
                     Console.WriteLine("\t\tCoeffs: {0}", coeffstring);
                 }
                 else
-                    Console.WriteLine("\t\tPCM");
-                Console.WriteLine("\t\tSample Rate: {0}, Waveform at: {1}", SampleRate.ToString(), WaveformPointer.ToString("X"));
+                {
+                    Console.WriteLine("\t\tPCM Sample Count: {0}", LoopEnd);
+                }
+                Console.WriteLine("\t\tSample Rate: {0}, Waveform at: {1}, Loop Start: {2}, Loop End: {3}", SampleRate.ToString(), WaveformPointer.ToString("X"), LoopStart, LoopEnd);
             }
         }
 
@@ -149,7 +151,7 @@ namespace MLTExtract
             byte FXLevel; // 0xB maybe
             byte BaseNote; // 0xC maybe
             byte FineTune; // 0xD, multiplied by 2
-            ushort Flags; // 0xE-0xF unknown
+            ushort BitRate; // 0xE-0xF unknown
             byte EnvAttackRate; // 0x10
             byte EnvDecayRate1; // 0x11
             byte EnvDecayLevel; // 0x12
@@ -161,18 +163,34 @@ namespace MLTExtract
 
             public GamecubeMidiProgramSplit(byte[] file, int address, string dir, int prg_id, int layer_id, int split_id)
             {
+                uint length;
                 WaveformID = ByteConverter.ToUInt32(file, address);
-                Console.WriteLine("\t\t\t\t\t Split at {0}, Wave ID: {1}", address.ToString("X"), WaveformID);
+                BitRate= ByteConverter.ToUInt16(file, address + 0xE);
+                Console.WriteLine("\t\t\t\t\t Split at {0}, Wave ID: {1}, Bit Rate: {2}", address.ToString("X"), WaveformID, BitRate);
                 GamecubeMidiProgramSample sample = SampleList[Math.Min((int)WaveformID, SampleList.Count-1)];
-                uint endAddr = (WaveformID < SampleList.Count - 1) ? SampleList[(int)WaveformID + 1].WaveformPointer : (uint)WaveformRawData.Length;
-                uint length = endAddr - sample.WaveformPointer;
                 if (sample.SampleCount != 0) // ADPCM
                     length = sample.NibbleCount / 2;
+                else // PCM
+                {
+                    switch (BitRate)
+                    {
+                        case 2:
+                            length = sample.LoopEnd;
+                            break;
+                        case 4:
+                        case 0:
+                        default:
+                    length = sample.LoopEnd * 2;
+                            break;
+                    }
+                }
                 Waveform = new byte[length];
+                Console.WriteLine("Length: {0}", length);
                 Array.Copy(WaveformRawData, sample.WaveformPointer, Waveform, 0, length);
                 string waveFilename = Path.Combine(dir, "P" + prg_id.ToString("D3") + "_L" + layer_id.ToString("") + "_" + split_id.ToString("D3") + ".wav");
 
                 // Save waveform
+                File.WriteAllBytes(Path.ChangeExtension(waveFilename, null), Waveform); // Save raw version
                 byte[] result;
                 if (sample.SampleCount != 0) // ADPCM
                 {
@@ -192,7 +210,7 @@ namespace MLTExtract
             ushort SplitsPointer; //0x2
             byte BendRangePlus; // 0x4
             byte BendRangeMinus; // 0x5
-            byte LayerDelay; // 0x6
+            uint LayerDelay; // 0x6
             // The rest is unknown/unused
             List<GamecubeMidiProgramSplit> Splits;
 
@@ -204,12 +222,17 @@ namespace MLTExtract
                 SplitsPointer = ByteConverter.ToUInt16(file, index + 2);
                 BendRangePlus = file[index + 4];
                 BendRangeMinus = file[index + 5];
-                LayerDelay= file[index + 6];
+                // 0x6 is unknown
+                LayerDelay = (uint)4 * (ByteConverter.ToUInt16(file, index + 7));
                 string unknownbytes = "";
-                for (int i = 0; i < 9; i++)
-                    unknownbytes += file[index + 7 + i].ToString();
+                for (int i = 0; i < 6; i++)
+                    unknownbytes += file[index + 9 + i].ToString() + " ";
                 Console.WriteLine("\t\t\t Layer at {0}, splits at {1}, split count {2}", index.ToString("X"), SplitsPointer.ToString("X"), NumSplits);
-                Console.WriteLine("\t\t\t\t BendPlus: {0}, BendMinus: {1}, Delay: {2}, Unknown bytes: {3}", BendRangePlus.ToString(), BendRangeMinus.ToString(), LayerDelay.ToString(), unknownbytes);
+                Console.WriteLine("\t\t\t\t BendPlus: {0}, BendMinus: {1}, Delay: {2}", BendRangePlus.ToString(), BendRangeMinus.ToString(), LayerDelay.ToString());
+                if (file[index + 6] != 0)
+                    Console.WriteLine("\t\t\t\t Unknown6: {0}", file[index + 6].ToString());
+                if (unknownbytes != "0 0 0 0 0 0 ")
+                    Console.WriteLine("\t\t\t\t Unknown bytes: {0}", unknownbytes);
                 for (int s = 0; s < NumSplits; s++)
                 {
                     Splits.Add(new GamecubeMidiProgramSplit(file, SplitsPointer + 48 * s, dir, prg_id, layer_id, s));
@@ -230,24 +253,6 @@ namespace MLTExtract
                 for (int l = 0; l < numlayers; l++)
                     Layers.Add(new GamecubeMidiProgramLayer(file, layerpointer + 16 * l, dir, prg_id, l));
             }
-        }
-
-        public static void SaveWaveform(GamecubeMidiProgramSample meta, int waveDataLength, string filename)
-        {
-            byte[] result;
-            if (!Directory.Exists(Path.GetDirectoryName(filename)))
-                Directory.CreateDirectory(Path.GetDirectoryName(filename));
-            byte[] wavedata = new byte[waveDataLength];
-            Array.Copy(WaveformRawData, meta.WaveformPointer, wavedata, 0, waveDataLength);
-            if (meta.SampleCount != 0) // ADPCM
-            {
-                wavedata = DecodeGamecubeADPCM(wavedata, meta.Coefficients);
-                result = AddWavHeader(wavedata, meta.SampleRate, 16);
-            }
-            else
-                result = AddWavHeader(ReverseWaveFormEndian(wavedata), meta.SampleRate, 16);
-            File.WriteAllBytes(filename, result);
-            //File.WriteAllBytes(Path.ChangeExtension(filename, null), wavedata);
         }
 
         public static byte[] ReverseWaveFormEndian(byte[] bigend)
@@ -279,7 +284,7 @@ namespace MLTExtract
             // Save velocity curves
             for (int v = 0; v < numCurves; v++)
             {
-                BankVelocityCurve curve = new BankVelocityCurve(file, velocityPointer, v);
+                BankVelocityCurve curve = new BankVelocityCurve(file, velocityPointer + v * 128, v);
                 IniSerializer.Serialize(curve, Path.Combine(dir, "CURVE" + v.ToString("D2") + ".ini"));
             }
 

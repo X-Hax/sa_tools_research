@@ -88,7 +88,7 @@ namespace SoundBankEditor
         {
             listViewLayers.Items.Clear();
             foreach (MidiProgramLayer layer in currentBank.Programs[currentProgram].Layers)
-                listViewLayers.Items.Add(new ListViewItem(new[] { currentBank.Programs[currentProgram].Layers.IndexOf(layer).ToString(), layer.BendRangeMinus.ToString(), layer.BendRangePlus.ToString(), (4 * layer.LayerDelay).ToString(), layer.CountSplits().ToString(), layer.GetSize().ToString(sizeConversion) }));
+                listViewLayers.Items.Add(new ListViewItem(new[] { currentBank.Programs[currentProgram].Layers.IndexOf(layer).ToString(), layer.BendRangeMinus.ToString(), layer.BendRangePlus.ToString(), layer.LayerDelay.ToString(), layer.CountSplits().ToString(), layer.GetSize().ToString(sizeConversion) }));
         }
 
         private void RefreshSplitList()

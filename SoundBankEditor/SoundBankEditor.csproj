@@ -1,200 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{9B049A04-35C8-4B63-8095-330DD07E903F}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SoundBankEditor</RootNamespace>
-    <AssemblyName>SoundBankEditor</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\build\tools\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\build\tools\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup />
-  <PropertyGroup />
-  <PropertyGroup>
-    <ApplicationIcon>
-    </ApplicationIcon>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-  </PropertyGroup>
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+		<OutputPath>..\build\tools\</OutputPath>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<DebugType>embedded</DebugType>
+		<Platforms>x64;x86</Platforms>
+	</PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
+    <ProjectReference Include="..\sa_tools\Libraries\ArchiveLib\ArchiveLib.csproj" />
+    <ProjectReference Include="..\sa_tools\Libraries\SplitTools\SplitTools.csproj" />
+    <ProjectReference Include="..\sa_tools\Libraries\SAEditorCommon\SAEditorCommon.csproj" />
+    <ProjectReference Include="..\sa_tools\Libraries\SAModel\SAModel.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ProgramBankEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ProgramBankEditor.Designer.cs">
-      <DependentUpon>ProgramBankEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Formats\MSB.cs" />
-    <Compile Include="LayerProperties.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="LayerProperties.Designer.cs">
-      <DependentUpon>LayerProperties.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Formats\MPB.cs" />
-    <Compile Include="ProgramProperties.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ProgramProperties.Designer.cs">
-      <DependentUpon>ProgramProperties.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="SequenceBankEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SequenceBankEditor.Designer.cs">
-      <DependentUpon>SequenceBankEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SplitEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SplitEditor.Designer.cs">
-      <DependentUpon>SplitEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SplitProperties.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SplitProperties.Designer.cs">
-      <DependentUpon>SplitProperties.cs</DependentUpon>
-    </Compile>
-    <Compile Include="VelocityCurveEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="VelocityCurveEditor.Designer.cs">
-      <DependentUpon>VelocityCurveEditor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="WaveformStuff.cs" />
+    <Compile Remove="Resource1.Designer.cs" />
+    <EmbeddedResource Remove="Resource1.resx" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\sa_tools\Libraries\ArchiveLib\ArchiveLib.csproj">
-      <Project>{29BD5A4F-1400-471C-BCFC-F1EE2A0EC73A}</Project>
-      <Name>ArchiveLib</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\sa_tools\Libraries\SplitTools\SplitTools.csproj">
-      <Project>{50847bdb-699d-4a2e-aaf7-1ea58e1ec48e}</Project>
-      <Name>SplitTools</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\sa_tools\Libraries\SAEditorCommon\SAEditorCommon.csproj">
-      <Project>{0d72870c-29a2-4b16-b016-2f2e266a0e64}</Project>
-      <Name>SAEditorCommon</Name>
-      <Private>False</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\sa_tools\Libraries\SAModel\SAModel.csproj">
-      <Project>{0EE5D36F-CACF-41E9-8C9A-76FFD946B22D}</Project>
-      <Name>SAModel</Name>
-      <Private>False</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="app.manifest" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ProgramBankEditor.resx">
-      <DependentUpon>ProgramBankEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LayerProperties.resx">
-      <DependentUpon>LayerProperties.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ProgramProperties.resx">
-      <DependentUpon>ProgramProperties.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SplitEditor.resx">
-      <DependentUpon>SplitEditor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SplitProperties.resx">
-      <DependentUpon>SplitProperties.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="VelocityCurveEditor.resx">
-      <DependentUpon>VelocityCurveEditor.cs</DependentUpon>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DefaultCurve1.bin" />
-    <None Include="Resources\DefaultCurve2.bin" />
-    <None Include="Resources\DefaultCurve3.bin" />
-    <None Include="Resources\DefaultCurve4.bin" />
-    <None Include="Resources\help.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\new.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\import.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\export.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\open.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\save.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\saveas.png" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>xcopy /D /Y "$(SolutionDir)sa_tools\build\tools\lib\*.*" "$(ProjectDir)..\build\tools\lib\"</PostBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
