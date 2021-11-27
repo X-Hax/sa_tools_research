@@ -82,11 +82,16 @@ namespace MetaTransfer
                                         // or texlist INI
                                         else if (item.Value.CustomProperties.ContainsKey("texnames"))
                                             meta.Add(item.Value.CustomProperties["texnames"]);
-                                        result.Add(NormalizePath(item.Value.Filename), string.Join("|", meta));
-                                        Console.WriteLine(item.Value.Filename + ": {0}", item.Key);
+                                        if (!result.ContainsKey(NormalizePath(item.Value.Filename)))
+                                        {
+                                            result.Add(NormalizePath(item.Value.Filename), string.Join("|", meta));
+                                            Console.WriteLine("\t" + item.Value.Filename + ": {0}", item.Key);
+                                        }
+                                        else
+                                            Console.WriteLine("\tDuplicate model file found: {0}", NormalizePath(item.Value.Filename));
                                     }
                                     else
-                                        Console.WriteLine("Duplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                        Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
                                     break;
                             }
                         }
@@ -116,10 +121,10 @@ namespace MetaTransfer
                                         if (!result.ContainsKey(item.Value.Filename))
                                         {
                                             result.Add(NormalizePath(item.Value.Filename), item.Value.CustomProperties["meta"]);
-                                            Console.WriteLine(item.Value.Filename + ": {0}", item.Value.CustomProperties["meta"]);
+                                            Console.WriteLine("\t" + item.Value.Filename + ": {0}", item.Value.CustomProperties["meta"]);
                                         }
                                         else
-                                            Console.WriteLine("Duplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                            Console.WriteLine("\t Duplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
                                     }
                                     break;
                                 // Model array
@@ -137,7 +142,7 @@ namespace MetaTransfer
                                             string modelpath;
                                             if (!item.Value.CustomProperties.ContainsKey("filename" + i.ToString()))
                                             {
-                                                Console.WriteLine("Warning: Filename for {0}:{1} not specified", item.Key, i.ToString());
+                                                Console.WriteLine("\tWarning: Filename for {0}:{1} not specified", item.Key, i.ToString());
                                                 modelpath = Path.Combine(item.Value.Filename, i.ToString("D3") + modelext);
                                             }
                                             else
@@ -145,10 +150,10 @@ namespace MetaTransfer
                                             if (!result.ContainsKey(modelpath))
                                             {
                                                 result.Add(NormalizePath(modelpath), item.Value.CustomProperties["meta" + i.ToString()]);
-                                                Console.WriteLine(modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString()]);
+                                                Console.WriteLine("\t" + modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString()]);
                                             }
                                             else
-                                                Console.WriteLine("Duplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                                Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
                                         }
                                     }
                                     break;
@@ -162,10 +167,10 @@ namespace MetaTransfer
                                             if (!result.ContainsKey(modelpath))
                                             {
                                                 result.Add(NormalizePath(modelpath), item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
-                                                Console.WriteLine(modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
+                                                Console.WriteLine("\t" + modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
                                             }
                                             else
-                                                Console.WriteLine("Duplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                                Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
                                         }
                                     }
                                         break;
@@ -186,11 +191,11 @@ namespace MetaTransfer
                             {
                                 for (int i = 1; i < nbMeta.Length; i++)
                                     resultNBMeta.Add(nbMeta[i]);
-                                Console.WriteLine("{0}:{1}", nbMeta[0] + modelext, resultNBMeta[0]);
+                                Console.WriteLine("\t{0}:{1}", nbMeta[0] + modelext, resultNBMeta[0]);
                                 result.Add(NormalizePath(nbMeta[0] + modelext), string.Join("|", resultNBMeta));
                             }
                             else
-                                Console.WriteLine("No metadata for item {0}:{1}", nbitem.Key.ToString(), nbMeta[0] + modelext);
+                                Console.WriteLine("\tNo metadata for item {0}:{1}", nbitem.Key.ToString(), nbMeta[0] + modelext);
                         }
                         break;
                     default:
@@ -260,14 +265,14 @@ namespace MetaTransfer
                                                 }
                                             }
                                             result.Add(meta[0], item.Value);
-                                            Console.WriteLine(item.Value.Filename + ": {0}", meta[0]);
+                                            Console.WriteLine("\t" + item.Value.Filename + ": {0}", meta[0]);
                                         }
                                         else
-                                            Console.WriteLine("Duplicate entry: {0}", meta[0]);
+                                            Console.WriteLine("\tDuplicate entry: {0}", meta[0]);
                                     }
                                     else
                                     {
-                                        Console.WriteLine("Item not found: {0} in {1}", item.Value.Filename, splitData.IniFile);
+                                        Console.WriteLine("\tItem not found: {0} in {1}", item.Value.Filename, splitData.IniFile);
                                         result.Add(item.Key, item.Value);
                                     }
                                     break;
@@ -313,7 +318,7 @@ namespace MetaTransfer
                                     }
                                     else
                                     {
-                                        Console.WriteLine("Item not found: {0}", item.Value.Filename);
+                                        Console.WriteLine("\tItem not found: {0}", item.Value.Filename);
                                         resultdll.Add(item.Key, item.Value);
                                     }
                                     break;
@@ -345,7 +350,7 @@ namespace MetaTransfer
                                         if (metadata.ContainsKey(NormalizePath(modelpath)))
                                         {
                                             item.Value.CustomProperties["meta" + i.ToString() + "_m"] = metadata[NormalizePath(modelpath)];
-                                            Console.WriteLine(modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
+                                            Console.WriteLine("\t" + modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
                                         }
                                     }
                                     resultdll.Add(item.Key, item.Value);
@@ -372,11 +377,11 @@ namespace MetaTransfer
                                 resultNBWithName.Add(NormalizePath(nbMeta[0]));
                                 resultNBWithName.Add(metadata[NormalizePath(nbMeta[0] + modelext)]);
                                 resultNB.Add(nbitem.Key, string.Join("|", resultNBWithName));
-                                Console.WriteLine("{0}:{1}", nbMeta[0] + modelext, resultNBWithName[1]);
+                                Console.WriteLine("\t{0}:{1}", nbMeta[0] + modelext, resultNBWithName[1]);
                             }
                             else
                             {
-                                Console.WriteLine("Item not found: {0}", nbMeta[0] + modelext);
+                                Console.WriteLine("\tItem not found: {0}", nbMeta[0] + modelext);
                                 resultNB.Add(nbitem.Key, NormalizePath(nbMeta[0]));
                             }
                         }
