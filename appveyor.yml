@@ -17,6 +17,7 @@ build:
   publish_nuget: true
   include_nuget_references: true
   verbosity: minimal
+  project: sa_tools_research.sln
 after_build:
 - cmd: >-
    
