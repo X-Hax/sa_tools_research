@@ -18,6 +18,7 @@ namespace SoundBankEditor
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             baseNotes = CreateBaseNotes();
             if (args.Length > 0)
             switch (Path.GetExtension(args[0].ToLowerInvariant()))
