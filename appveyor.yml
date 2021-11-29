@@ -21,7 +21,7 @@ build:
 after_build:
 - cmd: >-
    
-    cd C:\projects\sa-tools-research\
+    cd C:\projects\sa-tools-research\build\
     
     7z a "C:\projects\sa-tools-research\SAToolsResearch.7z" *
 artifacts:
