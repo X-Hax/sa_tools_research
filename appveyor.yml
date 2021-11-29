@@ -1,0 +1,21 @@
+version: .{build}
+image: Visual Studio 2019
+configuration: Release
+init:
+- ps: Update-AppveyorBuild -Version "$(Get-Date -format yyyy.MM.dd.HH.mm.ss)"
+nuget:
+  project_feed: true
+before_build:
+- cmd: nuget restore
+build:
+  publish_nuget: true
+  include_nuget_references: true
+  verbosity: minimal
+after_build:
+- cmd: >-
+   
+    cd C:\projects\sa-tools-research\
+    
+    7z a "C:\projects\sa-tools-research\SAToolsResearch.7z" *
+artifacts:
+- path: SAToolsResearch.7z
