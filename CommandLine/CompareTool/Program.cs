@@ -608,21 +608,21 @@ namespace CompareTool
                 {
                     // Write texids
                     if (item2 is MaterialTextureDiffData tex)
-                        tw.WriteLine("((NJS_MATERIAL*){0})->attr_texID={1};",
+                        tw.WriteLine("((NJS_MATERIAL*){0})->attr_texID = {1};",
                             dllHandle == "" ? "0x" + (0x400000 + item.Key + NJS_MATERIAL.Size * tex.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + NJS_MATERIAL.Size * tex.ArrayID).ToString("X8"),
                             tex.TexID);
 
                     // Write exponents
                     else if (item2 is MaterialExponentDiffData exp)
-                        tw.WriteLine("((NJS_MATERIAL*){0})->exponent={1};",
+                        tw.WriteLine("((NJS_MATERIAL*){0})->exponent = {1};",
                              dllHandle == "" ? "0x" + (0x400000 + item.Key + NJS_MATERIAL.Size * exp.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + NJS_MATERIAL.Size * exp.ArrayID).ToString("X8"),
                             exp.Exponent);
 
                     // Write material flags
                     else if (item2 is MaterialFlagsDiffData flg)
-                        tw.WriteLine("((NJS_MATERIAL*){0})->attrflags=0x{1};",
+                        tw.WriteLine("((NJS_MATERIAL*){0})->attrflags = 0x{1};",
                             dllHandle == "" ? "0x" + (0x400000 + item.Key + NJS_MATERIAL.Size * flg.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + NJS_MATERIAL.Size * flg.ArrayID).ToString("X8"),
                             flg.Flags.ToString("X8"));
@@ -630,22 +630,22 @@ namespace CompareTool
                     // Write UVs
                     else if (item2 is UVDiffData uvd)
                     {
-                        string addrstring = dllHandle == "" ? "0x" + (0x400000 + item.Key + UV.Size * uvd.ArrayID).ToString("X8") :
-                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + UV.Size * uvd.ArrayID).ToString("X8");
-                        tw.WriteLine("((NJS_TEX*){0})->u={1};", addrstring, uvd.U);
-                        tw.WriteLine("((NJS_TEX*){0})->v={1};", addrstring, uvd.V);
+                        tw.WriteLine("*(NJS_TEX*){0} = {{ {1}, {2} }};", 
+                            dllHandle == "" ? "0x" + (0x400000 + item.Key + UV.Size * uvd.ArrayID).ToString("X8") :
+                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + UV.Size * uvd.ArrayID).ToString("X8"), 
+                            uvd.U, uvd.V);
                     }
 
                     // Write colors
                     else if (item2 is ColorDiffData clr)
-                        tw.WriteLine("((NJS_COLOR*){0})->color=0x{1}{2}{3}{4};",
+                        tw.WriteLine("((NJS_COLOR*){0})->color = 0x{1}{2}{3}{4};",
                              dllHandle == "" ? "0x" + (0x400000 + item.Key + 4 * clr.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 4 * clr.ArrayID).ToString("X8"),
-                            clr.A.ToString("X"), clr.R.ToString("X"), clr.G.ToString("X"), clr.B.ToString("X"));
+                            clr.A.ToString("X2"), clr.R.ToString("X2"), clr.G.ToString("X2"), clr.B.ToString("X2"));
 
                     // Write vertices/normals
                     else if (item2 is VertexNormalDiffData vtx)
-                        tw.WriteLine("*(NJS_VECTOR*){0}={ {1}, {2}, {3} };",
+                        tw.WriteLine("*(NJS_VECTOR*){0} = {{ {1}, {2}, {3} }};",
                              dllHandle == "" ? "0x" + (0x400000 + item.Key + Vertex.Size * vtx.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + Vertex.Size * vtx.ArrayID).ToString("X8"),
                             vtx.X, vtx.Y, vtx.Z);
