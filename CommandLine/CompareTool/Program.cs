@@ -258,6 +258,14 @@ namespace CompareTool
                                 return true;
                     }
                 }
+                int flags_src = (int)mdl_src.GetFlags();
+                int flags_dst = (int)mdl_dst.GetFlags();
+                if (flags_src != flags_dst)
+                {
+                    Console.WriteLine("Evalflags are different: {0} vs {1}", flags_src.ToString("X8"), flags_dst.ToString("X8"));
+                    Console.WriteLine("Evalflags are different: {0} vs {1}", mdl_src.GetFlags().ToString(), mdl_dst.GetFlags().ToString());
+                    return true;
+                }
                 if (mdl_src.Attach != null)
                     if (CompareAttach((BasicAttach)mdl_src.Attach, (BasicAttach)mdl_dst.Attach))
                         return true;
@@ -332,222 +340,264 @@ namespace CompareTool
             int addr = 0; // Address of an item to be replaced
             List<ModelDiffData> items; // List of differences for materials, UVs 
             bool result = false;
+
             // Compare materials
-            if (att_src.Material != null && att_src.Material.Count != att_dst.Material.Count)
+            if (att_src.Material.Count != att_dst.Material.Count)
             {
                 Console.WriteLine("Material count different: {0} vs {1}", att_src.Material.Count, att_dst.Material.Count);
                 result = true;
                 dontadd = true;
             }
-            items = new();
-            addr = int.Parse(att_src.MaterialName.Replace("matlist_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
-            Console.WriteLine("Address: {0}", att_src.MaterialName);
-            for (int m = 0; m < att_src.Material.Count; m++)
+            else if (att_src.Material.Count > 0)
             {
-                NJS_MATERIAL[] mat_src = att_src.Material.ToArray();
-                NJS_MATERIAL[] mat_dst = att_dst.Material.ToArray();
-                if (m >= mat_dst.Length) break;
-                if (mat_src[m].TextureID != mat_dst[m].TextureID)
+                items = new();
+                addr = int.Parse(att_src.MaterialName.Replace("matlist_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                for (int m = 0; m < att_src.Material.Count; m++)
                 {
-                    Console.WriteLine("Different texture IDs in material {0}: {1} vs {2}", m, mat_src[m].TextureID, mat_dst[m].TextureID, mat_src[m].Flags.ToString("X8"), mat_dst[m].Flags.ToString("X8"));
-                    items.Add(new MaterialTextureDiffData { ArrayID = m, TexID = mat_dst[m].TextureID });
-                    result = true;
+                    NJS_MATERIAL[] mat_src = att_src.Material.ToArray();
+                    NJS_MATERIAL[] mat_dst = att_dst.Material.ToArray();
+                    if (m >= mat_dst.Length) break;
+                    if (mat_src[m].TextureID != mat_dst[m].TextureID)
+                    {
+                        Console.WriteLine("Different texture IDs in material {0}: {1} vs {2}", m, mat_src[m].TextureID, mat_dst[m].TextureID, mat_src[m].Flags.ToString("X8"), mat_dst[m].Flags.ToString("X8"));
+                        items.Add(new MaterialTextureDiffData { ArrayID = m, TexID = mat_dst[m].TextureID });
+                        result = true;
+                    }
+                    if (mat_src[m].Flags != mat_dst[m].Flags)
+                    {
+                        Console.WriteLine("Different flags in material {0}: {1} vs {2}", m, mat_src[m].Flags.ToString("X8"), mat_dst[m].Flags.ToString("X8"));
+                        items.Add(new MaterialFlagsDiffData { ArrayID = m, Flags = mat_dst[m].Flags });
+                        result = true;
+                    }
+                    if (mat_src[m].Exponent != mat_dst[m].Exponent)
+                    {
+                        Console.WriteLine("Different exponent in material {0}: {1} vs {2}", m, mat_src[m].Exponent, mat_dst[m].Exponent);
+                        items.Add(new MaterialExponentDiffData { ArrayID = m, Exponent = mat_dst[m].Exponent });
+                        result = true;
+                    }
+                    if (mat_src[m].DiffuseColor != mat_dst[m].DiffuseColor)
+                    {
+                        Console.WriteLine("Different diffuse color for material {0}: {1} vs {2}", m, mat_src[m].DiffuseColor.ToArgb().ToString("X"), mat_dst[m].DiffuseColor.ToArgb().ToString("X"));
+                        items.Add(new ColorDiffData { ArrayID = m, A = mat_dst[m].DiffuseColor.A, R = mat_dst[m].DiffuseColor.R, G = mat_dst[m].DiffuseColor.G, B = mat_dst[m].DiffuseColor.B });
+                        result = true;
+                    }
                 }
-                if (mat_src[m].Flags != mat_dst[m].Flags)
-                {
-                    Console.WriteLine("Different flags in material {0}: {1} vs {2}", m, mat_src[m].Flags.ToString("X8"), mat_dst[m].Flags.ToString("X8"));
-                    items.Add(new MaterialFlagsDiffData { ArrayID = m, Flags = mat_dst[m].Flags });
-                    result = true;
-                }
-                if (mat_src[m].Exponent != mat_dst[m].Exponent)
-                {
-                    Console.WriteLine("Different exponent in material {0}: {1} vs {2}", m, mat_src[m].Exponent, mat_dst[m].Exponent);
-                    items.Add(new MaterialExponentDiffData { ArrayID = m, Exponent = mat_dst[m].Exponent });
-                    result = true;
-                }
-                if (mat_src[m].DiffuseColor != mat_dst[m].DiffuseColor)
-                {
-                    Console.WriteLine("Different diffuse color for material {0}: {1} vs {2}", m, mat_src[m].DiffuseColor.ToArgb().ToString("X"), mat_dst[m].DiffuseColor.ToArgb().ToString("X"));
-                    items.Add(new ColorDiffData { ArrayID = m, A = mat_dst[m].DiffuseColor.A, R = mat_dst[m].DiffuseColor.R, G = mat_dst[m].DiffuseColor.G, B = mat_dst[m].DiffuseColor.B });
-                    result = true;
-                }
+                if (!dontadd)
+                    AddDiffItems(addr, items);
             }
-            if (!dontadd)
-                AddDiffItems(addr, items);
 
             // Compare vertices
             if (att_src.Vertex.Length != att_dst.Vertex.Length)
             {
-                Console.WriteLine("Vertex count different! {0} vs {1}", att_src.Vertex.Length, att_dst.Vertex.Length);
+                Console.WriteLine("Vertex count different: {0} vs {1}", att_src.Vertex.Length, att_dst.Vertex.Length);
                 dontadd = true;
                 result = true;
             }
-            items = new();
-            addr = int.Parse(att_src.VertexName.Replace("vertex_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
-            for (int m = 0; m < att_src.Vertex.Length; m++)
+            else
             {
-                if (m >= att_dst.Vertex.Length) break;
-                bool x = false;
-                bool y = false;
-                bool z = false;
-                if (Math.Abs(att_src.Vertex[m].X - att_dst.Vertex[m].X) > 0.01f)
-                    x = true;
-                if (Math.Abs(att_src.Vertex[m].Y - att_dst.Vertex[m].Y) > 0.01f)
-                    y = true;
-                if (Math.Abs(att_src.Vertex[m].Z - att_dst.Vertex[m].Z) > 0.01f)
-                    z = true;
-                if (x || y || z)
+                items = new();
+                addr = int.Parse(att_src.VertexName.Replace("vertex_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                for (int m = 0; m < att_src.Vertex.Length; m++)
                 {
-                    Console.WriteLine("Different vertex {0}: {1} vs {2}", m, att_src.Vertex[m], att_dst.Vertex[m]);
-                    if (!dontadd)
-                        items.Add(new VertexNormalDiffData { ArrayID = m, X = att_dst.Vertex[m].X, Y = att_dst.Vertex[m].Y, Z = att_dst.Vertex[m].Z });
-                    result = true;
+                    if (m >= att_dst.Vertex.Length) break;
+                    bool x = false;
+                    bool y = false;
+                    bool z = false;
+                    if (Math.Abs(att_src.Vertex[m].X - att_dst.Vertex[m].X) > 0.01f)
+                        x = true;
+                    if (Math.Abs(att_src.Vertex[m].Y - att_dst.Vertex[m].Y) > 0.01f)
+                        y = true;
+                    if (Math.Abs(att_src.Vertex[m].Z - att_dst.Vertex[m].Z) > 0.01f)
+                        z = true;
+                    if (x || y || z)
+                    {
+                        Console.WriteLine("Different vertex {0}: {1} vs {2}", m, att_src.Vertex[m], att_dst.Vertex[m]);
+                        if (!dontadd)
+                            items.Add(new VertexNormalDiffData { ArrayID = m, X = att_dst.Vertex[m].X, Y = att_dst.Vertex[m].Y, Z = att_dst.Vertex[m].Z });
+                        result = true;
+                    }
                 }
+                if (!dontadd)
+                    AddDiffItems(addr, items);
             }
-            if (!dontadd)
-                AddDiffItems(addr, items);
 
             // Compare normals
             if (att_src.Normal.Length != att_dst.Normal.Length)
             {
                 dontadd = true;
-                Console.WriteLine("Normal count different! {0} vs {1}", att_src.Normal.Length, att_dst.Normal.Length);
+                Console.WriteLine("Normal count different: {0} vs {1}", att_src.Normal.Length, att_dst.Normal.Length);
                 result = true;
             }
-            items = new();
-            addr = int.Parse(att_src.NormalName.Replace("normal_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
-            for (int m = 0; m < att_src.Normal.Length; m++)
+            else
             {
-                if (m >= att_dst.Normal.Length) break;
-                bool x = false;
-                bool y = false;
-                bool z = false;
-                if (Math.Abs(att_src.Normal[m].X - att_dst.Normal[m].X) > 0.01f)
-                    x = true;
-                if (Math.Abs(att_src.Normal[m].Y - att_dst.Normal[m].Y) > 0.01f)
-                    y = true;
-                if (Math.Abs(att_src.Normal[m].Z - att_dst.Normal[m].Z) > 0.01f)
-                    z = true;
-                if (x || y || z)
+                items = new();
+                addr = int.Parse(att_src.NormalName.Replace("normal_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                for (int m = 0; m < att_src.Normal.Length; m++)
                 {
-                    Console.WriteLine("Different normal {0}: {1} vs {2}", m, att_src.Normal[m], att_dst.Normal[m]);
-                    if (!dontadd)
-                        items.Add(new VertexNormalDiffData { ArrayID = m, X = att_dst.Normal[m].X, Y = att_dst.Normal[m].Y, Z = att_dst.Normal[m].Z });
-                    result = true;
+                    if (m >= att_dst.Normal.Length) break;
+                    bool x = false;
+                    bool y = false;
+                    bool z = false;
+                    if (Math.Abs(att_src.Normal[m].X - att_dst.Normal[m].X) > 0.01f)
+                        x = true;
+                    if (Math.Abs(att_src.Normal[m].Y - att_dst.Normal[m].Y) > 0.01f)
+                        y = true;
+                    if (Math.Abs(att_src.Normal[m].Z - att_dst.Normal[m].Z) > 0.01f)
+                        z = true;
+                    if (x || y || z)
+                    {
+                        Console.WriteLine("Different normal {0}: {1} vs {2}", m, att_src.Normal[m], att_dst.Normal[m]);
+                        if (!dontadd)
+                            items.Add(new VertexNormalDiffData { ArrayID = m, X = att_dst.Normal[m].X, Y = att_dst.Normal[m].Y, Z = att_dst.Normal[m].Z });
+                        result = true;
+                    }
                 }
+                if (!dontadd)
+                    AddDiffItems(addr, items);
             }
-            if (!dontadd)
-                AddDiffItems(addr, items);
 
             // Compare meshsets
             if (att_src.Mesh.Count != att_dst.Mesh.Count)
             {
-                Console.WriteLine("Mesh count different! {0} vs {1}", att_src.Mesh.Count, att_dst.Mesh.Count);
+                Console.WriteLine("Mesh count different: {0} vs {1}", att_src.Mesh.Count, att_dst.Mesh.Count);
                 dontadd = true;
                 result = true;
             }
-            for (int u = 0; u < att_src.Mesh.Count; u++)
+            else
             {
-                // Compare attributes
-                if (att_src.Mesh[u].PAttr != att_dst.Mesh[u].PAttr)
+                bool stop = false;
+                for (int u = 0; u < att_src.Mesh.Count; u++)
                 {
-                    Console.WriteLine("Attributes different for mesh {0}: {1} vs {2}", att_src.Mesh[u].PAttr.ToString("X"), att_dst.Mesh[u].PAttr.ToString("X"));
-                    result = true;
-                    dontadd = true;
-                }
-
-                // Check vertex colors
-                if (att_src.Mesh[u].VColor == null && att_dst.Mesh[u].VColor != null)
-                {
-                    Console.WriteLine("Original mesh doesn't have vertex colors, comparison mesh does.");
-                    result = true;
-                    dontadd = true;
-                }
-
-                // Compare polys
-                if (att_src.Mesh[u].Poly != null)
-                {
-                    if (att_src.Mesh[u].Poly.Count != att_dst.Mesh[u].Poly.Count)
+                    // Compare attributes
+                    if (att_src.Mesh[u].PAttr != att_dst.Mesh[u].PAttr)
                     {
-                        Console.WriteLine("Poly count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].Poly.Count, att_dst.Mesh[u].Poly.Count);
+                        Console.WriteLine("Attributes different for mesh {0}: {1} vs {2}", att_src.Mesh[u].PAttr.ToString("X"), att_dst.Mesh[u].PAttr.ToString("X"));
                         result = true;
                         dontadd = true;
+                        stop = true;
                     }
-                    for (int v = 0; v < att_src.Mesh[u].Poly.Count; v++)
+
+                    // Check vertex colors
+                    if ((att_src.Mesh[u].VColor == null && att_dst.Mesh[u].VColor != null) || (att_dst.Mesh[u].VColor == null && att_src.Mesh[u].VColor != null))
                     {
-                        if (v >= att_dst.Mesh[u].Poly.Count) break;
-                        if (att_src.Mesh[u].Poly[v].Indexes.Length != att_dst.Mesh[u].Poly[v].Indexes.Length)
+                        Console.WriteLine("Vertex color mismatch detected.");
+                        result = true;
+                        dontadd = true;
+                        stop = true;
+                    }
+
+                    // Check UVs
+                    if ((att_src.Mesh[u].UV == null && att_dst.Mesh[u].UV != null) || (att_dst.Mesh[u].UV == null && att_src.Mesh[u].UV != null))
+                    {
+                        Console.WriteLine("UV mismatch detected.");
+                        result = true;
+                        dontadd = true;
+                        stop = true;
+                    }
+
+                    if (!stop)
+                    {
+                        // Compare polys
+                        if (att_src.Mesh[u].Poly != null)
                         {
-                            Console.WriteLine("Poly index count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].Poly[v].Indexes.Length, att_dst.Mesh[u].Poly[v].Indexes.Length);
-                            dontadd = true;
-                            result = true;
-                        }
-                        for (int i = 0; i < att_src.Mesh[u].Poly[v].Indexes.Length; i++)
-                        {
-                            if (i >= att_dst.Mesh[u].Poly[v].Indexes.Length) break;
-                            if (att_src.Mesh[u].Poly[v].Indexes[i] != att_dst.Mesh[u].Poly[v].Indexes[i])
+                            if (att_src.Mesh[u].Poly.Count != att_dst.Mesh[u].Poly.Count)
                             {
-                                Console.WriteLine("Mesh {0} poly {1} index {2} different: {3} vs {4}", u, v, i, att_src.Mesh[u].Poly[v].Indexes[i], att_dst.Mesh[u].Poly[v].Indexes[i]);
+                                Console.WriteLine("Poly count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].Poly.Count, att_dst.Mesh[u].Poly.Count);
                                 result = true;
                                 dontadd = true;
                             }
-                        }
-                    }
-                }
-
-                // Compare vcolors
-                if (att_src.Mesh[u].VColor != null)
-                {
-                    addr = int.Parse(att_src.Mesh[u].VColorName.Replace("vcolor_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
-                    if (att_src.Mesh[u].VColor.Length != att_dst.Mesh[u].VColor.Length)
-                    {
-                        Console.WriteLine("VColor count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].VColor.Length, att_dst.Mesh[u].VColor.Length);
-                        dontadd = true;
-                        result = true;
-                    }
-                    items = new();
-                    for (int v = 0; v < att_src.Mesh[u].VColor.Length; v++)
-                    {
-                        if (v >= att_dst.Mesh[u].VColor.Length) break;
-                        if (att_src.Mesh[u].VColor[v].A != att_dst.Mesh[u].VColor[v].A || att_src.Mesh[u].VColor[v].R != att_dst.Mesh[u].VColor[v].R || att_src.Mesh[u].VColor[v].G != att_dst.Mesh[u].VColor[v].G || att_src.Mesh[u].VColor[v].B != att_dst.Mesh[u].VColor[v].B)
-                        {
-                            Console.WriteLine("VColor {0} different for mesh {1}: {2} vs {3}", v, u, att_src.Mesh[u].VColor[v], att_dst.Mesh[u].VColor[v]);
-                            if (!dontadd)
-                                items.Add(new ColorDiffData { ArrayID = v, A = att_dst.Mesh[u].VColor[v].A, R = att_dst.Mesh[u].VColor[v].R, G = att_dst.Mesh[u].VColor[v].G, B = att_dst.Mesh[u].VColor[v].B });
-                            result = true;
-                        }
-                    }
-                    if (!dontadd)
-                        AddDiffItems(addr, items);
-                }
-
-                // Compare UVs
-                if (att_src.Mesh[u].UV != null)
-                {
-                    bool name = false;
-                    addr = int.Parse(att_src.Mesh[u].UVName.Replace("uv_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
-                    items = new();
-                    for (int uvindex = 0; uvindex < att_src.Mesh[u].UV.Length; uvindex++)
-                    {
-                        short src_U = (short)(att_src.Mesh[u].UV[uvindex].U * 255f);
-                        short src_V = (short)(att_src.Mesh[u].UV[uvindex].V * 255f);
-                        short dst_U = (short)(att_dst.Mesh[u].UV[uvindex].U * 255f);
-                        short dst_V = (short)(att_dst.Mesh[u].UV[uvindex].V * 255f);
-                        if (src_U != dst_U || src_V != dst_V)
-                        {
-                            if (!name)
+                            else
                             {
-                                name = true;
-                                Console.WriteLine("UV array {0} is different: Source U{1} V{2}, Destination U{3} V{4}", att_src.Mesh[u].UVName, src_U, src_V, dst_U, dst_V);
+                                for (int v = 0; v < att_src.Mesh[u].Poly.Count; v++)
+                                {
+                                    if (v >= att_dst.Mesh[u].Poly.Count) break;
+                                    if (att_src.Mesh[u].Poly[v].Indexes.Length != att_dst.Mesh[u].Poly[v].Indexes.Length)
+                                    {
+                                        Console.WriteLine("Poly index count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].Poly[v].Indexes.Length, att_dst.Mesh[u].Poly[v].Indexes.Length);
+                                        dontadd = true;
+                                        result = true;
+                                    }
+                                    for (int i = 0; i < att_src.Mesh[u].Poly[v].Indexes.Length; i++)
+                                    {
+                                        if (i >= att_dst.Mesh[u].Poly[v].Indexes.Length) break;
+                                        if (att_src.Mesh[u].Poly[v].Indexes[i] != att_dst.Mesh[u].Poly[v].Indexes[i])
+                                        {
+                                            Console.WriteLine("Mesh {0} poly {1} index {2} different: {3} vs {4}", u, v, i, att_src.Mesh[u].Poly[v].Indexes[i], att_dst.Mesh[u].Poly[v].Indexes[i]);
+                                            result = true;
+                                            dontadd = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Compare vcolors
+                        if (att_src.Mesh[u].VColor != null)
+                        {
+                            addr = int.Parse(att_src.Mesh[u].VColorName.Replace("vcolor_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                            if (att_src.Mesh[u].VColor.Length != att_dst.Mesh[u].VColor.Length)
+                            {
+                                Console.WriteLine("VColor count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].VColor.Length, att_dst.Mesh[u].VColor.Length);
+                                dontadd = true;
                                 result = true;
                             }
-                            if (!dontadd)
-                                items.Add(new UVDiffData { ArrayID = uvindex, U = dst_U, V = dst_V });
-                            Console.WriteLine("{0} : {1}, {2} is {3}, {4}", uvindex, src_U, src_V, dst_U, dst_V);
+                            else
+                            {
+                                items = new();
+                                for (int v = 0; v < att_src.Mesh[u].VColor.Length; v++)
+                                {
+                                    if (v >= att_dst.Mesh[u].VColor.Length) break;
+                                    if (att_src.Mesh[u].VColor[v].A != att_dst.Mesh[u].VColor[v].A || att_src.Mesh[u].VColor[v].R != att_dst.Mesh[u].VColor[v].R || att_src.Mesh[u].VColor[v].G != att_dst.Mesh[u].VColor[v].G || att_src.Mesh[u].VColor[v].B != att_dst.Mesh[u].VColor[v].B)
+                                    {
+                                        Console.WriteLine("VColor {0} different for mesh {1}: {2} vs {3}", v, u, att_src.Mesh[u].VColor[v], att_dst.Mesh[u].VColor[v]);
+                                        if (!dontadd)
+                                            items.Add(new ColorDiffData { ArrayID = v, A = att_dst.Mesh[u].VColor[v].A, R = att_dst.Mesh[u].VColor[v].R, G = att_dst.Mesh[u].VColor[v].G, B = att_dst.Mesh[u].VColor[v].B });
+                                        result = true;
+                                    }
+                                }
+                                if (!dontadd)
+                                    AddDiffItems(addr, items);
+                            }
+                        }
+
+                        // Compare UVs
+                        if (att_src.Mesh[u].UV != null)
+                        {
+                            bool name = false;
+                            addr = int.Parse(att_src.Mesh[u].UVName.Replace("uv_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                            if (att_src.Mesh[u].UV.Length != att_dst.Mesh[u].UV.Length)
+                            {
+                                Console.WriteLine("UV count different for mesh {0}: {1} vs {2}", u, att_src.Mesh[u].UV.Length, att_dst.Mesh[u].UV.Length);
+                                dontadd = true;
+                                result = true;
+                            }
+                            else
+                            {
+                                items = new();
+                                for (int uvindex = 0; uvindex < att_src.Mesh[u].UV.Length; uvindex++)
+                                {
+                                    short src_U = (short)(att_src.Mesh[u].UV[uvindex].U * 255f);
+                                    short src_V = (short)(att_src.Mesh[u].UV[uvindex].V * 255f);
+                                    short dst_U = (short)(att_dst.Mesh[u].UV[uvindex].U * 255f);
+                                    short dst_V = (short)(att_dst.Mesh[u].UV[uvindex].V * 255f);
+                                    if (src_U != dst_U || src_V != dst_V)
+                                    {
+                                        if (!name)
+                                        {
+                                            name = true;
+                                            Console.WriteLine("UV array {0} is different: Source U{1} V{2}, Destination U{3} V{4}", att_src.Mesh[u].UVName, src_U, src_V, dst_U, dst_V);
+                                            result = true;
+                                        }
+                                        if (!dontadd)
+                                            items.Add(new UVDiffData { ArrayID = uvindex, U = dst_U, V = dst_V });
+                                        //Console.WriteLine("{0} : {1}, {2} is {3}, {4}", uvindex, src_U, src_V, dst_U, dst_V);
+                                    }
+                                }
+                                if (!dontadd)
+                                    AddDiffItems(addr, items);
+                            }
                         }
                     }
-                    if (!dontadd)
-                        AddDiffItems(addr, items);
                 }
             }
             return result;
