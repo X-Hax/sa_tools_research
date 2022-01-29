@@ -378,7 +378,13 @@ namespace CompareTool
                     if (mat_src[m].DiffuseColor != mat_dst[m].DiffuseColor)
                     {
                         Console.WriteLine("Different diffuse color for material {0}: {1} vs {2}", m, mat_src[m].DiffuseColor.ToArgb().ToString("X"), mat_dst[m].DiffuseColor.ToArgb().ToString("X"));
-                        items.Add(new ColorDiffData { ArrayID = m, A = mat_dst[m].DiffuseColor.A, R = mat_dst[m].DiffuseColor.R, G = mat_dst[m].DiffuseColor.G, B = mat_dst[m].DiffuseColor.B });
+                        items.Add(new DiffuseColorDiffData { ArrayID = m, A = mat_dst[m].DiffuseColor.A, R = mat_dst[m].DiffuseColor.R, G = mat_dst[m].DiffuseColor.G, B = mat_dst[m].DiffuseColor.B });
+                        result = true;
+                    }
+                    if (mat_src[m].SpecularColor != mat_dst[m].SpecularColor)
+                    {
+                        Console.WriteLine("Different specular color for material {0}: {1} vs {2}", m, mat_src[m].SpecularColor.ToArgb().ToString("X"), mat_dst[m].SpecularColor.ToArgb().ToString("X"));
+                        items.Add(new SpecularColorDiffData { ArrayID = m, A = mat_dst[m].SpecularColor.A, R = mat_dst[m].SpecularColor.R, G = mat_dst[m].SpecularColor.G, B = mat_dst[m].SpecularColor.B });
                         result = true;
                     }
                 }
@@ -658,10 +664,24 @@ namespace CompareTool
                 {
                     // Write texids
                     if (item2 is MaterialTextureDiffData tex)
-                        tw.WriteLine("((NJS_MATERIAL*){0})->attr_texID = {1};",
+                        tw.WriteLine("((NJS_MATERIAL*){0})->attr_texId = {1};",
                             dllHandle == "" ? "0x" + (0x400000 + item.Key + NJS_MATERIAL.Size * tex.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + NJS_MATERIAL.Size * tex.ArrayID).ToString("X8"),
                             tex.TexID);
+
+                    // Write material colors
+                    else if (item2 is DiffuseColorDiffData clr)
+                        tw.WriteLine("((NJS_MATERIAL*){0})->diffuse.color = 0x{1}{2}{3}{4};",
+                             dllHandle == "" ? "0x" + (0x400000 + item.Key + 4 * clr.ArrayID).ToString("X8") :
+                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 4 * clr.ArrayID).ToString("X8"),
+                            clr.A.ToString("X2"), clr.R.ToString("X2"), clr.G.ToString("X2"), clr.B.ToString("X2"));
+
+                    // Write specular colors
+                    else if (item2 is SpecularColorDiffData sclr)
+                        tw.WriteLine("((NJS_MATERIAL*){0})->specular.color = 0x{1}{2}{3}{4};",
+                             dllHandle == "" ? "0x" + (0x400000 + item.Key + 4 * sclr.ArrayID).ToString("X8") :
+                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 4 * sclr.ArrayID).ToString("X8"),
+                            sclr.A.ToString("X2"), sclr.R.ToString("X2"), sclr.G.ToString("X2"), sclr.B.ToString("X2"));
 
                     // Write exponents
                     else if (item2 is MaterialExponentDiffData exp)
@@ -680,25 +700,18 @@ namespace CompareTool
                     // Write UVs
                     else if (item2 is UVDiffData uvd)
                     {
-                        tw.WriteLine("*(NJS_TEX*){0} = {{ {1}, {2} }};", 
+                        tw.WriteLine("*(NJS_TEX*){0}) = {{ {1}, {2} }};", 
                             dllHandle == "" ? "0x" + (0x400000 + item.Key + UV.Size * uvd.ArrayID).ToString("X8") :
-                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + UV.Size * uvd.ArrayID).ToString("X8"), 
+                            "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + UV.Size * uvd.ArrayID).ToString("X8"), 
                             uvd.U, uvd.V);
                     }
 
-                    // Write colors
-                    else if (item2 is ColorDiffData clr)
-                        tw.WriteLine("((NJS_COLOR*){0})->color = 0x{1}{2}{3}{4};",
-                             dllHandle == "" ? "0x" + (0x400000 + item.Key + 4 * clr.ArrayID).ToString("X8") :
-                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 4 * clr.ArrayID).ToString("X8"),
-                            clr.A.ToString("X2"), clr.R.ToString("X2"), clr.G.ToString("X2"), clr.B.ToString("X2"));
-
                     // Write vertices/normals
                     else if (item2 is VertexNormalDiffData vtx)
-                        tw.WriteLine("*(NJS_VECTOR*){0} = {{ {1}, {2}, {3} }};",
+                        tw.WriteLine("*(NJS_VECTOR*){0}) = {{ {1}, {2}, {3} }};",
                              dllHandle == "" ? "0x" + (0x400000 + item.Key + Vertex.Size * vtx.ArrayID).ToString("X8") :
-                            "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + Vertex.Size * vtx.ArrayID).ToString("X8"),
-                            vtx.X, vtx.Y, vtx.Z);
+                            "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + Vertex.Size * vtx.ArrayID).ToString("X8"),
+                            vtx.X.ToC(), vtx.Y.ToC(), vtx.Z.ToC());
                 }
             }
             tw.WriteLine();

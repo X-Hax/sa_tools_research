@@ -48,5 +48,9 @@ namespace CompareTool
 			public int G;
 			public int B;
 		}
+
+		public class DiffuseColorDiffData : ColorDiffData { }
+
+		public class SpecularColorDiffData : ColorDiffData { }
 	}
 }
