@@ -239,6 +239,34 @@ namespace CompareTool
                     SortModel(child, true);
         }
 
+        /*
+        static bool CompareMotion(NJS_MOTION mot_src, NJS_MOTION mot_dest)
+        {
+            bool result = false;
+            // Model parts
+            if (mot_src.ModelParts != mot_dest.ModelParts)
+            {
+                Console.WriteLine("Model part mismatch: {0} vs {1}", mot_src.ModelParts, mot_dest.ModelParts);
+                return true;
+            }
+            if (mot_src.Frames != mot_dest.Frames)
+            {
+                Console.WriteLine("Frame number mismatch: {0} vs {1}", mot_src.Frames, mot_dest.Frames);
+                return true;
+            }
+            if (mot_src.InterpolationMode != mot_dest.InterpolationMode)
+            {
+                Console.WriteLine("Interpolation mode different: {0} vs {1}", mot_src.InterpolationMode.ToString(), mot_dest.InterpolationMode.ToString());
+                return true;
+            }
+            foreach (var anim in mot_src.Models)
+            {
+                //if (mot_dest.Models[anim.Key] == null)
+            }
+            return result;
+        }
+        */
+
         static bool CompareModel(NJS_OBJECT mdl_src, NJS_OBJECT mdl_dst)
         {
             bool result = false;
@@ -264,7 +292,7 @@ namespace CompareTool
                 {
                     Console.WriteLine("Evalflags are different: {0} vs {1}", flags_src.ToString("X8"), flags_dst.ToString("X8"));
                     Console.WriteLine("Evalflags are different: {0} vs {1}", mdl_src.GetFlags().ToString(), mdl_dst.GetFlags().ToString());
-                    return true;
+                    result = true;
                 }
                 if (mdl_src.Attach != null)
                     if (CompareAttach((BasicAttach)mdl_src.Attach, (BasicAttach)mdl_dst.Attach))
@@ -700,17 +728,17 @@ namespace CompareTool
                     // Write UVs
                     else if (item2 is UVDiffData uvd)
                     {
-                        tw.WriteLine("*(NJS_TEX*){0}) = {{ {1}, {2} }};", 
+                        tw.WriteLine("*(NJS_TEX*){0} = {{ {1}, {2} }};",
                             dllHandle == "" ? "0x" + (0x400000 + item.Key + UV.Size * uvd.ArrayID).ToString("X8") :
-                            "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + UV.Size * uvd.ArrayID).ToString("X8"), 
+                            "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + UV.Size * uvd.ArrayID).ToString("X8") + ")",
                             uvd.U, uvd.V);
                     }
 
                     // Write vertices/normals
                     else if (item2 is VertexNormalDiffData vtx)
-                        tw.WriteLine("*(NJS_VECTOR*){0}) = {{ {1}, {2}, {3} }};",
+                        tw.WriteLine("*(NJS_VECTOR*){0} = {{ {1}, {2}, {3} }};",
                              dllHandle == "" ? "0x" + (0x400000 + item.Key + Vertex.Size * vtx.ArrayID).ToString("X8") :
-                            "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + Vertex.Size * vtx.ArrayID).ToString("X8"),
+                            "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + Vertex.Size * vtx.ArrayID).ToString("X8") + ")",
                             vtx.X.ToC(), vtx.Y.ToC(), vtx.Z.ToC());
                 }
             }
