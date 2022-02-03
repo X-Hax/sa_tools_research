@@ -959,7 +959,7 @@ namespace ObjScan
 						addresslist.Add(address, "NJS_MOTION");
 						uint[] arr = new uint[2];
 						arr[0] = address;
-						arr[1] = (uint)modelparts;
+						arr[1] = (uint)mot.ModelParts;
 						actionlist.Add(address, arr);
 					}
 					catch (Exception ex)
