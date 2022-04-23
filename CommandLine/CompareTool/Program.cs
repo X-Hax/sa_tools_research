@@ -351,7 +351,7 @@ namespace CompareTool
                     }
                 }
                 if (!found)
-                    Console.WriteLine("Model not found: {0}", files1[u]);
+                    Console.WriteLine("\tModel not found: {0}", files1[u]);
             }
             TextWriter tw = File.CreateText("result.txt");
             foreach (var item in results)
