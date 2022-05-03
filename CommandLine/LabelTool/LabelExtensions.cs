@@ -639,5 +639,37 @@ namespace LabelTool
             int listmax = addressList.Max() + structsize - 1;
             writer.WriteLine("{0}={1}-{2}", filePath_relative.Replace(ext, ""), listmin.ToString("X8"), listmax.ToString("X8"));
         }
+
+        static void LabelsFromObject(NJS_OBJECT obj, TextWriter writer)
+        {
+            writer.WriteLine(obj.Name);
+            if (obj.Children != null && obj.Children.Count > 0)
+                LabelsFromObject(obj.Children[0], writer);
+            if (obj.Sibling != null)
+                LabelsFromObject(obj.Sibling, writer);
+        }
+
+        static void LabelsFromFile(string filename, TextWriter writer)
+        {
+            switch (Path.GetExtension(filename).ToLowerInvariant())
+            {
+                case ".sa1lvl":
+                    LandTable land = LandTable.LoadFromFile(filename);
+                    writer.WriteLine(land.Name);
+                    writer.WriteLine(land.AnimName);
+                    writer.WriteLine(land.COLName);
+                    foreach (COL col in land.COL)
+                    {
+                        if (col.Model != null)
+                            LabelsFromObject(col.Model, writer);
+                    }
+                    foreach (GeoAnimData geo in land.Anim)
+                    {
+                        if (geo.Model != null)
+                            LabelsFromObject(geo.Model, writer);
+                    }
+                    break;
+            }
+        }
     }
 }

@@ -14,6 +14,14 @@ namespace LabelTool
         {
             switch (args[args.Length - 1])
             {
+                // Scan a folder and output all NJS_OBJECT labels found in level files
+                case "-scanlabels":
+                    ScanLabels(args);
+                    return;
+                // Load two lists and remove all lines in the first list containing string in the second list
+                case "-remlabels":
+                    CompareRemoveLabels(args);
+                    return;
                 // Generate script for IDA and DataPointers
                 case "-ida":
                     LabelGen_IdaAndPointers(args);
@@ -47,9 +55,9 @@ namespace LabelTool
         static void WriteDataPointerItem(TextWriter output, string type, string name, string address, bool array = false, string count = "")
         {
             if (array)
-               output.WriteLine("DataArray(" + type + ", " + name + ", 0x" + address + ", " + count + ");");
+                output.WriteLine("DataArray(" + type + ", " + name + ", 0x" + address + ", " + count + ");");
             else
-               output.WriteLine("DataPointer(" + type + ", " + name + ", 0x" + address +");");
+                output.WriteLine("DataPointer(" + type + ", " + name + ", 0x" + address + ");");
         }
 
         static void WriteIdaScriptItem(TextWriter output, string type, string name, string address, bool array = false, string count = "")
@@ -221,6 +229,41 @@ namespace LabelTool
             }
             writer_list.Flush();
             writer_list.Close();
+        }
+
+        // Scans a folder with labelled assets and outputs all labels to a text file
+        static void ScanLabels(string[] args)
+        {
+            string folder = args[0];
+            string[] files = Directory.GetFiles(Path.GetFullPath(folder), "*.sa*", SearchOption.AllDirectories);
+            TextWriter writer_list = File.CreateText("foundlabels.txt");
+            for (int i = 0; i < files.Length; i++)
+            {
+                string filePath_rel = MakeRelativePath(Path.GetFullPath(folder), files[i]);
+                Console.WriteLine("Processing file {0} of {1}: {2}", i + 1, files.Length, filePath_rel);
+                LabelsFromFile(files[i], writer_list);
+            }
+            writer_list.Flush();
+        }
+
+        // Loads two lists and removes any lines from the first list containing strings in the second list
+        static void CompareRemoveLabels(string[] args)
+        {
+            List<int> linesToRemove = new List<int>();
+            string[] source = File.ReadAllLines(args[0]);
+            string[] toremove = File.ReadAllLines(args[1]);
+            for (int i = 0; i < source.Length; i++)
+            {
+                for (int u = 0; u < toremove.Length; u++)
+                    if (source[i].Contains(toremove[u]))
+                        linesToRemove.Add(i);
+            }
+            TextWriter result = File.CreateText("result.txt");
+            for (int i = 0; i < source.Length; i++)
+                if (!linesToRemove.Contains(i))
+                    result.WriteLine(source[i]);
+            result.Flush();
+            result.Close();
         }
     }
 }
