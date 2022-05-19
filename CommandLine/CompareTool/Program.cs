@@ -700,14 +700,14 @@ namespace CompareTool
                     // Write material colors
                     else if (item2 is DiffuseColorDiffData clr)
                         tw.WriteLine("((NJS_MATERIAL*){0})->diffuse.color = 0x{1}{2}{3}{4};",
-                             dllHandle == "" ? "0x" + (0x400000 + item.Key + 4 * clr.ArrayID).ToString("X8") :
+                             dllHandle == "" ? "0x" + (0x400000 + item.Key + NJS_MATERIAL.Size * clr.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 4 * clr.ArrayID).ToString("X8"),
                             clr.A.ToString("X2"), clr.R.ToString("X2"), clr.G.ToString("X2"), clr.B.ToString("X2"));
 
                     // Write specular colors
                     else if (item2 is SpecularColorDiffData sclr)
                         tw.WriteLine("((NJS_MATERIAL*){0})->specular.color = 0x{1}{2}{3}{4};",
-                             dllHandle == "" ? "0x" + (0x400000 + item.Key + 4 * sclr.ArrayID).ToString("X8") :
+                             dllHandle == "" ? "0x" + (0x400000 + item.Key + NJS_MATERIAL.Size * sclr.ArrayID).ToString("X8") :
                             "(size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 4 * sclr.ArrayID).ToString("X8"),
                             sclr.A.ToString("X2"), sclr.R.ToString("X2"), sclr.G.ToString("X2"), sclr.B.ToString("X2"));
 
