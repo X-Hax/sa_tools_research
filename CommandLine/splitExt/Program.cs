@@ -23,6 +23,9 @@ namespace SplitExt
             }
             switch (args[args.Length - 1])
             {
+                case "-tl":
+                    SplitTL(args);
+                    break;
                 case "-m":
                     SplitM(args);
                     break;
@@ -61,9 +64,28 @@ namespace SplitExt
             }
         }
 
+        // Creates a split INI file for NJS_TEXLIST (texnamearray) items listed as address=filename
+        static void SplitTL(string[] args)
+        {
+            TextWriter output = File.CreateText("output.txt");
+            Dictionary<string, string> files = new Dictionary<string, string>();
+            string[] lines = File.ReadAllLines(args[0]);
+            for (int u = 0; u < lines.Length; u++)
+            {
+                string[] spl = lines[u].Split('=');
+                output.WriteLine("[{0}]", spl[0]);
+                output.WriteLine("type=texnamearray");
+                output.WriteLine("address={0}", spl[0]);
+                output.WriteLine("filename={0}", spl[1] + ".satex");
+                output.WriteLine();
+            }
+            output.Flush();
+            output.Close();
+        }
+         
         // Merges two split INI files by adding new addresses from the second file and keeping filenames for existing addresses from the first file
         static void SplitLC(string[] args)
-        {
+        {  
             IniData inidata1 = IniSerializer.Deserialize<IniData>(args[0]);
             IniData inidata2 = IniSerializer.Deserialize<IniData>(args[1]);
             IniData inidata3 = new IniData();
