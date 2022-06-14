@@ -189,7 +189,7 @@ namespace ObjScan
 					fileOutputPath = Path.Combine(dir, address.ToString("X8"));
 				try
 				{
-					if (!CheckModel(address, false, modelfmt)) continue;
+					if (!CheckModel(address, -1, modelfmt)) continue;
 					NJS_OBJECT mdl = new NJS_OBJECT(datafile, (int)address, imageBase, modelfmt, new Dictionary<int, Attach>());
 					if (!CompareModels(originalmodel, mdl)) continue;
 					NJS_OBJECT[] children1 = originalmodel.Children.ToArray();
@@ -211,7 +211,7 @@ namespace ObjScan
 			return result;
 		}
 
-		static bool CheckModel(uint address, bool recursive, ModelFormat modelfmt)
+		static bool CheckModel(uint address, int numhierarchy, ModelFormat modelfmt)
 		{
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
 			if (address > (uint)datafile.Length - 20) return false;
@@ -219,7 +219,8 @@ namespace ObjScan
 			uint vertlist = 0;
 			uint polylist = 0;
 			uint chunkend = 0;
-			int radius = 0;
+			float radius = 0;
+			int radiusChunk = 0;
 			uint attach = 0;
 			uint child = 0;
 			uint sibling = 0;
@@ -233,6 +234,9 @@ namespace ObjScan
 			short opaquecount = 0;
 			uint alphapoly = 0;
 			short alphacount = 0;
+			float center_x = 0;
+			float center_y = 0;
+			float center_z = 0;
 			Vertex pos;
 			Vertex scl;
 			switch (modelfmt)
@@ -279,6 +283,14 @@ namespace ObjScan
 						if (mesh_count > 2048 || mesh_count < 0) return false;
 						mat_count = ByteConverter.ToInt16(datafile, (int)(attach - imageBase) + 0x16);
 						if (mat_count > 2048 || mat_count < 0) return false;
+						center_x = ByteConverter.ToSingle(datafile, (int)(attach - imageBase) + 0x18);
+						center_y = ByteConverter.ToSingle(datafile, (int)(attach - imageBase) + 0x1C);
+						center_z = ByteConverter.ToSingle(datafile, (int)(attach - imageBase) + 0x20);
+						radius = ByteConverter.ToSingle(datafile, (int)(attach - imageBase) + 0x24);
+						if (center_x < -100000.0f || center_x > 100000.0f) return false;
+						if (center_y < -100000.0f || center_y > 100000.0f) return false;
+						if (center_z < -100000.0f || center_z > 100000.0f) return false;
+						if (radius < 0.0f || radius > 100000.0f) return false;
 					}
 					if (pos.X < -100000 || pos.X > 100000) return false;
 					if (pos.Y < -100000 || pos.Y > 100000) return false;
@@ -286,9 +298,31 @@ namespace ObjScan
 					if (scl.X <= 0 || scl.X > 10000) return false;
 					if (scl.Y <= 0 || scl.Y > 10000) return false;
 					if (scl.Z <= 0 || scl.Z > 10000) return false;
-					if (recursive && child != 0 && !CheckModel(child - imageBase, false, modelfmt)) return false;
-					if (recursive && sibling != 0 && !CheckModel(sibling - imageBase, false, modelfmt)) return false;
+					if (child == address + imageBase || child == attach) return false;
+					if (sibling == address + imageBase || sibling == attach) return false;
+					if (child != 0 && child == sibling) return false;
+					if (numhierarchy != -1 && child != 0)
+					{
+						if (numhierarchy < 3)
+						{
+							numhierarchy++;
+							return CheckModel(child - imageBase, numhierarchy, modelfmt);
+						}
+						else
+							return CheckModel(child - imageBase, -1, modelfmt);
+					}
+					if (numhierarchy != -1 && sibling != 0)
+					{
+						if (numhierarchy < 3)
+						{
+							numhierarchy++;
+							return CheckModel(sibling - imageBase, numhierarchy, modelfmt);
+						}
+						else
+							return CheckModel(sibling - imageBase, -1, modelfmt);
+					}
 					if (attach == 0 && flags == 0) return false;
+					//Console.WriteLine("Attach pointer {0}, Vertices count {1}, Mesh count {2}, Center {3} {4} {5}, Radius {6} at {7}", attach.ToString("X"), vert_count, mesh_count, center_x, center_y, center_z, radius, address.ToString("X"));
 					break;
 				case ModelFormat.Chunk:
 					if ((int)address > datafile.Length - 20) return false;
@@ -307,8 +341,9 @@ namespace ObjScan
 						polylist = ByteConverter.ToUInt32(datafile, (int)(attach - imageBase) + 4);
 						if (polylist != 0 && polylist < imageBase) return false;
 						if (polylist > datafile.Length - 51 + imageBase) return false;
-						radius = ByteConverter.ToInt32(datafile, (int)(attach - imageBase) + 0x14);
-						if (radius < 0) return false;
+						radiusChunk = ByteConverter.ToInt32(datafile, (int)(attach - imageBase) + 0x14);
+						if (radiusChunk < 0) return false;
+
 					}
 					pos = new Vertex(datafile, (int)address + 8);
 					if (pos.X < -100000 || pos.X > 100000) return false;
@@ -326,11 +361,35 @@ namespace ObjScan
 					if (sibling > datafile.Length - 52 + imageBase) return false;
 					if (child != 0 && child < imageBase) return false;
 					if (sibling != 0 && sibling < imageBase) return false;
-					if (recursive && child != 0 && !CheckModel(child - imageBase, false, modelfmt)) return false;
-					if (recursive && sibling != 0 && !CheckModel(sibling - imageBase, false, modelfmt)) return false;
+					if (numhierarchy != 0 && child != 0 && !CheckModel(child - imageBase, -1, modelfmt)) return false;
+					if (numhierarchy != 0 && sibling != 0 && !CheckModel(sibling - imageBase, -1, modelfmt)) return false;
 					if (vertlist == 0 && child == 0 && sibling == 0) return false;
 					if (attach == 0 && flags == 0) return false;
 					if (attach == 0 && child == 0 && sibling == 0) return false;
+					if (child == address + imageBase || child == attach) return false;
+					if (sibling == address + imageBase || sibling == attach) return false;
+					if (child != 0 && child == sibling) return false;
+					if (numhierarchy != -1 && child != 0)
+					{
+						if (numhierarchy < 3)
+						{
+							numhierarchy++;
+							return CheckModel(child - imageBase, numhierarchy, modelfmt);
+						}
+						else
+							return CheckModel(child - imageBase, -1, modelfmt);
+					}
+					if (numhierarchy != -1 && sibling != 0)
+					{
+						if (numhierarchy < 3)
+						{
+							numhierarchy++;
+							return CheckModel(sibling - imageBase, numhierarchy, modelfmt);
+						}
+						else
+							return CheckModel(sibling - imageBase, -1, modelfmt);
+					}
+					if (attach == 0 && flags == 0) return false;
 					break;
 				case ModelFormat.GC:
 					if (address <= 0 || address > datafile.Length - 20) return false;
@@ -375,13 +434,37 @@ namespace ObjScan
 					if (sibling > datafile.Length - 52 + imageBase) return false;
 					if (child != 0 && child < imageBase) return false;
 					if (sibling != 0 && sibling < imageBase) return false;
-					if (recursive && child != 0 && !CheckModel(child - imageBase, false, modelfmt)) return false;
-					if (recursive && sibling != 0 && !CheckModel(sibling - imageBase, false, modelfmt)) return false;
+					if (numhierarchy != -1 && child != 0 && !CheckModel(child - imageBase, -1, modelfmt)) return false;
+					if (numhierarchy != -1 && sibling != 0 && !CheckModel(sibling - imageBase, -1, modelfmt)) return false;
 					if (attach == 0 && flags == 0) return false;
 					if (attach == 0 && child == 0 && sibling == 0) return false;
+					if (child == address + imageBase || child == attach) return false;
+					if (sibling == address + imageBase || sibling == attach) return false;
+					if (child != 0 && child == sibling) return false;
+					if (numhierarchy != -1 && child != 0)
+					{
+						if (numhierarchy < 3)
+						{
+							numhierarchy++;
+							return CheckModel(child - imageBase, numhierarchy, modelfmt);
+						}
+						else
+							return CheckModel(child - imageBase, -1, modelfmt);
+					}
+					if (numhierarchy != -1 && sibling != 0)
+					{
+						if (numhierarchy < 3)
+						{
+							numhierarchy++;
+							return CheckModel(sibling - imageBase, numhierarchy, modelfmt);
+						}
+						else
+							return CheckModel(sibling - imageBase, -1, modelfmt);
+					}
+					if (attach == 0 && flags == 0) return false;
 					break;
 			}
-			if (recursive) Console.WriteLine("{0} model at {1}", modelfmt.ToString(), address.ToString("X"));
+			if (numhierarchy != -1) Console.WriteLine("{0} model at {1}", modelfmt.ToString(), address.ToString("X"));
 			return true;
 		}
 
@@ -435,7 +518,7 @@ namespace ObjScan
 					ObjAddrPointer = (int)(COLAddress - imageBase) + 0x18;
 					ObjAddr = ByteConverter.ToUInt32(datafile, ObjAddrPointer);
 					if (ObjAddr < imageBase) return false;
-					if (!CheckModel(ObjAddr - imageBase, false, modelfmt)) return false;
+					if (!CheckModel(ObjAddr - imageBase, -1, modelfmt)) return false;
 					break;
 				case LandTableFormat.SA2:
 				case LandTableFormat.SA2B:
@@ -700,7 +783,7 @@ namespace ObjScan
 					fileOutputPath = Path.Combine(dir, address.ToString("X8"));
 				try
 				{
-					if (!CheckModel(address, true, modelfmt))
+					if (!CheckModel(address, 0, modelfmt))
 					{
 						//Console.WriteLine("Not found: {0}", address.ToString("X"));
 						continue;
