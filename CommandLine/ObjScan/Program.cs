@@ -211,8 +211,9 @@ namespace ObjScan
 			return result;
 		}
 
-		static bool CheckModel(uint address, int numhierarchy, ModelFormat modelfmt)
+		static bool CheckModel(uint address, int numhierarchy, ModelFormat modelfmt, bool landtable = false)
 		{
+			//Console.WriteLine("Check: {0}", address.ToString("X"));
 			ByteConverter.BigEndian = SAModel.ByteConverter.BigEndian = bigendian;
 			if (address > (uint)datafile.Length - 20) return false;
 			int flags = 0;
@@ -250,6 +251,7 @@ namespace ObjScan
 					scl = new Vertex(datafile, (int)address + 0x20);
 					child = ByteConverter.ToUInt32(datafile, (int)address + 0x2C);
 					sibling = ByteConverter.ToUInt32(datafile, (int)address + 0x30);
+					if (landtable && (child != 0 || sibling != 0)) return false;
 					if (child > address + imageBase) return false;
 					if (sibling > address + imageBase) return false;
 					if (child != 0 && child < imageBase) return false;
@@ -298,8 +300,8 @@ namespace ObjScan
 					if (scl.X <= 0 || scl.X > 10000) return false;
 					if (scl.Y <= 0 || scl.Y > 10000) return false;
 					if (scl.Z <= 0 || scl.Z > 10000) return false;
-					if (child == address + imageBase || child == attach) return false;
-					if (sibling == address + imageBase || sibling == attach) return false;
+					if (child == address + imageBase || (attach != 0 && child == attach)) return false;
+					if (sibling == address + imageBase || (attach != 0 && sibling == attach)) return false;
 					if (child != 0 && child == sibling) return false;
 					if (numhierarchy != -1 && child != 0)
 					{
@@ -518,7 +520,7 @@ namespace ObjScan
 					ObjAddrPointer = (int)(COLAddress - imageBase) + 0x18;
 					ObjAddr = ByteConverter.ToUInt32(datafile, ObjAddrPointer);
 					if (ObjAddr < imageBase) return false;
-					if (!CheckModel(ObjAddr - imageBase, -1, modelfmt)) return false;
+					if (!CheckModel(ObjAddr - imageBase, -1, modelfmt, true)) return false;
 					break;
 				case LandTableFormat.SA2:
 				case LandTableFormat.SA2B:
