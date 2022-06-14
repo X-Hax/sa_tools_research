@@ -33,26 +33,26 @@ namespace BlockBitTool
             int address = int.Parse(args[2], System.Globalization.NumberStyles.HexNumber);
             LandTable original = new LandTable(binary, address, key, LandTableFormat.SA1);
             // First go through the COL list and create a texlist with all textures that it uses
-            TexnameArray texlist_full = CreateLandtableTexlist(original, binary, key);
+            NJS_TEXLIST texlist_full = CreateLandtableTexlist(original, binary, key);
             texlist_full.Save(original.Name + ".tls");
             // Now go through the COL list again and match up texture names with the list that was created earlier
             LandTable result = ConvertLandTableBlockBits(original, binary, key, texlist_full);
             result.SaveToFile(original.Name + ".sa1lvl", LandTableFormat.SA1);
         }
 
-        static TexnameArray CreateLandtableTexlist(LandTable landTable, byte[] binary, uint key)
+        static NJS_TEXLIST CreateLandtableTexlist(LandTable landTable, byte[] binary, uint key)
         {
             List<string> texlistRecreated = new List<string>();
             if (landTable.TextureList != 0)
             {
                 Console.WriteLine("This landtable has a single texlist pointer.");
-                return new TexnameArray(binary, (int)(landTable.TextureList - key), key);
+                return new NJS_TEXLIST(binary, (int)(landTable.TextureList - key), key);
             }
             foreach (COL col in landTable.COL)
             {
                 if (col.BlockBits > key)
                 {
-                    TexnameArray texlist = new TexnameArray(binary, (int)((uint)col.BlockBits - key), key);
+                    NJS_TEXLIST texlist = new NJS_TEXLIST(binary, (int)((uint)col.BlockBits - key), key);
                     BasicAttach batt = (BasicAttach)col.Model.Attach;
                     foreach (NJS_MATERIAL mat in batt.Material)
                     {
@@ -62,10 +62,10 @@ namespace BlockBitTool
                     }
                 }
             }
-            return new TexnameArray(texlistRecreated.ToArray());
+            return new NJS_TEXLIST(texlistRecreated.ToArray());
         }
 
-        static LandTable ConvertLandTableBlockBits(LandTable landTable, byte[] binary, uint key, TexnameArray texlistFull)
+        static LandTable ConvertLandTableBlockBits(LandTable landTable, byte[] binary, uint key, NJS_TEXLIST texlistFull)
         {
             Dictionary<string, int> textureIDs = new Dictionary<string, int>();
             List<NJS_MATERIAL> fucked = new List<NJS_MATERIAL>();
@@ -73,7 +73,7 @@ namespace BlockBitTool
             {
                 if (col.BlockBits != 0)
                 {
-                    TexnameArray texlist = new TexnameArray(binary, (int)((uint)col.BlockBits - key), key);
+                    NJS_TEXLIST texlist = new NJS_TEXLIST(binary, (int)((uint)col.BlockBits - key), key);
                     BasicAttach batt = (BasicAttach)col.Model.Attach;
                     foreach (NJS_MATERIAL mat in batt.Material)
                     {

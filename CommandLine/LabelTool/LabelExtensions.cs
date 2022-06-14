@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+// The label structs have changed and this may not work properly anymore, needs further testing.
 // Methods to retrieve and export labels
 namespace LabelTool
 {
@@ -77,12 +78,12 @@ namespace LabelTool
                 Console.WriteLine("Name {0} missing in the address list", label);
                 return;
             }
-            Label_OBJECT desc = IniSerializer.Deserialize<Label_OBJECT>(Path.Combine(path, indx.ToString() + ".txt"));
+            LabelOBJECT desc = IniSerializer.Deserialize<LabelOBJECT>(Path.Combine(path, indx.ToString() + ".txt"));
             if (mdl.Attach != null)
             {
                 if (mdl.Attach is BasicAttach)
                 {
-                    AddAddress("NJS_MODEL_SADX", mdl.Attach.Name, desc.AtachName, writer_split, writer_ida);
+                    AddAddress("NJS_MODEL_SADX", mdl.Attach.Name, desc.AttachName, writer_split, writer_ida);
                     BasicAttach attach = (BasicAttach)mdl.Attach;
                     if (attach.Vertex != null) AddAddress(attach.Vertex.Length.ToString() + ",NJS_VECTOR", attach.VertexName, desc.VertexName, writer_split, writer_ida);
                     if (attach.Normal != null) AddAddress(attach.Normal.Length.ToString() + ",NJS_VECTOR", attach.NormalName, desc.NormalName, writer_split, writer_ida);
@@ -124,7 +125,7 @@ namespace LabelTool
                 }
                 else if (mdl.Attach is ChunkAttach)
                 {
-                    AddAddress("NJS_CNK_ATTACH", mdl.Attach.Name, desc.AtachName, writer_split, writer_ida);
+                    AddAddress("NJS_CNK_ATTACH", mdl.Attach.Name, desc.AttachName, writer_split, writer_ida);
                     ChunkAttach attach = (ChunkAttach)mdl.Attach;
                     if (attach.Vertex != null)
                     {
@@ -153,12 +154,12 @@ namespace LabelTool
                 for (int u = 0; u < childarray.Length; u++)
                 {
                     //Console.WriteLine("Child of {0}: {1} ( {2} ) is {3}", mdl.Name, childarray[u].Name, u.ToString(), desc.ChildNames[u]);
-                    ExportAddr(childarray[u], path, writer_split, writer_ida, desc.ChildNames[u], labelindex);
+                    ExportAddr(childarray[u], path, writer_split, writer_ida, childarray[u].Name, labelindex);
                 }
             }
             if (mdl.Parent == null && mdl.Sibling != null)
             {
-                ExportAddr(mdl.Sibling, path, writer_split, writer_ida, desc.SiblingName, labelindex);
+                ExportAddr(mdl.Sibling, path, writer_split, writer_ida, mdl.Sibling.Name, labelindex);
             }
         }
 
@@ -340,14 +341,14 @@ namespace LabelTool
                 Console.WriteLine("Name {0} missing in the address list", label);
                 return;
             }
-            Label_MOTION desc = IniSerializer.Deserialize<Label_MOTION>(Path.Combine(path, indx.ToString() + ".txt"));
+            LabelMOTION desc = IniSerializer.Deserialize<LabelMOTION>(Path.Combine(path, indx.ToString() + ".txt"));
             if (mot.Models != null)
             {
                 AddAddress(mot.ModelParts.ToString() + ",NJS_MDATA" + GetMdataType(mot).ToString(), mot.MdataName, desc.MdataName, writer_split, writer_ida);
                 if (mot.Models.Count == 0) return;
                 foreach (var item in mot.Models)
                 {
-                    Label_MKEY mkey = desc.MkeyNames[item.Key];
+                    LabelMKEY mkey = desc.MkeyNames[item.Key];
                     if (item.Value.Position.Count > 0)
                         AddAddress(item.Value.Position.Count.ToString() + ",NJS_MKEY_F", item.Value.PositionName, mkey.PositionName, writer_split, writer_ida);
                     if (item.Value.Rotation.Count > 0)
@@ -423,7 +424,7 @@ namespace LabelTool
                 Console.WriteLine("Name {0} missing in the address list", label);
                 return;
             }
-            Label_ACTION desc = IniSerializer.Deserialize<Label_ACTION>(Path.Combine(path, indx.ToString() + ".txt"));
+            LabelACTION desc = IniSerializer.Deserialize<LabelACTION>(Path.Combine(path, indx.ToString() + ".txt"));
             if (action.Model != null)
             {
                 ExportAddr(action.Model, path, writer_split, writer_ida, desc.ObjectName, labelindex);
@@ -449,7 +450,7 @@ namespace LabelTool
                 Console.WriteLine("Name {0} missing in the address list", label);
                 return;
             }
-            Label_LANDTABLE desc = IniSerializer.Deserialize<Label_LANDTABLE>(Path.Combine(path, indx.ToString() + ".txt"));
+            LabelLANDTABLE desc = IniSerializer.Deserialize<LabelLANDTABLE>(Path.Combine(path, indx.ToString() + ".txt"));
             if (land.COL != null && land.COL.Count > 0)
             {
                 AddAddress(land.COL.Count.ToString() + ",OBJ_LANDENTRY", land.COLName, desc.COLListName, writer_split, writer_ida);
@@ -466,7 +467,7 @@ namespace LabelTool
                 for (int u = 0; u < geoanimarray.Length; u++)
                 {
                     NJS_ACTION action = new NJS_ACTION(geoanimarray[u].Model, geoanimarray[u].Animation);
-                    action.Name = geoanimarray[u].ActionName;
+                    action.Name = geoanimarray[u].Animation.ActionName;
                     ExportAddr(action, path, writer_split, writer_ida, desc.GeoAnimActionNames[u], labelindex);
                 }
             }
