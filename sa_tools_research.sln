@@ -53,6 +53,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NvTriStripDotNet", "sa_tool
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchTexID", "CommandLine\MatchTexID\MatchTexID.csproj", "{1EA624E6-0453-4617-9143-05D7E6373D50}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataToolbox", "sa_tools\DataToolbox\DataToolbox.csproj", "{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -253,6 +255,14 @@ Global
 		{1EA624E6-0453-4617-9143-05D7E6373D50}.Release|x64.Build.0 = Release|x64
 		{1EA624E6-0453-4617-9143-05D7E6373D50}.Release|x86.ActiveCfg = Release|x86
 		{1EA624E6-0453-4617-9143-05D7E6373D50}.Release|x86.Build.0 = Release|x86
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Debug|x64.ActiveCfg = Debug|x64
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Debug|x64.Build.0 = Debug|x64
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Debug|x86.ActiveCfg = Debug|x86
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Debug|x86.Build.0 = Debug|x86
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x64.ActiveCfg = Release|x64
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x64.Build.0 = Release|x64
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x86.ActiveCfg = Release|x86
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -266,6 +276,7 @@ Global
 		{50847BDB-699D-4A2E-AAF7-1EA58E1EC48E} = {37E55E91-FEEC-419F-A407-E4DE7ACF4690}
 		{969BEF6A-7574-43BF-88C1-94F4CEA2F99C} = {37E55E91-FEEC-419F-A407-E4DE7ACF4690}
 		{E61EE918-7C2F-4D58-A666-2BEA78B3B215} = {37E55E91-FEEC-419F-A407-E4DE7ACF4690}
+		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC} = {37E55E91-FEEC-419F-A407-E4DE7ACF4690}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4CABB1FA-B0EE-4D47-B80D-5352ED04607E}
