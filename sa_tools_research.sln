@@ -55,6 +55,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatchTexID", "CommandLine\M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataToolbox", "sa_tools\DataToolbox\DataToolbox.csproj", "{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SADXSourceView", "SADXSourceView\SADXSourceView.csproj", "{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -263,6 +265,14 @@ Global
 		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x64.Build.0 = Release|x64
 		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x86.ActiveCfg = Release|x86
 		{784A0ABC-1AD6-4D39-976B-BB0D5F905EAC}.Release|x86.Build.0 = Release|x86
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Debug|x64.ActiveCfg = Debug|x64
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Debug|x64.Build.0 = Debug|x64
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Debug|x86.ActiveCfg = Debug|x86
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Debug|x86.Build.0 = Debug|x86
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x64.ActiveCfg = Release|x64
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x64.Build.0 = Release|x64
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x86.ActiveCfg = Release|x86
+		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
