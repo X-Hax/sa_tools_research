@@ -38,7 +38,9 @@
             // 
             // treeView
             // 
-            this.treeView.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.treeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.treeView.Location = new System.Drawing.Point(0, 64);
             this.treeView.Name = "treeView";
             this.treeView.Size = new System.Drawing.Size(800, 581);
@@ -84,8 +86,8 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 645);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.treeView);
