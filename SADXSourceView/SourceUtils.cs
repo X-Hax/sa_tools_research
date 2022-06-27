@@ -145,7 +145,7 @@ namespace SADXSourceView
             }
             else
             {
-                treeNode.Text = xmlNode.OuterXml.Trim(karakter);
+                treeNode.Text = ParseXMLNameForTreeView(xmlNode.OuterXml.Trim(karakter));
             }
         }
     }
