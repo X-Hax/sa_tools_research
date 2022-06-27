@@ -1,14 +1,15 @@
 ﻿using SAModel;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LabelTool
 {
-	partial class Program
-	{
+    partial class Program
+    {
         // From https://stackoverflow.com/a/8809437
         public static string ReplaceFirst(string text, string search, string replace)
         {
@@ -30,6 +31,7 @@ namespace LabelTool
             return ReplaceFirst(label_object, "object", label_destination + "_" + index.ToString());
         }
 
+        // Generate labels for OBJECT based on object name
         static void GenerateLabels(NJS_OBJECT obj, string label)
         {
             Console.WriteLine("Object: {0}", label);
@@ -43,14 +45,14 @@ namespace LabelTool
                 {
                     batt.NormalName = MakeLabel(label, "normal");
                     batt.VertexName = MakeLabel(label, "point");
-                    batt.MeshName=MakeLabel(label, "meshset");
-                    batt.MaterialName= MakeLabel(label, "material");
+                    batt.MeshName = MakeLabel(label, "meshset");
+                    batt.MaterialName = MakeLabel(label, "material");
                     if (batt.Mesh != null && batt.Mesh.Count > 0)
                     {
                         foreach (NJS_MESHSET mesh in batt.Mesh)
-						{
-							Console.WriteLine("Mesh {0}", batt.Mesh.IndexOf(mesh));
-							if (mesh.Poly != null)
+                        {
+                            Console.WriteLine("Mesh {0}", batt.Mesh.IndexOf(mesh));
+                            if (mesh.Poly != null)
                                 mesh.PolyName = MakeLabelWithID(label, "pgS", mesh.MaterialID);
                             if (mesh.UV != null)
                                 mesh.UVName = MakeLabelWithID(label, "vuvS", mesh.MaterialID);
@@ -64,6 +66,64 @@ namespace LabelTool
             }
         }
 
+        static string GetNodeNameFromMkey(AnimModelData mkey, string motname)
+        {
+            string nodefull = "";
+            if (mkey.PositionName != null)
+                nodefull = mkey.PositionName;
+            if (mkey.RotationName != null)
+                nodefull = mkey.RotationName;
+            if (mkey.ScaleName != null)
+                nodefull = mkey.ScaleName;
+            return nodefull.Remove(0, 4 + motname.Length + 1); // Remove "pos_" and "motionname_"
+        }
+
+        // Generate labels for OBJECT based on labels for MOTION (takes an array of MOTION)
+        static void GenerateLabels(NJS_MOTION[] mot, NJS_OBJECT obj, string objname)
+        {
+            // Build motion names
+            string[] motionnames = new string[mot.Length];
+            for (int i = 0; i < mot.Length; i++)
+            {
+                motionnames[i] = mot[i].Name.Remove(0, 7); // Remove "motion_"
+                Console.WriteLine("Motion {0}: {1}", i, motionnames[i]);
+            }
+            // Create a nodes list
+            int nodecount = obj.GetObjectsAnimated().Count();
+            Console.WriteLine("Nodes: {0}, animated nodes: {1}", obj.GetObjects().Count(), nodecount);
+            // Loop through motions and assign node names
+            Dictionary<int, string> foundnodes = new();
+            for (int n = 0; n < nodecount; n++)
+            {
+                for (int m = 0; m < mot.Length; m++)
+                {
+                    //Console.WriteLine(motionnames[m]);
+                    foreach (KeyValuePair<int, AnimModelData> mkey in mot[m].Models)
+                    {
+                        //Console.WriteLine(mkey.Key);
+                        if (!foundnodes.ContainsKey(n) && mkey.Key == n)
+                        {
+                            string nodename = "object_" + objname + "_" + GetNodeNameFromMkey(mkey.Value, motionnames[m]);
+                            foundnodes.Add(n, nodename);
+                            //Console.WriteLine("Node {0}: {1}", n, nodename);
+                        }
+                    }
+                }
+            }
+            for (int z = 0; z < nodecount; z++)
+            {
+                if (foundnodes.ContainsKey(z))
+                {
+                    GenerateLabels(obj.GetObjects()[z], foundnodes[z]);
+                    Console.WriteLine("Node {0}: {1}", z, foundnodes[z]);
+                }
+                else
+                    Console.WriteLine("Node {0}: not found", z);
+            }
+            Console.WriteLine("Recovered {0} of {1} nodes", foundnodes.Count, nodecount);
+        }
+
+        // Generate labels for MOTION based on labels for OBJECT
         static void GenerateLabels(NJS_MOTION mot, string motname, NJS_OBJECT obj)
         {
             Console.WriteLine("Motion for object: {0}", obj.Name);
@@ -116,15 +176,20 @@ namespace LabelTool
 
         }
 
-            static void LabelGen_Main(string[] args)
+        static void LabelGen_Main(string[] args)
         {
             NJS_OBJECT oldobj = new ModelFile(args[0]).Model;
-            NJS_MOTION newmot=NJS_MOTION.Load(args[1]);
-            GenerateLabels(newmot, "run", oldobj);
-            newmot.Save("C:\\Users\\Pkr\\desktop\\ass.saanim");
-           ModelFile.CreateFile("C:\\Users\\Pkr\\desktop\\ass.sa1mdl", oldobj, null, null, null, null, oldobj.GetModelFormat());
-            //GenerateLabels(oldobj, args[1]);
-
+            string[] foundmotions = Directory.GetFiles(Path.GetDirectoryName(Path.GetFullPath(args[0])), "*.saanim", SearchOption.TopDirectoryOnly);
+            NJS_MOTION[] srcmot = new NJS_MOTION[foundmotions.Length];
+            for (int m=0;m<srcmot.Length;m++)
+                srcmot[m] = NJS_MOTION.Load(foundmotions[m]);
+            // Labels from Motions
+            if (srcmot.Length > 0)
+                GenerateLabels(srcmot, oldobj, Path.GetFileNameWithoutExtension(args[0]).Replace(".nja", ""));
+            // Labels from filename
+            else
+                GenerateLabels(oldobj, Path.GetFileNameWithoutExtension(args[0]).Replace(".nja", ""));
+            ModelFile.CreateFile(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(args[0])), Path.GetFileNameWithoutExtension(args[0]) + "_rec.sa1mdl"), oldobj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
         }
 	}
 }
