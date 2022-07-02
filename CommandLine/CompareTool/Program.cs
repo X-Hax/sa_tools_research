@@ -267,23 +267,23 @@ namespace CompareTool
         }
         */
 
-        static bool CompareModel(NJS_OBJECT mdl_src, NJS_OBJECT mdl_dst)
+        static bool CompareModel(NJS_OBJECT mdl_src, NJS_OBJECT mdl_dst, bool notroot = false)
         {
+            //Console.WriteLine("Comparing {0} with {1}", mdl_src.Name, mdl_dst.Name);
             bool result = false;
             try
             {
+                if ((mdl_src.Attach != null && mdl_dst.Attach == null) || (mdl_src.Attach == null && mdl_dst.Attach != null))
+                {
+                    Console.WriteLine("Model data is missing in one object but present in another");
+                    return true;
+                }
                 if (mdl_src.GetObjects().Length > 1 || mdl_dst.GetObjects().Length > 1)
                 {
                     if (mdl_src.GetObjects().Length != mdl_dst.GetObjects().Length)
                     {
                         Console.WriteLine("Model hierarchy is different");
                         return true;
-                    }
-                    for (int id = 0; id < mdl_src.Children.Count; id++)
-                    {
-                        if (mdl_src.Children[id].Attach != null)
-                            if (CompareAttach((BasicAttach)mdl_src.Children[id].Attach, (BasicAttach)mdl_dst.Children[id].Attach))
-                                return true;
                     }
                 }
                 int flags_src = (int)mdl_src.GetFlags();
@@ -297,9 +297,17 @@ namespace CompareTool
                 if (mdl_src.Attach != null)
                     if (CompareAttach((BasicAttach)mdl_src.Attach, (BasicAttach)mdl_dst.Attach))
                         return true;
-                if (mdl_src.Sibling != null && mdl_src.Sibling.Attach != null)
-                    if (CompareAttach((BasicAttach)mdl_src.Sibling.Attach, (BasicAttach)mdl_dst.Sibling.Attach))
-                        return true;
+                if (!notroot)
+                {
+                    NJS_OBJECT[] objs_src = mdl_src.GetObjects();
+                    NJS_OBJECT[] objs_dst = mdl_dst.GetObjects();
+                    for (int id = 0; id < objs_src.Length; id++)
+                    {
+                        if (objs_src[id].Attach != null)
+                            if (CompareModel(objs_src[id], objs_dst[id], true))
+                                return true;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -369,6 +377,7 @@ namespace CompareTool
             List<ModelDiffData> items; // List of differences for materials, UVs 
             bool result = false;
 
+            //Console.WriteLine("Comparing attach {0} with {1}", att_src.Name, att_dst.Name);
             // Compare materials
             if (att_src.Material.Count != att_dst.Material.Count)
             {
