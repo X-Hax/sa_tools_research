@@ -296,7 +296,7 @@ namespace CompareTool
                 }
                 if (mdl_src.Attach != null)
                     if (CompareAttach((BasicAttach)mdl_src.Attach, (BasicAttach)mdl_dst.Attach))
-                        return true;
+                        result = true;
                 if (!notroot)
                 {
                     NJS_OBJECT[] objs_src = mdl_src.GetObjects();
@@ -305,7 +305,7 @@ namespace CompareTool
                     {
                         if (objs_src[id].Attach != null)
                             if (CompareModel(objs_src[id], objs_dst[id], true))
-                                return true;
+                                result = true;
                     }
                 }
             }
