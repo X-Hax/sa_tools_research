@@ -57,6 +57,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataToolbox", "sa_tools\Dat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SADXSourceView", "SADXSourceView\SADXSourceView.csproj", "{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnimRetarget", "CommandLine\AnimRetarget\AnimRetarget.csproj", "{0885CD02-00EF-4A24-AA37-F253B4072D63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -273,6 +275,14 @@ Global
 		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x64.Build.0 = Release|x64
 		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x86.ActiveCfg = Release|x86
 		{2BA561DD-C2A6-4A5D-BA88-CFDDE905C925}.Release|x86.Build.0 = Release|x86
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Debug|x64.ActiveCfg = Debug|x64
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Debug|x64.Build.0 = Debug|x64
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Debug|x86.ActiveCfg = Debug|x86
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Debug|x86.Build.0 = Debug|x86
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Release|x64.ActiveCfg = Release|x64
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Release|x64.Build.0 = Release|x64
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Release|x86.ActiveCfg = Release|x86
+		{0885CD02-00EF-4A24-AA37-F253B4072D63}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
