@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-// The label structs have changed and this may not work properly anymore, needs further testing.
+// The label structs have changed and this doesn't work properly anymore.
 // Methods to retrieve and export labels
 namespace LabelTool
 {
@@ -29,6 +29,12 @@ namespace LabelTool
                     NJS_MOTION mot_nolabel = NJS_MOTION.Load(path_nolabel);
                     NJS_MOTION mot_label = NJS_MOTION.Load(path_label);
                     ExportAddr(mot_nolabel, "labels", writer_split, writer_ida, mot_label.Name, labelindex);
+                    if (mot_nolabel.ActionName != null)
+                    {
+                        NJS_ACTION action = new NJS_ACTION(null, mot_nolabel);
+                        action.Name = mot_label.ActionName;
+                        ExportAddr(action, "labels", writer_split, writer_ida, mot_label.ActionName, labelindex);
+                    }
                     break;
                 case ".sa1lvl":
                 case ".sa2lvl":
@@ -94,7 +100,7 @@ namespace LabelTool
                         NJS_MESHSET[] mesharray = attach.Mesh.ToArray();
                         for (int u = 0; u < mesharray.Length; u++)
                         {
-                            //Console.WriteLine("Adding mesh {0} of {1} ({2})", u, mesharray.Length, desc.MeshsetItemNames.Length);
+                            //Console.WriteLine("Adding mesh {0} of {1} ({2})", u, mesharray.Length, desc.MeshsetItemNames.Count);
                             if (mesharray[u].Poly != null && desc.MeshsetItemNames[u].PolyName != null)
                             {
                                 int polycount = 0;
