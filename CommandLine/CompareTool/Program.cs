@@ -690,7 +690,7 @@ namespace CompareTool
 
         static void WriteSingleItemDiffs(TextWriter tw)
         {
-            if (modelDiffList.Count == 0 || modelDiffList.Count >= 100)
+            if (modelDiffList.Count == 0 || modelDiffList.Count >= maxDifferences)
             {
                 tw.WriteLine("\t//Model too different\n");
                 return;
