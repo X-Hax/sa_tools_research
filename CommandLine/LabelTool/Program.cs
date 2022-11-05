@@ -14,6 +14,14 @@ namespace LabelTool
         {
             switch (args[args.Length - 1])
             {
+                // Export labels from SA*MDL, SA*LVL and SAANIM files
+                case "-save":
+                    LabelSave(args);
+                    return;
+                // Load labels and apply them to SA*MDL, SA*LVL and SAANIM files
+                case "-load":
+                    LabelLoad(args);
+                    return;
                 // Scan a folder and output all NJS_OBJECT labels found in level files
                 case "-scanlabels":
                     ScanLabels(args);

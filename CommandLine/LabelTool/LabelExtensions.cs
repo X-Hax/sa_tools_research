@@ -96,12 +96,12 @@ namespace LabelTool
                     if (attach.Material != null) AddAddress(attach.Material.Count.ToString() + ",NJS_MATERIAL", attach.MaterialName, desc.MaterialName, writer_split, writer_ida);
                     if (attach.Mesh != null && attach.Mesh.Count > 0)
                     {
-                        AddAddress(attach.Mesh.Count.ToString() + ",NJS_MESHSET_SADX", attach.MeshName, desc.MeshsetOrPolyName, writer_split, writer_ida);
+                        AddAddress(attach.Mesh.Count.ToString() + ",NJS_MESHSET_SADX", attach.MeshName, desc.MeshsetName, writer_split, writer_ida);
                         NJS_MESHSET[] mesharray = attach.Mesh.ToArray();
                         for (int u = 0; u < mesharray.Length; u++)
                         {
-                            //Console.WriteLine("Adding mesh {0} of {1} ({2})", u, mesharray.Length, desc.MeshsetItemNames.Count);
-                            if (mesharray[u].Poly != null && desc.MeshsetItemNames[u].PolyName != null)
+                            //Console.WriteLine("Adding mesh {0} of {1} ({2})", u, mesharray.Length, desc.MeshsetItems.Count);
+                            if (mesharray[u].Poly != null && desc.MeshsetItems[u].PolyName != null)
                             {
                                 int polycount = 0;
                                 foreach (var poly in mesharray[u].Poly)
@@ -109,22 +109,22 @@ namespace LabelTool
                                 if (mesharray[u].PolyType == Basic_PolyType.Strips)
                                     polycount+= mesharray[u].Poly.Count;
                                 //Console.WriteLine("Adding poly");
-                                AddAddress(polycount.ToString() + ",Sint16", mesharray[u].PolyName, desc.MeshsetItemNames[u].PolyName, writer_split, writer_ida);
+                                AddAddress(polycount.ToString() + ",Sint16", mesharray[u].PolyName, desc.MeshsetItems[u].PolyName, writer_split, writer_ida);
                             }
-                            if (mesharray[u].UV != null && desc.MeshsetItemNames[u].UVName != null)
+                            if (mesharray[u].UV != null && desc.MeshsetItems[u].UVName != null)
                             {
                                 //Console.WriteLine("Adding tex");
-                                AddAddress(mesharray[u].UV.Length.ToString() + ",NJS_TEX", mesharray[u].UVName, desc.MeshsetItemNames[u].UVName, writer_split, writer_ida);
+                                AddAddress(mesharray[u].UV.Length.ToString() + ",NJS_TEX", mesharray[u].UVName, desc.MeshsetItems[u].UVName, writer_split, writer_ida);
                             }
-                            if (mesharray[u].PolyNormal != null && desc.MeshsetItemNames[u].PolyNormalName != null)
+                            if (mesharray[u].PolyNormal != null && desc.MeshsetItems[u].PolyNormalName != null)
                             {
                                 //Console.WriteLine("Adding polynormal");
-                                AddAddress(mesharray[u].PolyNormal.Length.ToString() + ",NJS_VECTOR", mesharray[u].PolyNormalName, desc.MeshsetItemNames[u].PolyNormalName, writer_split, writer_ida);
+                                AddAddress(mesharray[u].PolyNormal.Length.ToString() + ",NJS_VECTOR", mesharray[u].PolyNormalName, desc.MeshsetItems[u].PolyNormalName, writer_split, writer_ida);
                             }
-                            if (mesharray[u].VColor != null && desc.MeshsetItemNames[u].VColorName != null)
+                            if (mesharray[u].VColor != null && desc.MeshsetItems[u].VColorName != null)
                             {
                                 //Console.WriteLine("Adding vc");
-                                AddAddress(mesharray[u].VColor.Length.ToString() + ",NJS_COLOR", mesharray[u].VColorName, desc.MeshsetItemNames[u].VColorName, writer_split, writer_ida);
+                                AddAddress(mesharray[u].VColor.Length.ToString() + ",NJS_COLOR", mesharray[u].VColorName, desc.MeshsetItems[u].VColorName, writer_split, writer_ida);
                             }
                         }
                     }
@@ -149,7 +149,7 @@ namespace LabelTool
                             chunks.AddRange(item.GetBytes());
                         chunks.AddRange(BitConverter.GetBytes((short)0));
                         byte[] cb = chunks.ToArray();
-                        AddAddress((cb.Length / 2).ToString() + ",Sint16", attach.PolyName, desc.MeshsetOrPolyName, writer_split, writer_ida);
+                        AddAddress((cb.Length / 2).ToString() + ",Sint16", attach.PolyName, desc.MeshsetName, writer_split, writer_ida);
                     }
                 }
             }
@@ -372,8 +372,8 @@ namespace LabelTool
                         int cunt = 0;
                         foreach (KeyValuePair<int, Vertex[]> vkey in item.Value.Vertex)
                         {
-                            Console.WriteLine("Adding {0} to {1}, index {2}", mkey.VertexItemNames[cunt], item.Value.VertexItemName[cunt], cunt);
-                            AddAddress(vkey.Value.Length.ToString() + ",NJS_VECTOR", item.Value.VertexItemName[cunt], mkey.VertexItemNames[cunt], writer_split, writer_ida);
+                            Console.WriteLine("Adding {0} to {1}, index {2}", mkey.VertexItems[cunt], item.Value.VertexItemName[cunt], cunt);
+                            AddAddress(vkey.Value.Length.ToString() + ",NJS_VECTOR", item.Value.VertexItemName[cunt], mkey.VertexItems[cunt], writer_split, writer_ida);
                             cunt++;
                         }
                     }
@@ -383,7 +383,7 @@ namespace LabelTool
                         int cunt = 0;
                         foreach (KeyValuePair<int, Vertex[]> nkey in item.Value.Normal)
                         {
-                            AddAddress(nkey.Value.Length.ToString() + ",NJS_VECTOR", item.Value.NormalItemName[cunt], mkey.NormalItemNames[cunt], writer_split, writer_ida);
+                            AddAddress(nkey.Value.Length.ToString() + ",NJS_VECTOR", item.Value.NormalItemName[cunt], mkey.NormalItems[cunt], writer_split, writer_ida);
                             cunt++;
                         }
                     }
@@ -433,11 +433,11 @@ namespace LabelTool
             LabelACTION desc = IniSerializer.Deserialize<LabelACTION>(Path.Combine(path, indx.ToString() + ".txt"));
             if (action.Model != null)
             {
-                ExportAddr(action.Model, path, writer_split, writer_ida, desc.ObjectName, labelindex);
+                ExportAddr(action.Model, path, writer_split, writer_ida, desc.ObjectNames.ObjectName, labelindex);
             }
             if (action.Animation != null)
             {
-                ExportAddr(action.Animation, path, writer_split, writer_ida, desc.MotionName, labelindex);
+                ExportAddr(action.Animation, path, writer_split, writer_ida, desc.MotionNames.MotionName, labelindex);
             }
             //Console.WriteLine("Action nameS: {0}, motion nameS: {1}", label, desc.MotionName);
         }
@@ -463,7 +463,7 @@ namespace LabelTool
                 COL[] colarray = land.COL.ToArray();
                 for (int u = 0; u < colarray.Length; u++)
                 {
-                    ExportAddr(colarray[u].Model, path, writer_split, writer_ida, desc.ColItemNames[u], labelindex);
+                    ExportAddr(colarray[u].Model, path, writer_split, writer_ida, desc.ColObjectNames[u].ObjectName, labelindex);
                 }
             }
             if (land.Anim != null && land.Anim.Count > 0)
@@ -474,7 +474,7 @@ namespace LabelTool
                 {
                     NJS_ACTION action = new NJS_ACTION(geoanimarray[u].Model, geoanimarray[u].Animation);
                     action.Name = geoanimarray[u].Animation.ActionName;
-                    ExportAddr(action, path, writer_split, writer_ida, desc.GeoAnimActionNames[u], labelindex);
+                    ExportAddr(action, path, writer_split, writer_ida, desc.GeoAnimActionNames[u].ActionName, labelindex);
                 }
             }
         }
