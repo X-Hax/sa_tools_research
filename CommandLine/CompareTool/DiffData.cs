@@ -52,5 +52,10 @@ namespace CompareTool
 		public class DiffuseColorDiffData : ColorDiffData { }
 
 		public class SpecularColorDiffData : ColorDiffData { }
-	}
+
+		public class ColFlagsDiffData : ModelDiffData
+		{
+			public uint flags;
+		}
+    }
 }

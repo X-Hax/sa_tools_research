@@ -104,33 +104,36 @@ namespace CompareTool
                     LandTable land_dst = LandTable.LoadFromFile(filename_dst);
                     COL[] arr_src = land_src.COL.ToArray();
                     COL[] arr_dst = land_dst.COL.ToArray();
-                    bool same = true;
-                    for (int co = 0; co < arr_src.Length; co++)
+                    int addr = int.Parse(land_src.COLName.Replace("collist_", ""), System.Globalization.NumberStyles.AllowHexSpecifier);
+                    // Assume the same COL item order, otherwise it's fucked
+                    if (arr_dst.Length != arr_src.Length)
+                        Console.WriteLine("COL count different: {0} vs {1}", arr_src.Length, arr_dst.Length);
+                    // Compare COL items
+                    List<ModelDiffData> col = new();
+                    maxDifferences = 90000;
+                    for (int c = 0; c < arr_src.Length; c++)
+                        CompareCOL(arr_src[c], arr_dst[c], c, col);
+                    AddDiffItems(addr, col);
+                    // Compare models
+                    for (int c = 0; c < arr_src.Length; c++)
                     {
-                        if (same && !CompareCOL(arr_src[co], arr_dst[co]))
-                        {
-                            Console.WriteLine("COL order different at item {0} ({1} / {2} / {3})! Trying manual match.", co, arr_src[co].Bounds.Center.X, arr_src[co].Bounds.Center.Y, arr_src[co].Bounds.Center.Z);
-                            same = false;
-                        }
+                        if (arr_src[c].Model.Attach != null)
+                            CompareModel(arr_src[c].Model, arr_dst[c].Model);
                     }
-                    // Compare using identical order
-                    if (same)
-                    {
-                        for (int c = 0; c < arr_src.Length; c++)
-                            if (arr_src[c].Model.Attach != null)
-                                CompareAttach((BasicAttach)arr_src[c].Model.Attach, (BasicAttach)arr_dst[c].Model.Attach);
-                    }
+                    // Save differences
+                    if (saveDiffFile)
+                        SerializeDiffList(outputDiffFilename);
+                    /*
                     // Compare using different order
                     else
                     {
-                        if (arr_dst.Length != arr_src.Length)
-                            Console.WriteLine("COL count different: {0} vs {1}", arr_src.Length, arr_dst.Length);
+                       
                         Dictionary<int, int> matches = new Dictionary<int, int>();
                         for (int c1 = 0; c1 < arr_dst.Length; c1++)
                         {
                             bool found = false;
                             for (int c2 = 0; c2 < arr_dst.Length; c2++)
-                                if (arr_src[c1].Model.Attach != null && CompareCOL(arr_src[c1], arr_dst[c2], 0))
+                                if (arr_src[c1].Model.Attach != null && CompareCOL(arr_src[c1], arr_dst[c2], c1, addr, 0))
                                     if (!matches.ContainsKey(c2) && !matches.ContainsValue(c1))
                                     {
                                         matches.Add(c2, c1);
@@ -142,7 +145,7 @@ namespace CompareTool
                             if (!found)
                             {
                                 for (int c2 = 0; c2 < arr_dst.Length; c2++)
-                                    if (arr_src[c1].Model.Attach != null && CompareCOL(arr_src[c1], arr_dst[c2], 1))
+                                    if (arr_src[c1].Model.Attach != null && CompareCOL(arr_src[c1], arr_dst[c2], c1, addr, 1))
                                         if (!matches.ContainsKey(c2) && !matches.ContainsValue(c1))
                                         {
                                             matches.Add(c2, c1);
@@ -151,10 +154,8 @@ namespace CompareTool
                                         }
                             }
                         }
-                        Console.WriteLine("Total COL items in landtables: {0} vs {1}, matches: {2}", arr_src.Length, arr_dst.Length, matches.Count);
-                    }
-                    if (saveDiffFile)
-                        SerializeDiffList(outputDiffFilename);
+                    Console.WriteLine("Total COL items in landtables: {0} vs {1}, matches: {2}", arr_src.Length, arr_dst.Length, matches.Count);
+                    */
                     break;
                 case ".sa1mdl":
                     NJS_OBJECT mdl_src = new ModelFile(filename_src).Model;
@@ -656,43 +657,46 @@ namespace CompareTool
             {
                 Console.WriteLine("Over {0} differences detected", maxDifferences);
             }
-            else
+            else if (items.Count > 0)
             {
+                Console.WriteLine("Adding {0} items for address {1}", items.Count, addr.ToString("X"));
                 modelDiffList.Add(addr, items);
             }
         }
 
-        static bool CompareCOL(COL item1, COL item2, int tryhard = 0)
+        static bool CompareCOL(COL item1, COL item2, int arrayID, List<ModelDiffData> items)
         {
-            if (item1.Bounds.Center.X != item2.Bounds.Center.X) return false;
-            if (item1.Bounds.Center.Y != item2.Bounds.Center.Y) return false;
-            if (item1.Bounds.Center.Z != item2.Bounds.Center.Z) return false;
-            if (item1.Bounds.Radius != item2.Bounds.Radius)
+            bool same = true;
+            if (item1.Bounds.Center.X != item2.Bounds.Center.X ||
+                item1.Bounds.Center.Y != item2.Bounds.Center.Y ||
+                item1.Bounds.Center.Z != item2.Bounds.Center.Z)
             {
-                if (tryhard < 1) return false;
-                else
-                    Console.WriteLine("Radius different for COL item at {0} / {1} / {2}: {3} vs {4}", item1.Bounds.Center.X, item1.Bounds.Center.Y, item1.Bounds.Center.Z, item1.Bounds.Radius, item2.Bounds.Radius);
+                same = false;
+                Console.WriteLine("Bounds different for COL item {0} : {1} / {2} / {3} vs {4} / {5} / {6}", arrayID, item1.Bounds.Center.X, item1.Bounds.Center.Y, item1.Bounds.Center.Z, item2.Bounds.Center.X, item2.Bounds.Center.Y, item2.Bounds.Center.Z);
+                items.Add(new VertexNormalDiffData { ArrayID = arrayID, X = item2.Bounds.Center.X, Y = item2.Bounds.Center.Y, Z = item2.Bounds.Center.Z });
+            }
+            if (item1.Bounds.Radius != item2.Bounds.Radius ||
+                item1.WidthY != item2.WidthY ||
+                item1.WidthZ != item2.WidthZ)
+            {
+                same = false;
+                Console.WriteLine("Radius different for COL item {0} : {1} / {2} / {3} vs {4} / {5} / {6}", arrayID, item1.Bounds.Center.X, item1.WidthY, item1.WidthZ, item2.Bounds.Radius, item2.WidthY, item2.WidthZ);
+                items.Add(new VertexNormalDiffData { ArrayID = arrayID, X = item2.Bounds.Radius, Y = item2.WidthY, Z = item2.WidthZ });
             }
             if (item1.Flags != item2.Flags)
             {
-                if (tryhard < 1) return false;
-                else
-                    Console.WriteLine("Flags different for COL item at {0} / {1} / {2}: {3} vs {4}", item1.Bounds.Center.X, item1.Bounds.Center.Y, item1.Bounds.Center.Z, item1.Flags.ToString("X"), item2.Flags.ToString("X"));
+                same = false;
+                Console.WriteLine("Flags different for COL item {0} : / {1} vs {2}", arrayID, item1.Flags.ToString("X"), item2.Flags.ToString("X"));
+                items.Add(new ColFlagsDiffData { ArrayID = arrayID, flags = (uint)item2.Flags });
             }
-            if (item1.SurfaceFlags != item2.SurfaceFlags)
-            {
-                if (tryhard < 1) return false;
-                else
-                    Console.WriteLine("Surface flags different for COL item at {0} / {1} / {2}: {3} vs {4}", item1.Bounds.Center.X, item1.Bounds.Center.Y, item1.Bounds.Center.Z, item1.SurfaceFlags.ToString("X"), item2.SurfaceFlags.ToString("X"));
-            }
-            return true;
+            return same;
         }
 
         static void WriteSingleItemDiffs(TextWriter tw)
         {
             if (modelDiffList.Count == 0 || modelDiffList.Count >= maxDifferences)
             {
-                tw.WriteLine("\t//Model too different\n");
+                tw.WriteLine("\t//Model too different (num diff: {0})\n", modelDiffList.Count);
                 return;
             }
             foreach (var item in modelDiffList)
@@ -743,12 +747,25 @@ namespace CompareTool
                             uvd.U, uvd.V);
                     }
 
-                    // Write vertices/normals
+                    // Write vertices/normals/COL position
                     else if (item2 is VertexNormalDiffData vtx)
                         tw.WriteLine("*(NJS_VECTOR*){0} = {{ {1}, {2}, {3} }};",
                              dllHandle == "" ? "0x" + (0x400000 + item.Key + Vertex.Size * vtx.ArrayID).ToString("X8") :
                             "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + Vertex.Size * vtx.ArrayID).ToString("X8") + ")",
                             vtx.X.ToC(), vtx.Y.ToC(), vtx.Z.ToC());
+
+                    // Write COL flags
+                    else if (item2 is ColFlagsDiffData cfl)
+                        tw.WriteLine("((_OBJ_LANDENTRY*){0})[{1}].slAttribute = {2};",
+                 dllHandle == "" ? "0x" + (0x400000 + item.Key).ToString("X8") :
+                "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key).ToString("X8") + ")", cfl.ArrayID,
+                "0x" + cfl.flags.ToString("X8"));
+                    /* Old one that writes to the COL item directly
+                    tw.WriteLine("((_OBJ_LANDENTRY*){0}->slAttribute = {1};",
+                         dllHandle == "" ? "0x" + (0x400000 + item.Key + 36 * cfl.ArrayID).ToString("X8") :
+                        "((size_t)handle" + dllHandle.ToUpperInvariant() + " + " + "0x" + (item.Key + 36 * cfl.ArrayID).ToString("X8") + ")",
+                        "0x"+cfl.flags.ToString("X8"));
+                    */
                 }
             }
             tw.WriteLine();
