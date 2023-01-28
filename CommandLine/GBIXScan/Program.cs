@@ -5,7 +5,7 @@ using System.Text;
 using ArchiveLib;
 using VrSharp.Pvr;
 
-// This program scans a folder for texture archives and texture packs, and outputs Global Index information
+// This program scans a folder for PVM archives and PVR files, and outputs Global Index information
 
 namespace GBIXScan
 {
@@ -17,7 +17,7 @@ namespace GBIXScan
             bool name = false;
             if (args.Length < 1)
             {
-                Console.WriteLine("This program scans a folder for texture archives and texture packs, and outputs Global Index information.");
+                Console.WriteLine("This program scans a folder for PVM archives and PVR files, and outputs Global Index information.");
                 Console.WriteLine("\nUsage:");
                 Console.WriteLine("GBIXScan [folder] [-all] [-name]");
                 Console.WriteLine("\nfolder: Folder to scan");
