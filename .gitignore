@@ -28,3 +28,5 @@
 /CommandLine/MatchTexID/obj
 /SADXSourceView/obj
 /CommandLine/RetargetAnim/obj
+/CommandLine/GBIXScan/obj
+/CommandLine/DupmodelMaker/obj
