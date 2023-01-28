@@ -61,6 +61,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetargetAnim", "CommandLine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DupmodelMaker", "CommandLine\DupmodelMaker\DupmodelMaker.csproj", "{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GBIXScan", "CommandLine\GBIXScan\GBIXScan.csproj", "{5838CA79-C21D-4048-8BA3-1E2702220F89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -293,6 +295,14 @@ Global
 		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x64.Build.0 = Release|x64
 		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x86.ActiveCfg = Release|x86
 		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x86.Build.0 = Release|x86
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x64.ActiveCfg = Debug|x64
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x64.Build.0 = Debug|x64
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x86.ActiveCfg = Debug|x86
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x86.Build.0 = Debug|x86
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x64.ActiveCfg = Release|x64
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x64.Build.0 = Release|x64
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x86.ActiveCfg = Release|x86
+		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
