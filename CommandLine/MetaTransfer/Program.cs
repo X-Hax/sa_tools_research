@@ -93,6 +93,28 @@ namespace MetaTransfer
                                     else
                                         Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
                                     break;
+                                case "animation":
+                                case "motion":
+                                case "action":
+                                    if (!result.ContainsKey(item.Value.Filename))
+                                    {
+                                        List<string> meta = new List<string>();
+                                        // Name
+                                        meta.Add(item.Key);
+                                        // Number of parts
+                                        if (item.Value.CustomProperties.ContainsKey("numparts"))
+                                            meta.Add(item.Value.CustomProperties["numparts"]);
+                                        if (!result.ContainsKey(NormalizePath(item.Value.Filename)))
+                                        {
+                                            result.Add(NormalizePath(item.Value.Filename), string.Join("|", meta));
+                                            Console.WriteLine("\t" + item.Value.Filename + ": {0}", item.Key);
+                                        }
+                                        else
+                                            Console.WriteLine("\tDuplicate animation file found: {0}", NormalizePath(item.Value.Filename));
+                                    }
+                                    else
+                                        Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                    break;
                             }
                         }
                         break;
@@ -161,16 +183,39 @@ namespace MetaTransfer
                                 case "actionarray":
                                     for (int i = 0; i < item.Value.Length; i++)
                                     {
+                                        // Model
                                         if (item.Value.CustomProperties.ContainsKey("meta" + i.ToString() + "_m"))
                                         {
-                                            string modelpath = Path.Combine(item.Value.Filename, item.Value.CustomProperties["filename" + i.ToString() +"_m"] + modelext);
-                                            if (!result.ContainsKey(modelpath))
+                                            if (item.Value.CustomProperties.ContainsKey("filename" + i.ToString() + "_m"))
                                             {
-                                                result.Add(NormalizePath(modelpath), item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
-                                                Console.WriteLine("\t" + modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
+                                                string modelpath = Path.Combine(item.Value.Filename, item.Value.CustomProperties["filename" + i.ToString() + "_m"] + modelext);
+                                                if (!result.ContainsKey(modelpath))
+                                                {
+                                                    result.Add(NormalizePath(modelpath), item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
+                                                    Console.WriteLine("\t" + modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
+                                                }
+                                                else
+                                                    Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
                                             }
                                             else
-                                                Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                                Console.WriteLine("\t Model file for entry {0} not specified", item.Value);
+                                        }
+                                        // Animation
+                                        if (item.Value.CustomProperties.ContainsKey("meta" + i.ToString() + "_a"))
+                                        {
+                                            if (item.Value.CustomProperties.ContainsKey("filename" + i.ToString() + "_a"))
+                                            {
+                                                string animpath = Path.Combine(item.Value.Filename, item.Value.CustomProperties["filename" + i.ToString() + "_a"] + ".saanim");
+                                                if (!result.ContainsKey(animpath))
+                                                {
+                                                    result.Add(NormalizePath(animpath), item.Value.CustomProperties["meta" + i.ToString() + "_a"]);
+                                                    Console.WriteLine("\t" + animpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_a"]);
+                                                }
+                                                else
+                                                    Console.WriteLine("\tDuplicate entry for {0} found in {1}", item.Value.Filename, splitData.IniFile);
+                                            }
+                                            else
+                                                Console.WriteLine("\t Animation file for entry {0} not specified", item.Value);
                                         }
                                     }
                                         break;
@@ -276,6 +321,32 @@ namespace MetaTransfer
                                         result.Add(item.Key, item.Value);
                                     }
                                     break;
+                                case "animation":
+                                case "action":
+                                case "motion":
+                                    if (metadata.ContainsKey(NormalizePath(item.Value.Filename)))
+                                    {
+                                        string[] meta = metadata[NormalizePath(item.Value.Filename)].Split('|');
+                                        if (!result.ContainsKey(meta[0]))
+                                        {
+                                            // Texture
+                                            if (meta.Length > 1 && meta[1] != "")
+                                            {
+                                                // Number of parts
+                                                item.Value.CustomProperties["numparts"] = meta[1];
+                                            }
+                                            result.Add(meta[0], item.Value);
+                                            Console.WriteLine("\t" + item.Value.Filename + ": {0}", meta[0]);
+                                        }
+                                        else
+                                            Console.WriteLine("\tDuplicate entry: {0}", meta[0]);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("\tItem not found: {0} in {1}", item.Value.Filename, splitData.IniFile);
+                                        result.Add(item.Key, item.Value);
+                                    }
+                                    break;
                                 default:
                                     result.Add(item.Key, item.Value);
                                     break;
@@ -344,6 +415,7 @@ namespace MetaTransfer
                                 case "actionarray":
                                     for (int i = 0; i < item.Value.Length; i++)
                                     {
+                                        // Model
                                         if (!item.Value.CustomProperties.ContainsKey("filename" + i.ToString() + "_m"))
                                             continue;
                                         string modelpath = Path.Combine(item.Value.Filename, item.Value.CustomProperties["filename" + i.ToString() + "_m"] + modelext);
@@ -351,6 +423,15 @@ namespace MetaTransfer
                                         {
                                             item.Value.CustomProperties["meta" + i.ToString() + "_m"] = metadata[NormalizePath(modelpath)];
                                             Console.WriteLine("\t" + modelpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_m"]);
+                                        }
+                                        // Animation
+                                        if (!item.Value.CustomProperties.ContainsKey("filename" + i.ToString() + "_a"))
+                                            continue;
+                                        string animpath = Path.Combine(item.Value.Filename, item.Value.CustomProperties["filename" + i.ToString() + "_a"] + ".saanim");
+                                        if (metadata.ContainsKey(NormalizePath(animpath)))
+                                        {
+                                            item.Value.CustomProperties["meta" + i.ToString() + "_m"] = metadata[NormalizePath(animpath)];
+                                            Console.WriteLine("\t" + animpath + ": {0}", item.Value.CustomProperties["meta" + i.ToString() + "_a"]);
                                         }
                                     }
                                     resultdll.Add(item.Key, item.Value);
