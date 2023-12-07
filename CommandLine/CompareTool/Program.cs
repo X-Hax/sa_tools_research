@@ -75,6 +75,7 @@ namespace CompareTool
             }
         }
 
+
         static void CompareFiles(string[] args)
         {
             string filename_src = Path.GetFullPath(args[1]); // File for comparison 1
@@ -111,14 +112,32 @@ namespace CompareTool
                     // Compare COL items
                     List<ModelDiffData> col = new();
                     maxDifferences = 90000;
-                    for (int c = 0; c < arr_src.Length; c++)
-                        CompareCOL(arr_src[c], arr_dst[c], c, col);
+                    for (int c = 0; c < arr_dst.Length; c++)
+                    {
+                        int c2 = FindCompareCOL(arr_dst[c], arr_src);
+                        if (c2 != -1)
+                            CompareCOL(arr_src[c2], arr_dst[c], c2, col);
+                        else
+                            Console.WriteLine("\tCould not match COL item {0} in the destination landtable", c);
+                    }
                     AddDiffItems(addr, col);
                     // Compare models
-                    for (int c = 0; c < arr_src.Length; c++)
+                    for (int c = 0; c < Math.Min(arr_dst.Length, arr_src.Length); c++)
                     {
                         if (arr_src[c].Model.Attach != null)
-                            CompareModel(arr_src[c].Model, arr_dst[c].Model);
+                        {
+                            int c2 = FindCompareCOL(arr_dst[c], arr_src);
+                            if (c2 != -1)
+                            {
+                                bool result = CompareModel(arr_src[c2].Model, arr_dst[c].Model);
+                                if (result == false)
+                                    Console.WriteLine("COL item {0} model is identical", c.ToString());
+                                else
+                                    Console.WriteLine("\tCOL item {0} model is different", c.ToString());
+                            }
+                            else
+                                Console.WriteLine("\tCould not match COL item {0} in the destination landtable", c);
+                        }
                     }
                     // Save differences
                     if (saveDiffFile)
@@ -664,6 +683,40 @@ namespace CompareTool
             }
         }
 
+       static int FindCompareCOL(COL item, COL[] list)
+        {
+            for (int i = 0; i < list.Length; i++)
+            {
+                if (item.Bounds.Radius != list[i].Bounds.Radius)
+                    continue;
+                if (item.Bounds.Center.X != list[i].Bounds.Center.X)
+                    continue;
+                if (item.Bounds.Center.Y != list[i].Bounds.Center.Y)
+                    continue;
+                if (item.Bounds.Center.Z != list[i].Bounds.Center.Z)
+                    continue;
+                if (item.Model.Attach.Bounds.Center.X != list[i].Model.Attach.Bounds.Center.X)
+                    continue;
+                if (item.Model.Attach.Bounds.Center.Y != list[i].Model.Attach.Bounds.Center.Y)
+                    continue;
+                if (item.Model.Attach.Bounds.Center.Z != list[i].Model.Attach.Bounds.Center.Z)
+                    continue;
+                if (item.Model.Attach.Bounds.Radius != list[i].Model.Attach.Bounds.Radius)
+                    continue;
+                BasicAttach att_src = (BasicAttach)list[i].Model.Attach;
+                BasicAttach att_dst = (BasicAttach)item.Model.Attach;
+                if (att_src.Vertex.Length != att_dst.Vertex.Length)
+                    continue;
+                if (att_src.Normal.Length != att_dst.Normal.Length)
+                    continue;
+                if (att_src.Mesh.Count != att_dst.Mesh.Count)
+                    continue;
+                //Console.WriteLine(i.ToString());
+                return i;
+            }
+            return -1;
+        }
+
         static bool CompareCOL(COL item1, COL item2, int arrayID, List<ModelDiffData> items)
         {
             bool same = true;
@@ -673,7 +726,7 @@ namespace CompareTool
             {
                 same = false;
                 Console.WriteLine("Bounds different for COL item {0} : {1} / {2} / {3} vs {4} / {5} / {6}", arrayID, item1.Bounds.Center.X, item1.Bounds.Center.Y, item1.Bounds.Center.Z, item2.Bounds.Center.X, item2.Bounds.Center.Y, item2.Bounds.Center.Z);
-                items.Add(new VertexNormalDiffData { ArrayID = arrayID, X = item2.Bounds.Center.X, Y = item2.Bounds.Center.Y, Z = item2.Bounds.Center.Z });
+                //items.Add(new VertexNormalDiffData { ArrayID = arrayID, X = item2.Bounds.Center.X, Y = item2.Bounds.Center.Y, Z = item2.Bounds.Center.Z });
             }
             if (item1.Bounds.Radius != item2.Bounds.Radius ||
                 item1.WidthY != item2.WidthY ||
@@ -681,7 +734,7 @@ namespace CompareTool
             {
                 same = false;
                 Console.WriteLine("Radius different for COL item {0} : {1} / {2} / {3} vs {4} / {5} / {6}", arrayID, item1.Bounds.Center.X, item1.WidthY, item1.WidthZ, item2.Bounds.Radius, item2.WidthY, item2.WidthZ);
-                items.Add(new VertexNormalDiffData { ArrayID = arrayID, X = item2.Bounds.Radius, Y = item2.WidthY, Z = item2.WidthZ });
+                //items.Add(new VertexNormalDiffData { ArrayID = arrayID, X = item2.Bounds.Radius, Y = item2.WidthY, Z = item2.WidthZ });
             }
             if (item1.Flags != item2.Flags)
             {
@@ -689,6 +742,8 @@ namespace CompareTool
                 Console.WriteLine("Flags different for COL item {0} : / {1} vs {2}", arrayID, item1.Flags.ToString("X"), item2.Flags.ToString("X"));
                 items.Add(new ColFlagsDiffData { ArrayID = arrayID, flags = (uint)item2.Flags });
             }
+            if (!same)
+                Console.WriteLine("\tCOL item {0} is different", arrayID.ToString());
             return same;
         }
 
