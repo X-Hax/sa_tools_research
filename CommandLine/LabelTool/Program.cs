@@ -14,6 +14,10 @@ namespace LabelTool
         {
             switch (args[args.Length - 1])
             {
+                // A quick fix to port X360 texlist labels. Looks through an INI file and a list of labels and copies over addresses.
+                case "-texlist":
+                    LabelTexlist(args);
+                    return;
                 // Export labels from SA*MDL, SA*LVL and SAANIM files
                 case "-save":
                     LabelSave(args);

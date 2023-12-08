@@ -97,5 +97,51 @@ namespace LabelTool
                     break;
             }
         }
+
+        static void LabelTexlist(string[] args)
+        {
+            Dictionary <int,string> applabels= new Dictionary<int,string>();
+            IniData ini = IniSerializer.Deserialize<IniData>(args[0]);
+            applabels = IniSerializer.Deserialize<Dictionary<int, string>>(args[1]);
+            Dictionary<string, SplitTools.FileInfo> newlist = new();
+            foreach (var file in ini.Files)
+            {
+                if (file.Value.Type == "texlist")
+                {
+                    bool found = false;
+                    string name = Path.GetFileName(file.Value.Filename).Replace(".tls.satex", "");
+                    //Console.WriteLine(name);
+                    foreach (var dict in applabels)
+                    {
+                        if (dict.Value.Contains("texlist") && dict.Value.Equals("texlist_" + name))
+                        {
+                            //Console.WriteLine(name + " / " + dict.Value);
+                            newlist.Add(file.Key, new SplitTools.FileInfo { Address = dict.Key, Type = "texlist", Filename = file.Value.Filename });
+                            found = true;
+                        }
+                    }
+                    if (!found)
+                    {
+                        foreach (var dict in applabels)
+                        {
+                            if (dict.Value.ToLowerInvariant().Contains("texlist") && dict.Value.ToLowerInvariant().Contains(name))
+                            {
+                                Console.WriteLine("Found second: " + name + " / " + dict.Value);
+                                newlist.Add(file.Key, new SplitTools.FileInfo { Address = dict.Key, Type = "texlist", Filename = file.Value.Filename });
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found)
+                    {
+                        Console.WriteLine("Not found: {0}", file.Key);
+                        newlist.Add(file.Key, new SplitTools.FileInfo { Address = 0x9999, Type = "texlist", Filename = file.Value.Filename });
+                    }
+                }
+            }
+            IniData newini = new IniData { Files = newlist };
+            IniSerializer.Serialize(newini, "out.ini");
+        }
     }
 }
