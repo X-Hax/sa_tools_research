@@ -1,0 +1,15 @@
+D:\GitHub\sa_tools_research\build\bin\TextFinder.exe
+D:\GitHub\sa_tools_research\build\bin\TextFinder.deps.json
+D:\GitHub\sa_tools_research\build\bin\TextFinder.runtimeconfig.json
+D:\GitHub\sa_tools_research\build\bin\TextFinder.dll
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.csproj.AssemblyReference.cache
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.GeneratedMSBuildEditorConfig.editorconfig
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.AssemblyInfoInputs.cache
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.AssemblyInfo.cs
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.csproj.CoreCompileInputs.cache
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.sourcelink.json
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.csproj.Up2Date
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.dll
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\refint\TextFinder.dll
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\TextFinder.genruntimeconfig.cache
+D:\GitHub\sa_tools_research\CommandLine\TextFinder\obj\x64\Release\ref\TextFinder.dll

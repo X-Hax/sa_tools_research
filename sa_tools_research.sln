@@ -63,6 +63,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DupmodelMaker", "CommandLin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GBIXScan", "CommandLine\GBIXScan\GBIXScan.csproj", "{5838CA79-C21D-4048-8BA3-1E2702220F89}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextFinder", "CommandLine\TextFinder\TextFinder.csproj", "{C758A496-6AEC-47B2-8BC1-7953CCC569C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -303,6 +305,14 @@ Global
 		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x64.Build.0 = Release|x64
 		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x86.ActiveCfg = Release|x86
 		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Release|x86.Build.0 = Release|x86
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Debug|x64.ActiveCfg = Debug|x64
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Debug|x64.Build.0 = Debug|x64
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Debug|x86.ActiveCfg = Debug|x86
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Debug|x86.Build.0 = Debug|x86
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Release|x64.ActiveCfg = Release|x64
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Release|x64.Build.0 = Release|x64
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Release|x86.ActiveCfg = Release|x86
+		{C758A496-6AEC-47B2-8BC1-7953CCC569C9}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

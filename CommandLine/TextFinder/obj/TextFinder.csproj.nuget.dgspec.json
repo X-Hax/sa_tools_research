@@ -1,0 +1,287 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\GitHub\\sa_tools_research\\CommandLine\\TextFinder\\TextFinder.csproj": {}
+  },
+  "projects": {
+    "D:\\GitHub\\sa_tools_research\\CommandLine\\TextFinder\\TextFinder.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GitHub\\sa_tools_research\\CommandLine\\TextFinder\\TextFinder.csproj",
+        "projectName": "TextFinder",
+        "projectPath": "D:\\GitHub\\sa_tools_research\\CommandLine\\TextFinder\\TextFinder.csproj",
+        "packagesPath": "C:\\Users\\PkR\\.nuget\\packages\\",
+        "outputPath": "D:\\GitHub\\sa_tools_research\\CommandLine\\TextFinder\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\PkR\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net7.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0-windows7.0": {
+            "targetAlias": "net7.0-windows",
+            "projectReferences": {
+              "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj": {
+                "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj"
+              },
+              "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj": {
+                "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj"
+              },
+              "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SplitTools\\SplitTools.csproj": {
+                "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SplitTools\\SplitTools.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net7.0-windows7.0": {
+          "targetAlias": "net7.0-windows",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj",
+        "projectName": "FraGag.Compression.Prs",
+        "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj",
+        "packagesPath": "C:\\Users\\PkR\\.nuget\\packages\\",
+        "outputPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\PkR\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net7.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0": {
+            "targetAlias": "net7.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net7.0": {
+          "targetAlias": "net7.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj",
+        "projectName": "SAModel",
+        "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj",
+        "packagesPath": "C:\\Users\\PkR\\.nuget\\packages\\",
+        "outputPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\PkR\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net7.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0-windows7.0": {
+            "targetAlias": "net7.0-windows",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net7.0-windows7.0": {
+          "targetAlias": "net7.0-windows",
+          "dependencies": {
+            "Microsoft.Windows.Compatibility": {
+              "target": "Package",
+              "version": "[7.0.3, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WindowsForms": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SplitTools\\SplitTools.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SplitTools\\SplitTools.csproj",
+        "projectName": "SplitTools",
+        "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SplitTools\\SplitTools.csproj",
+        "packagesPath": "C:\\Users\\PkR\\.nuget\\packages\\",
+        "outputPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SplitTools\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\PkR\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net7.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net7.0-windows7.0": {
+            "targetAlias": "net7.0-windows",
+            "projectReferences": {
+              "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj": {
+                "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\FraGag.Compression.Prs\\FraGag.Compression.Prs.csproj"
+              },
+              "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj": {
+                "projectPath": "D:\\GitHub\\sa_tools_research\\sa_tools\\Libraries\\SAModel\\SAModel.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net7.0-windows7.0": {
+          "targetAlias": "net7.0-windows",
+          "dependencies": {
+            "System.Text.Encoding.CodePages": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WindowsForms": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
