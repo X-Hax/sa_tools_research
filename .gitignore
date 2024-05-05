@@ -14,6 +14,7 @@
 /CommandLine/StructExporter/obj/
 /CommandLine/USplit/obj/
 /CommandLine/VariableListGenerator/obj
+/CommandLine/TextFinder/obj
 /SA1Tools/VMSEditor/obj/
 /.vs
 /CommandLine/splitExt/obj/
