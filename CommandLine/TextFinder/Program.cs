@@ -122,7 +122,7 @@ namespace TextFinder
                                     try
                                     {
                                         Console.WriteLine("Length: {0}", file.Value.Length);
-                                        CutsceneText text_kr = new CutsceneText(sonic_kr, structaddr, 0x400000, file.Value.Length, true);
+                                        CutsceneText text_kr = new CutsceneText(sonic_kr, structaddr, 0x400000, file.Value.Length);
                                         nomatch = false;
                                         for (int l = 0; l < file.Value.Length; l++)
                                         {
