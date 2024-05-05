@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TextFinder")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c2b50db4953b242f606e6bf2f0835d9381c56e6d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9b1366bb628c082368ce40e3cb77ff01d47e33f5")]
 [assembly: System.Reflection.AssemblyProductAttribute("TextFinder")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TextFinder")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
