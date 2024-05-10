@@ -14,9 +14,9 @@ namespace RecreatePVM
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("This tool builds a PVM from a list of texture names by recursively searching for each texture in the 'textures' folder.");
+                Console.WriteLine("This tool builds a PVM from a list of texture names (created by BlockBitTool) by recursively searching for each texture in the 'textures' folder.");
                 Console.WriteLine("\nUsage:");
-                Console.WriteLine("RecreatePVM <texturelist.tls> [-q]");
+                Console.WriteLine("RecreatePVM <texturelist.txt> [-q]");
                 Console.WriteLine("\nSwitches:");
                 Console.WriteLine("-q: When multiple unique textures with the same name are found, pick the first one by default (no prompt)");
                 Console.WriteLine("\nPress ENTER to exit.");
@@ -31,20 +31,18 @@ namespace RecreatePVM
             PuyoFile pvm = new PuyoFile();
             for (int i = 0; i < files.Length; i++)
             {
-                if (files[i].Contains(".pvr"))
-                {
-                    string[] found = Directory.GetFiles("textures", files[i], SearchOption.AllDirectories);
+                    string[] found = Directory.GetFiles("textures", files[i] + ".pvr", SearchOption.AllDirectories);
                     if (found.Length == 1)
                     {
-                        pvm.Entries.Add(new PVMEntry(File.ReadAllBytes(found[0]), Path.GetFileNameWithoutExtension(files[i])));
-                        Console.WriteLine("{0}: Found {1}", i.ToString(), files[i]);
+                        pvm.Entries.Add(new PVMEntry(File.ReadAllBytes(found[0]), Path.GetFileName(files[i])));
+                        Console.WriteLine("{0}: Found {1}", i.ToString(), files[i] + ".pvr");
                     }
                     else if (found.Length > 1)
                     {
                         if (quick)
                         {
-                            pvm.Entries.Add(new PVMEntry(File.ReadAllBytes(found[0]), Path.GetFileNameWithoutExtension(files[i])));
-                            Console.WriteLine("{0}: Found {1}", i.ToString(), files[i]);
+                            pvm.Entries.Add(new PVMEntry(File.ReadAllBytes(found[0]), Path.GetFileName(files[i])));
+                            Console.WriteLine("{0}: Found {1}", i.ToString(), files[i] + ".pvr");
                         }
                         else
                         {
@@ -75,11 +73,10 @@ namespace RecreatePVM
                     }
                     else
                     {
-                        pvm.Entries.Add(new PVMEntry(Properties.Resource1.unknown, Path.GetFileNameWithoutExtension(files[i])));
+                        pvm.Entries.Add(new PVMEntry(Properties.Resource1.unknown, Path.GetFileName(files[i]) + ".pvr"));
                         Console.WriteLine("{0}: Missing {1}", i.ToString(), files[i]);
                         count++;
                     }
-                }
             }
             pvm.Save(Path.ChangeExtension(args[0], ".pvm"));
             Console.WriteLine("Missing {0} textures of {1}", count, pvm.Entries.Count);

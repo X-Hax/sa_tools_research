@@ -35,7 +35,7 @@ namespace BlockBitTool
             LandTable original = new LandTable(binary, address, key, LandTableFormat.SA1);
             // First go through the COL list and create a texlist with all textures that it uses
             NJS_TEXLIST texlist_full = CreateLandtableTexlist(original, binary, key);
-            texlist_full.Save(original.Name + ".tls");
+            File.WriteAllLines(original.Name + ".txt", texlist_full.TextureNames);
             // Now go through the COL list again and match up texture names with the list that was created earlier
             LandTable result = ConvertLandTableBlockBits(original, binary, key, texlist_full);
             result.SaveToFile(original.Name + ".sa1lvl", LandTableFormat.SA1);
