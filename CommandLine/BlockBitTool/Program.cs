@@ -24,6 +24,7 @@ namespace BlockBitTool
                 Console.ReadLine();
                 return;
             }
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             // Binary file
             byte[] binary = File.ReadAllBytes(args[0]);
             if (Path.GetExtension(args[0].ToLowerInvariant()) == ".prs")
