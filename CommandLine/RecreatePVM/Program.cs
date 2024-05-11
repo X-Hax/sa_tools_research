@@ -1,7 +1,9 @@
 ﻿using ArchiveLib;
+using SplitTools;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace RecreatePVM
 {
@@ -14,9 +16,9 @@ namespace RecreatePVM
         {
             if (args.Length < 1)
             {
-                Console.WriteLine("This tool builds a PVM from a list of texture names (created by BlockBitTool) by recursively searching for each texture in the 'textures' folder.");
+                Console.WriteLine("This tool builds a PVM from a list of texture names (created by BlockBitTool or split) by recursively searching for each texture in the 'textures' folder.");
                 Console.WriteLine("\nUsage:");
-                Console.WriteLine("RecreatePVM <texturelist.txt> [-q]");
+                Console.WriteLine("RecreatePVM <texturelist.satex> [-q]");
                 Console.WriteLine("\nSwitches:");
                 Console.WriteLine("-q: When multiple unique textures with the same name are found, pick the first one by default (no prompt)");
                 Console.WriteLine("\nPress ENTER to exit.");
@@ -27,7 +29,14 @@ namespace RecreatePVM
             if (args.Length > 1 && args[1] == "-q")
                 quick = true;
             int count = 0;
-            string[] files = File.ReadAllLines(args[0]);
+            string[] files;
+            if (Path.GetExtension(args[0]).ToLowerInvariant() == ".satex")
+            {
+                NJS_TEXLIST tls = NJS_TEXLIST.Load(args[0]);
+                files = tls.TextureNames.ToArray();
+            }
+            else
+                files = File.ReadAllLines(args[0]);
             PuyoFile pvm = new PuyoFile();
             for (int i = 0; i < files.Length; i++)
             {
