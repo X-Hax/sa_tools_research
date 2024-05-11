@@ -59,12 +59,12 @@ namespace PatternPatchMaker
                     {
                         if (index - prevadr == 1)
                         {
-                            patches[patchcount] += " " + data_dst.ToString("X");
+                            patches[patchcount] += " " + data_dst.ToString("X02");
                             prevadr = index;
                         }
                         else
                         {
-                            patches.Add(index.ToString("X") + "=" + data_dst.ToString("X"));
+                            patches.Add(index.ToString("X02") + "=" + data_dst.ToString("X02"));
                             patchcount++;
                             prevadr = index;
                         }
@@ -78,7 +78,7 @@ namespace PatternPatchMaker
                     uint data_src = BitConverter.ToUInt32(file_src, index);
                     uint data_dst = BitConverter.ToUInt32(file_dst, index);
                     if (data_src != data_dst)
-                        patches.Add("Patch_" + index.ToString("X") + "," + data_src.ToString("X") + "," + data_dst.ToString("X"));
+                        patches.Add("Patch_" + index.ToString("X") + "," + data_src.ToString("X08") + "," + data_dst.ToString("X8"));
                 }
             }
             File.WriteAllLines(Path.ChangeExtension(filen_src, ".ini"), patches.ToArray());
