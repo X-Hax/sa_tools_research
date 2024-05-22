@@ -18,16 +18,18 @@ namespace RecreatePVM
             {
                 Console.WriteLine("This tool builds a PVM from a list of texture names (created by BlockBitTool or split) by recursively searching for each texture in the 'textures' folder.");
                 Console.WriteLine("\nUsage:");
-                Console.WriteLine("RecreatePVM <texturelist.satex> [-q] [-p]");
+                Console.WriteLine("RecreatePVM <texturelist.satex> [-q] [-p] [-n]");
                 Console.WriteLine("\nSwitches:");
                 Console.WriteLine("-q: When multiple unique textures with the same name are found, pick the first one by default (no prompt)");
                 Console.WriteLine("-p: Compress to PRS");
+                Console.WriteLine("-n: Don't put found textures in a PVM.");
                 Console.WriteLine("\nPress ENTER to exit.");
                 Console.ReadLine();
                 return;
             }
             bool quick = false;
             bool prs = false;
+            bool nopvm = false;
 
             for (int i = 0; i < args.Length; i++)
             {
@@ -39,7 +41,9 @@ namespace RecreatePVM
                     case "-p":
                         prs = true;
                         break;
-
+                    case "-n":
+                        nopvm = true;
+                        break;
                 }
             }
             int count = 0;
@@ -103,14 +107,29 @@ namespace RecreatePVM
             }
             // Remove double extension in SA Tools satex files
             string outfile = args[0].Replace(".tls", "");
-            if (prs)
+            if (nopvm)
             {
-                Console.WriteLine("Compressing PRS...");
-                byte[] prsdata = FraGag.Compression.Prs.Compress(pvm.GetBytes());
-                File.WriteAllBytes(Path.ChangeExtension(outfile, ".prs"), prsdata);
+                Console.WriteLine(outfile);
+                Console.WriteLine(Path.GetFullPath(outfile));
+                string outpath = Path.Combine(Path.GetDirectoryName(outfile), Path.GetFileNameWithoutExtension(outfile));
+                Directory.CreateDirectory(outpath);
+                foreach (PVMEntry entry in pvm.Entries)
+                {
+                    string path=Path.Combine(outpath, entry.Name + ".pvr");
+                    File.WriteAllBytes(path, entry.Data);
+                }
             }
             else
-                pvm.Save(Path.ChangeExtension(outfile, ".pvm"));
+            {
+                if (prs)
+                {
+                    Console.WriteLine("Compressing PRS...");
+                    byte[] prsdata = FraGag.Compression.Prs.Compress(pvm.GetBytes());
+                    File.WriteAllBytes(Path.ChangeExtension(outfile, ".prs"), prsdata);
+                }
+                else
+                    pvm.Save(Path.ChangeExtension(outfile, ".pvm"));
+            }
             Console.WriteLine("Missing {0} textures of {1}", count, pvm.Entries.Count);
         }
 
