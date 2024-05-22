@@ -64,7 +64,7 @@ namespace SplitExt
             }
         }
 
-        // Creates a split INI file for NJS_TEXLIST (texnamearray) items listed as address=filename
+        // Creates a split INI file for NJS_TEXLIST (texlist) items listed as address=filename
         static void SplitTL(string[] args)
         {
             TextWriter output = File.CreateText("output.txt");
@@ -74,7 +74,7 @@ namespace SplitExt
             {
                 string[] spl = lines[u].Split('=');
                 output.WriteLine("[{0}]", spl[0]);
-                output.WriteLine("type=texnamearray");
+                output.WriteLine("type=texlist");
                 output.WriteLine("address={0}", spl[0]);
                 output.WriteLine("filename={0}", spl[1] + ".satex");
                 output.WriteLine();
@@ -597,7 +597,7 @@ namespace SplitExt
                         finalext = ".saanim";
                         break;
                     case ".tls":
-                        tp = "texnamearray";
+                        tp = "texlist";
                         finalext = ".txt";
                         break;
                     case ".nac":
