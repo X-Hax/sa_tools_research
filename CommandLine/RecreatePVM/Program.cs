@@ -55,6 +55,7 @@ namespace RecreatePVM
             }
             else
                 files = File.ReadAllLines(args[0]);
+            Console.WriteLine("Finding textures for: {0}", args[0]);
             PuyoFile pvm = new PuyoFile();
             for (int i = 0; i < files.Length; i++)
             {
