@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetargetAnim", "CommandLine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DupmodelMaker", "CommandLine\DupmodelMaker\DupmodelMaker.csproj", "{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GBIXScan", "CommandLine\GBIXScan\GBIXScan.csproj", "{5838CA79-C21D-4048-8BA3-1E2702220F89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GBIXTool", "CommandLine\GBIXScan\GBIXTool.csproj", "{5838CA79-C21D-4048-8BA3-1E2702220F89}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextFinder", "CommandLine\TextFinder\TextFinder.csproj", "{C758A496-6AEC-47B2-8BC1-7953CCC569C9}"
 EndProject
