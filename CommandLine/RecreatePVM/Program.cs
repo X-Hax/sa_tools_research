@@ -101,7 +101,7 @@ namespace RecreatePVM
                 }
                 else
                 {
-                    pvm.Entries.Add(new PVMEntry(Properties.Resource1.unknown, Path.GetFileName(files[i]) + ".pvr"));
+                    pvm.Entries.Add(new PVMEntry(Properties.Resource1.unknown, Path.GetFileNameWithoutExtension(files[i])));
                     Console.WriteLine("{0}: Missing {1}", i.ToString(), files[i]);
                     count++;
                 }
