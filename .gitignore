@@ -32,3 +32,4 @@
 /CommandLine/GBIXScan/obj
 /CommandLine/DupmodelMaker/obj
 /CommandLine/PointerPatchMaker/obj
+/CommandLine/ExportRawBinary/obj
