@@ -23,6 +23,9 @@ namespace SplitExt
             }
             switch (args[args.Length - 1])
             {
+                case "-ad":
+                    SplitAD(args);
+                    break;
                 case "-tl":
                     SplitTL(args);
                     break;
@@ -62,6 +65,88 @@ namespace SplitExt
                 default:
                     break;
             }
+        }
+
+        // Loads a split INI file and outputs a list of data from it in the format 'name address_with_key'
+        static void SplitAD(string[] args)
+        {
+            string fn = args[0];
+            TextWriter output = File.CreateText(Path.Combine(Path.GetDirectoryName(fn), Path.GetFileNameWithoutExtension(fn) + "_output.txt"));
+            Dictionary<string, string> levels = new Dictionary<string, string>();
+            Dictionary<string, string> models = new Dictionary<string, string>();
+            Dictionary<string, string> anims = new Dictionary<string, string>();
+            Dictionary<string, string> acts = new Dictionary<string, string>();
+            Dictionary<string, string> other = new Dictionary<string, string>();
+            IniData inidata = IniSerializer.Deserialize<IniData>(fn);
+            if (inidata.ImageBase == null)
+                return;
+            foreach (var data in inidata.Files)
+            {
+                int v = (int)inidata.ImageBase + data.Value.Address;
+                switch (data.Value.Type.ToLowerInvariant())
+                {
+                    case "landtable":
+                        levels.Add(data.Key.Replace(" ", ""), v.ToString("X")); break;
+                    case "model":
+                    case "basicmodel":
+                    case "basicdxmodel":
+                        models.Add(data.Key.Replace(" ", ""), v.ToString("X")); break;
+                    case "animation":
+                    case "motion":
+                        anims.Add(data.Key.Replace(" ", ""), v.ToString("X")); break;
+                    case "action":
+                        acts.Add(data.Key.Replace(" ", ""), v.ToString("X")); break;
+                    default:
+                        other.Add(data.Key.Replace(" ", ""), v.ToString("X")); break;
+                }
+            }
+            if (levels.Count > 0)
+            {
+                output.WriteLine("LandTable:");
+                foreach (var l in levels)
+                {
+                    output.WriteLine(l.Value + " " + l.Key);
+                }
+                output.WriteLine();
+            }
+            if (models.Count > 0)
+            {
+                output.WriteLine("NJS_OBJECT:");
+                foreach (var l in models)
+                {
+                    output.WriteLine(l.Value + " " + l.Key);
+                }
+                output.WriteLine();
+            }
+            if (anims.Count > 0)
+            {
+                output.WriteLine("NJS_MOTION:");
+                foreach (var l in anims)
+                {
+                    output.WriteLine(l.Value + " " + l.Key);
+                }
+                output.WriteLine();
+            }
+            if (acts.Count > 0)
+            {
+                output.WriteLine("NJS_ACTION:");
+                foreach (var l in acts)
+                {
+                    output.WriteLine(l.Value + " " + l.Key);
+                }
+                output.WriteLine();
+            }
+            if (other.Count > 0)
+            {
+                output.WriteLine("Other:");
+                foreach (var l in other)
+                {
+                    output.WriteLine(l.Value + " " + l.Key);
+                }
+                output.WriteLine();
+            }
+            output.Flush();
+            output.Close();
         }
 
         // Creates a split INI file for NJS_TEXLIST (texlist) items listed as address=filename
