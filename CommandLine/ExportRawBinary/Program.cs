@@ -37,14 +37,22 @@ namespace ExportRawBinary
 						ModelFile modelFile = new ModelFile(srcfilename);
 						NJS_OBJECT nObject = modelFile.Model;
 						byte[] objBytes = nObject.GetBytes(key + startaddr, false, out uint addr);
+						Console.WriteLine("NJS_OBJECT address in binary: original {0}, modified: {1}", endaddr.ToString("X"), (startaddr + addr).ToString("X"));
+						Console.WriteLine("NJS_OBJECT address in memory: original {0}, modified: {1}", (endaddr+key).ToString("X"), (startaddr + key + addr).ToString("X"));
+						uint dataSizeOrig = endaddr - startaddr;
+						uint dataSizeNew = addr;
+						int freeBytes = (int)(dataSizeOrig - dataSizeNew);
 						if (endaddr != 0 && endaddr != addr)
 						{
-							if (endaddr < addr)
+							if (freeBytes < 0)
 							{
-								Console.WriteLine("Not enough space for the root node, earliest possible position is {0}.", addr.ToString("X"));
+								Console.WriteLine("Need {0} bytes before the root node, earliest possible node position is {1}.\n", Math.Abs(freeBytes).ToString(), (startaddr + addr).ToString("X"));
 								return;
 							}
-							Console.WriteLine("Free bytes: {0} from {1} to {2}", endaddr - addr - startaddr, addr.ToCHex(), (endaddr-startaddr).ToCHex());
+							else if (freeBytes > 0)
+								Console.WriteLine("Free bytes: {0} from {1} to {2}\n", freeBytes, addr.ToCHex(), (endaddr - startaddr).ToCHex());
+							else
+								Console.WriteLine("All bytes are used\n");
 							List<byte> tempbytes = objBytes.ToList();
 							tempbytes.InsertRange((int)addr, new byte[endaddr - addr - startaddr]);
 							objBytes = tempbytes.ToArray();
@@ -66,10 +74,10 @@ namespace ExportRawBinary
                         {
                             if (endaddr < addrm)
                             {
-                                Console.WriteLine("Not enough space for the motion, earliest possible position is {0}.", addrm.ToString("X"));
+                                Console.WriteLine("Not enough space for the motion, earliest possible position is {0}.\n", addrm.ToString("X"));
                                 return;
                             }
-                            Console.WriteLine("Free bytes: {0} from {1} to {2}", endaddr - addrm - startaddr, addrm.ToCHex(), (endaddr - startaddr).ToCHex());
+                            Console.WriteLine("Free bytes: {0} from {1} to {2}\n", endaddr - addrm - startaddr, addrm.ToCHex(), (endaddr - startaddr).ToCHex());
                             List<byte> tempbytes = motBytes.ToList();
                             tempbytes.InsertRange((int)addrm, new byte[endaddr - addrm - startaddr]);
                             motBytes = tempbytes.ToArray();
