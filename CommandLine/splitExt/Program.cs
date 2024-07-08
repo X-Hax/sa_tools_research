@@ -105,7 +105,7 @@ namespace SplitExt
                 output.WriteLine("LandTable:");
                 foreach (var l in levels)
                 {
-                    output.WriteLine(l.Value + " " + l.Key);
+                    output.WriteLine(l.Key + " " + l.Value);
                 }
                 output.WriteLine();
             }
@@ -114,7 +114,7 @@ namespace SplitExt
                 output.WriteLine("NJS_OBJECT:");
                 foreach (var l in models)
                 {
-                    output.WriteLine(l.Value + " " + l.Key);
+                    output.WriteLine(l.Key + " " + l.Value);
                 }
                 output.WriteLine();
             }
@@ -123,7 +123,7 @@ namespace SplitExt
                 output.WriteLine("NJS_MOTION:");
                 foreach (var l in anims)
                 {
-                    output.WriteLine(l.Value + " " + l.Key);
+                    output.WriteLine(l.Key + " " + l.Value);
                 }
                 output.WriteLine();
             }
@@ -132,7 +132,7 @@ namespace SplitExt
                 output.WriteLine("NJS_ACTION:");
                 foreach (var l in acts)
                 {
-                    output.WriteLine(l.Value + " " + l.Key);
+                    output.WriteLine(l.Key + " " + l.Value);
                 }
                 output.WriteLine();
             }
@@ -141,7 +141,7 @@ namespace SplitExt
                 output.WriteLine("Other:");
                 foreach (var l in other)
                 {
-                    output.WriteLine(l.Value + " " + l.Key);
+                    output.WriteLine(l.Key + " " + l.Value);
                 }
                 output.WriteLine();
             }
