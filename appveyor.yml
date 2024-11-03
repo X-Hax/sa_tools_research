@@ -1,8 +1,13 @@
-version: .{build}
+version: '{build}'
+branches:
+  only:
+  - master
+skip_tags: true
 image: Visual Studio 2022
 configuration: Release
-init:
-- ps: Update-AppveyorBuild -Version "$(Get-Date -format yyyy.MM.dd.HH.mm.ss)"
+platform:
+- x64
+- x86
 install:
 - cmd: >-
    
@@ -23,6 +28,15 @@ after_build:
    
     cd C:\projects\sa-tools-research\build\
     
-    7z a "C:\projects\sa-tools-research\SAToolsResearch.7z" *
+    7z a "C:\projects\sa-tools-research\SAToolsResearch %PLATFORM%.7z" *
 artifacts:
-- path: SAToolsResearch.7z
+- path: SAToolsResearch $(platform).7z
+  name: satoolsresearch
+
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: 3U0hYOvkeEJsoN2b4U/c9RTDxjcj9txunvCbWfkg5qvOSB1qOnh4fnIE9EK5yAXi2m8RJMO4Zr/UqiVMB9CDPulfPRcJSJ83rsmh1EXBipUs4K/RQmQHaDG6UiiNQ1Xg
+  artifact: satoolsresearch
+  on:
+    branch: master
