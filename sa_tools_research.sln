@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PatternPatchMaker", "Comman
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExportRawBinary", "CommandLine\ExportRawBinary\ExportRawBinary.csproj", "{4CD58334-C848-4DF1-9F32-319D60495D13}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetMatchTool", "CommandLine\AssetMatchTool\AssetMatchTool.csproj", "{83C93E49-DF6B-C221-6C81-C9342527B0A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -333,6 +335,14 @@ Global
 		{4CD58334-C848-4DF1-9F32-319D60495D13}.Release|x64.Build.0 = Release|x64
 		{4CD58334-C848-4DF1-9F32-319D60495D13}.Release|x86.ActiveCfg = Release|x86
 		{4CD58334-C848-4DF1-9F32-319D60495D13}.Release|x86.Build.0 = Release|x86
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Debug|x64.ActiveCfg = Debug|x64
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Debug|x64.Build.0 = Debug|x64
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Debug|x86.ActiveCfg = Debug|x86
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Debug|x86.Build.0 = Debug|x86
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Release|x64.ActiveCfg = Release|x64
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Release|x64.Build.0 = Release|x64
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Release|x86.ActiveCfg = Release|x86
+		{83C93E49-DF6B-C221-6C81-C9342527B0A2}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

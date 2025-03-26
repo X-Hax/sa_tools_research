@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<OutputPath>..\..\build\bin\</OutputPath>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<DebugType>embedded</DebugType>
+		<Platforms>x64;x86</Platforms>
+	</PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\sa_tools\DataToolbox\DataToolbox.csproj" />
+    <ProjectReference Include="..\..\sa_tools\Libraries\SplitTools\SplitTools.csproj" />
+    <ProjectReference Include="..\..\sa_tools\Libraries\SAModel\SAModel.csproj" />
+    <ProjectReference Include="..\CompareTool\CompareTool.csproj" />
+  </ItemGroup>
+</Project>
