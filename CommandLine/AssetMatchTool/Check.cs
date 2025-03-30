@@ -3,50 +3,8 @@ using System;
 
 namespace AssetMatchTool
 {
-    public static class Check
+    public partial class Program
     {
-        static bool CompareFloat(float f1, float f2)
-        {
-            if (f1 == f2)
-                return false;
-            else if (f1 > f2)
-                return Math.Abs(f1 - f2) > 0.05f;
-            else
-                return Math.Abs(f2 - f1) > 0.05f;
-        }
-
-        static bool CompareVector(Vertex v1, Vertex v2)
-        {
-            if (CompareFloat(v1.X, v2.X))
-                return true;
-            if (CompareFloat(v1.Y, v2.Y))
-                return true;
-            if (CompareFloat(v1.Z, v2.Z))
-                return true;
-            return false;
-        }
-
-        static bool CompareInt(int i1, int i2)
-        {
-            if (i1 == i2)
-                return false;
-            else if (i1 > i2)
-                return Math.Abs(i1 - i2) > 32;
-            else
-                return Math.Abs(i2 - i1) > 32;
-        }
-
-        static bool CompareRotation(Rotation r1, Rotation r2)
-        {
-            if (CompareInt(r1.X, r2.X))
-                return true;
-            if (CompareInt(r1.Y, r2.Y))
-                return true;
-            if (CompareInt(r1.Z, r2.Z))
-                return true;
-            return false;
-        }
-
         public static bool CheckMotion(byte[] datafile, uint address, int numhierarchy, uint ImageBase, NJS_MOTION src_motion)
         {
             if (address > (uint)datafile.Length - 20) return false;

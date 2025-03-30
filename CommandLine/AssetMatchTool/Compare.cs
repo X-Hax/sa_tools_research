@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using SAModel;
-using static CompareTool.Program;
 
 namespace AssetMatchTool
 {
@@ -18,6 +16,7 @@ namespace AssetMatchTool
                 return Math.Abs(f2 - f1) > 0.05f;
         }
 
+        // Returns true if doubles don't match
         static bool CompareDouble(double f1, double f2)
         {
             if (f1 == f2)
@@ -313,7 +312,6 @@ namespace AssetMatchTool
                     // Compare UVs
                     if (att_src.Mesh[u].UV != null)
                     {
-                        bool name = false;
                         if (att_src.Mesh[u].UV.Length != att_dst.Mesh[u].UV.Length)
                         {
                             return true;
