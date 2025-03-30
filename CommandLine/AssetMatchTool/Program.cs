@@ -241,10 +241,10 @@ namespace AssetMatchTool
 
         static void ShowHelp()
         {
-            WriteLogLine("This program scans the specified binary and attempts to find the data specified in a split INI file.");
-            WriteLogLine("The end result is saved to an INI file that can be used with the split tool.");
-            WriteLogLine("Usage: AssetMatchTool <inifile> <binary> [key]");
-            WriteLogLine("Press any key to exit.");
+            Console.WriteLine("This program scans the specified binary and attempts to find the data specified in a split INI file.");
+            Console.WriteLine("The end result is saved to an INI file that can be used with the split tool.");
+            Console.WriteLine("Usage: AssetMatchTool <inifile> <binary> [key]");
+            Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
         }
 
