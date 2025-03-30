@@ -5,13 +5,16 @@ namespace AssetMatchTool
 {
     public partial class Program
     {
-        public static bool CheckMotion(byte[] datafile, uint address, int numhierarchy, uint ImageBase, NJS_MOTION src_motion)
+        public static bool CheckMotion(byte[] datafile, uint address, int numhierarchy, uint ImageBase, NJS_MOTION src_motion, bool relaxed)
         {
             if (address > (uint)datafile.Length - 20) return false;
-            int numparts_l = NJS_MOTION.CalculateModelParts(datafile, (int)address, ImageBase);
-            if (numparts_l == 0) return false;
-            else if (numparts_l < numhierarchy) return false;
-                uint mdatap = ByteConverter.ToUInt32(datafile, (int)address);
+            if (!relaxed)
+            {
+                int numparts_l = NJS_MOTION.CalculateModelParts(datafile, (int)address, ImageBase);
+                if (numparts_l == 0) return false;
+                else if (numparts_l < numhierarchy) return false;
+            }
+            uint mdatap = ByteConverter.ToUInt32(datafile, (int)address);
             if (mdatap == 0 || mdatap <= ImageBase || mdatap >= datafile.Length)
                 return false;
             //Console.WriteLine("Mdata: " + mdatap.ToString("X"));

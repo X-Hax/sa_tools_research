@@ -17,6 +17,8 @@ namespace AssetMatchTool
 
     partial class Program
     {
+        static TextWriter log;
+
         static void Main(string[] args)
         {
             if (args.Length < 1)
@@ -24,7 +26,9 @@ namespace AssetMatchTool
                 ShowHelp();
                 return;
             }
-            Dictionary<string,int> numPartsList = new Dictionary<string,int>();
+            log = File.CreateText("output.txt");
+            List<string> missingItems = new List<string>();
+            Dictionary<string, int> numPartsList = new Dictionary<string, int>();
             List<Tuple<int, AssetType, string>> originalAssetList = new List<Tuple<int, AssetType, string>>();
             List<Tuple<List<int>, AssetType, string>> newAssetList = new List<Tuple<List<int>, AssetType, string>>();
             string iniName = args[0];
@@ -33,14 +37,14 @@ namespace AssetMatchTool
                 binaryName = args[1];
             uint binaryKey;
             Directory.CreateDirectory("output");
-            Console.WriteLine("Binary name: " + binaryName);
+            WriteLogLine("Binary name: " + binaryName);
             if (args.Length < 3 || !uint.TryParse(args[2], System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture, out binaryKey))
             {
-                Console.WriteLine("Using the default key of 0x401A00 (SADX Steam EXE)");
+                WriteLogLine("Using the default key of 0x401A00 (SADX Steam EXE)");
                 binaryKey = 0x401A00;
             }
             else
-                Console.WriteLine("Binary key: " + binaryKey.ToString("X"));
+                WriteLogLine("Binary key: " + binaryKey.ToString("X"));
             byte[] datafile = File.ReadAllBytes(Path.GetFullPath(binaryName));
             IniData iniData = IniSerializer.Deserialize<IniData>(iniName);
             byte[] datafile_orig = File.ReadAllBytes(Path.GetFullPath(iniData.DataFilename));
@@ -89,16 +93,17 @@ namespace AssetMatchTool
             // Sort list by address
             originalAssetList.Sort((y, x) => y.Item1.CompareTo(x.Item1));
             int dataRange = originalAssetList[originalAssetList.Count - 1].Item1 - originalAssetList[0].Item1;
-            Console.WriteLine("Original data range: " + originalAssetList[0].Item1.ToString("X") + "/" + originalAssetList[originalAssetList.Count - 1].Item1.ToString("X") + " (size " + dataRange.ToString("X") + ")");
+            WriteLogLine("Original data range: " + originalAssetList[0].Item1.ToString("X") + "/" + originalAssetList[originalAssetList.Count - 1].Item1.ToString("X") + " (size " + dataRange.ToString("X") + ")");
             // Pass 1
-            Console.WriteLine("\n---RESULTS PASS 1---");
+            WriteLogLine("\n---RESULTS PASS 1---");
             int currentPosition = 0;
-            foreach (var scanData in originalAssetList)
+            for (int sc = 0; sc < originalAssetList.Count; sc++)
             {
+                var scanData = originalAssetList[sc];
                 bool updatePos = false;
                 List<int> res = new List<int>();
                 ByteConverter.BigEndian = iniData.BigEndian;
-                Console.Write(scanData.Item3);
+                WriteLogSingle(scanData.Item3);
                 switch (scanData.Item2)
                 {
                     case AssetType.Level:
@@ -121,30 +126,37 @@ namespace AssetMatchTool
                             numparts = numPartsList[scanData.Item3];
                         NJS_MOTION mot = new NJS_MOTION(datafile_orig, scanData.Item1, binaryKeyOrig, numparts, new Dictionary<int, string>(), false);
                         ByteConverter.BigEndian = false;
-                        res = FindMotion(mot, numparts, datafile, binaryKey, currentPosition, datafile.Length);
+                        res = FindMotion(mot, numparts, datafile, binaryKey, currentPosition, datafile.Length, false);
+                        if (res.Count == 0)
+                            res = FindMotion(mot, numparts, datafile, binaryKey, 0, datafile.Length, true);
                         updatePos = true;
                         break;
                     case AssetType.Action:
                         ByteConverter.BigEndian = iniData.BigEndian;
                         NJS_ACTION ani = new NJS_ACTION(datafile_orig, scanData.Item1, binaryKeyOrig, ModelFormat.BasicDX, new Dictionary<int, string>(), new Dictionary<int, Attach>());
                         int a_numparts = ani.Animation.ModelParts;
+                        if (!numPartsList.ContainsKey(scanData.Item3))
+                            numPartsList.Add(scanData.Item3, a_numparts);
                         ByteConverter.BigEndian = false;
-                        res = FindMotion(ani.Animation, a_numparts, datafile, binaryKey, currentPosition, datafile.Length);
+                        res = FindMotion(ani.Animation, a_numparts, datafile, binaryKey, currentPosition, datafile.Length, false);
+                        if (res.Count == 0)
+                            res = FindMotion(ani.Animation, a_numparts, datafile, binaryKey, 0, datafile.Length, true);
                         updatePos = true;
                         break;
                 }
                 // Not matched
                 if (res.Count == 0)
                 {
-                    Console.WriteLine(": NOT FOUND");
+                    missingItems.Add(scanData.Item3);
+                    WriteLogLine(": NOT FOUND");
                 }
                 // Unique match
                 else if (res.Count == 1)
                 {
                     if (updatePos)
                         currentPosition = res[0];
-                    Console.WriteLine(": FOUND " + res[0].ToString("X"));
-                    newAssetList.Add(new Tuple<List<int>, AssetType, string>(res, AssetType.Action, scanData.Item3));
+                    WriteLogLine(": FOUND " + (res[0] + binaryKey).ToString("X"));
+                    newAssetList.Add(new Tuple<List<int>, AssetType, string>(res, scanData.Item2, scanData.Item3));
                 }
                 // Multiple matches
                 else
@@ -152,19 +164,21 @@ namespace AssetMatchTool
                     string resstr = "";
                     for (int v = 0; v < res.Count; v++)
                     {
-                        resstr += res[v].ToString("X");
+                        resstr += (res[v] + binaryKey).ToString("X");
                         if (v < res.Count - 1)
                             resstr += ", ";
                     }
                     res.Sort();
-                    Console.WriteLine(": MULTIPLE found " + resstr);
-                    newAssetList.Add(new Tuple<List<int>, AssetType, string>(res, AssetType.Action, scanData.Item3));
+                    WriteLogLine(": MULTIPLE found " + resstr);
+                    newAssetList.Add(new Tuple<List<int>, AssetType, string>(res, scanData.Item2, scanData.Item3));
                 }
             }
-            Console.WriteLine("\n---RESULTS PASS 2---");
+            WriteLogLine("\n---RESULTS PASS 2---");
             // Print final list
             iniData.DataFilename = binaryName;
             iniData.ImageBase = binaryKey;
+            iniData.StartOffset = 0;
+            iniData.BigEndian = false;
             foreach (var ini in iniData.Files)
             {
                 ini.Value.Address = -1;
@@ -175,43 +189,77 @@ namespace AssetMatchTool
                 {
                     if (ini.Value.Filename == newAssetList[item].Item3)
                     {
+                        // If the source asset was an action, set it to motion
+                        if (newAssetList[item].Item2 == AssetType.Action)
+                            ini.Value.Type = "motion";
+                        // Add model parts for motion
+                        if (!ini.Value.CustomProperties.ContainsKey("numparts") && numPartsList.ContainsKey(newAssetList[item].Item3))
+                        {
+                            ini.Value.CustomProperties.Add("numparts", numPartsList[newAssetList[item].Item3].ToString());
+                        }
                         // Not found
                         if (newAssetList[item].Item1.Count == 0)
                         {
                             ini.Value.Address = -1;
-                            Console.WriteLine("NOT FOUND: " + newAssetList[item].Item3);
+                            WriteLogLine("NOT FOUND: " + newAssetList[item].Item3);
                         }
                         // Unique match
                         else if (newAssetList[item].Item1.Count == 1)
                         {
                             ini.Value.Address = newAssetList[item].Item1[0];
-                            Console.WriteLine(newAssetList[item].Item1[0].ToString("X") + ": " + newAssetList[item].Item3);
+                            WriteLogLine((binaryKey + newAssetList[item].Item1[0]).ToString("X") + ": " + newAssetList[item].Item3);
+
                         }
                         // Multiple matches
                         else
                         {
+                            ini.Value.Address = newAssetList[item].Item1[0];
                             string resstr = "";
                             for (int v = 0; v < newAssetList[item].Item1.Count; v++)
                             {
-                                resstr += newAssetList[item].Item1[v].ToString("X");
+                                resstr += newAssetList[item].Item1[v].ToString("X") + "(" + (binaryKey + newAssetList[item].Item1[v]).ToString("X") + ")";
                                 if (v < newAssetList[item].Item1.Count - 1)
                                     resstr += ", ";
                             }
+                            WriteLogLine("MULTIPLE: " + newAssetList[item].Item3 + ": " + resstr);
                             ini.Value.CustomProperties.Add("Multiple", resstr);
                         }
                     }
                 }
             }
             IniSerializer.Serialize(iniData, Path.Combine("output", Path.GetFileName(iniName)));
+            if (missingItems.Count > 0)
+            {
+                WriteLogLine("\n---MISSING---");
+                foreach (var item in missingItems)
+                {
+                    WriteLogLine(item);
+                }
+            }
+            log.Close();
         }
 
         static void ShowHelp()
         {
-            Console.WriteLine("This program scans the specified binary and attempts to find the data specified in a split INI file.");
-            Console.WriteLine("The end result is saved to an INI file that can be used with the split tool.");
-            Console.WriteLine("Usage: AssetMatchTool <inifile> <binary> [key]");
-            Console.WriteLine("Press any key to exit.");
+            WriteLogLine("This program scans the specified binary and attempts to find the data specified in a split INI file.");
+            WriteLogLine("The end result is saved to an INI file that can be used with the split tool.");
+            WriteLogLine("Usage: AssetMatchTool <inifile> <binary> [key]");
+            WriteLogLine("Press any key to exit.");
             Console.ReadLine();
+        }
+
+        static void WriteLogSingle(string msg)
+        {
+            log.Write(msg);
+            Console.Write(msg);
+            log.Flush();
+        }
+
+        static void WriteLogLine(string msg)
+        {
+            log.WriteLine(msg);
+            Console.WriteLine(msg);
+            log.Flush();
         }
     }
 }

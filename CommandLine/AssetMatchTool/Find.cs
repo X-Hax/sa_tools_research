@@ -7,7 +7,7 @@ namespace AssetMatchTool
 {
     public partial class Program
     {
-        static List<int> FindMotion(NJS_MOTION src_motion, int numparts, byte[] dataFile, uint imageBase, int startAddr, int endAddr)
+        static List<int> FindMotion(NJS_MOTION src_motion, int numparts, byte[] dataFile, uint imageBase, int startAddr, int endAddr, bool relaxed)
         {
             if (endAddr == 0)
                 endAddr = dataFile.Length;
@@ -22,7 +22,7 @@ namespace AssetMatchTool
                 {
                     for (int i = start; i < end; i += 4)
                     {
-                        if (!Check.CheckMotion(dataFile, (uint)i, numparts, imageBase, src_motion))
+                        if (!CheckMotion(dataFile, (uint)i, numparts, imageBase, src_motion, relaxed))
                             continue;
                         else
                         {
@@ -62,7 +62,7 @@ namespace AssetMatchTool
                 {
                     for (int i = start; i < end; i += 4)
                     {
-                        if (!Check.CheckModel(dataFile, (uint)i, src_model.GetObjects().Length, ModelFormat.BasicDX, imageBase, false, false, src_model, relax))
+                        if (!CheckModel(dataFile, (uint)i, src_model.GetObjects().Length, ModelFormat.BasicDX, imageBase, false, false, src_model, relax))
                             continue;
                         else
                         {
@@ -91,9 +91,9 @@ namespace AssetMatchTool
         {
             List<int> land_lands = new List<int>();
             COL[] arr_src = land_src.COL.ToArray();
-            for (int i = 0; i < dataFile.Length; i+=4)
+            for (int i = 0; i < dataFile.Length; i += 4)
             {
-                if (!Check.CheckLandTable(dataFile, (uint)i, LandTableFormat.SADX, imageBase))
+                if (!CheckLandTable(dataFile, (uint)i, LandTableFormat.SADX, imageBase))
                     continue;
                 else
                 {
