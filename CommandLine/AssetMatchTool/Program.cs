@@ -2,13 +2,19 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
 using SAModel;
 using SplitTools;
-using static CompareTool.Program;
 
 namespace AssetMatchTool
 {
+    enum AssetType
+    {
+        Level,
+        Model,
+        Motion,
+        Action
+    }
+
     partial class Program
     {
         static void Main(string[] args)
@@ -18,6 +24,9 @@ namespace AssetMatchTool
                 ShowHelp();
                 return;
             }
+            Dictionary<string,int> numPartsList = new Dictionary<string,int>();
+            List<Tuple<int, AssetType, string>> originalAssetList = new List<Tuple<int, AssetType, string>>();
+            List<Tuple<List<int>, AssetType, string>> newAssetList = new List<Tuple<List<int>, AssetType, string>>();
             string iniName = args[0];
             string binaryName = "Sonic Adventure DX.exe";
             if (args.Length > 1)
@@ -38,242 +47,162 @@ namespace AssetMatchTool
             ByteConverter.BigEndian = iniData.BigEndian;
             uint binaryKeyOrig = 0x400000;
             if (iniData.ImageBase != null)
-                binaryKeyOrig= (uint)iniData.ImageBase;
-            if (iniData.ImageBase != null)
-             binaryKeyOrig = (uint)iniData.ImageBase;
+                binaryKeyOrig = (uint)iniData.ImageBase;
             if (iniData.StartOffset != 0)
             {
                 byte[] datafile_new = new byte[iniData.StartOffset + datafile_orig.Length];
                 datafile_orig.CopyTo(datafile_new, iniData.StartOffset);
                 datafile_orig = datafile_new;
             }
-            Console.WriteLine("\n---RESULTS---");
+            // Make a list of original assets
+            Dictionary<string, SplitTools.FileInfo> newFiles = new Dictionary<string, SplitTools.FileInfo>();
             foreach (var info in iniData.Files)
             {
-                bool needcheck = false;
-                List<uint> res = new List<uint>();
                 switch (info.Value.Type)
                 {
                     case "landtable":
-                        needcheck = true;
-                        Console.Write(info.Value.Filename + "...");
-                        LandTable lt = new LandTable(datafile_orig, info.Value.Address, binaryKeyOrig, LandTableFormat.SADX, new Dictionary<int, string>(), iniData.StartOffset);
-                        ByteConverter.BigEndian = false;
-                        res = FindLandtable(lt, datafile, binaryKey);
+                        originalAssetList.Add(new Tuple<int, AssetType, string>(info.Value.Address, AssetType.Level, info.Value.Filename));
+                        newFiles.Add(info.Key, info.Value);
                         break;
                     case "model":
                     case "basicmodel":
                     case "basicdxmodel":
-                        needcheck = true;
-                        Console.Write(info.Value.Filename + "...");
-                        ByteConverter.BigEndian = iniData.BigEndian;
-                        NJS_OBJECT mdl = new NJS_OBJECT(datafile_orig, info.Value.Address, binaryKeyOrig, ModelFormat.BasicDX, new Dictionary<int, string>(), new Dictionary<int, Attach>());
-                        ByteConverter.BigEndian = false;
-                        res = FindModel(mdl, datafile, binaryKey);
+                        originalAssetList.Add(new Tuple<int, AssetType, string>(info.Value.Address, AssetType.Model, info.Value.Filename));
+                        newFiles.Add(info.Key, info.Value);
                         break;
                     case "motion":
                     case "animation":
-                        needcheck = true;
-                        Console.Write(info.Value.Filename + "...");
-                        ByteConverter.BigEndian = iniData.BigEndian;
-                        int numparts = 1;
+                        originalAssetList.Add(new Tuple<int, AssetType, string>(info.Value.Address, AssetType.Motion, info.Value.Filename));
                         if (info.Value.CustomProperties.ContainsKey("numparts"))
-                            numparts = int.Parse(info.Value.CustomProperties["numparts"], NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, NumberFormatInfo.InvariantInfo);
-                        NJS_MOTION mot = new NJS_MOTION(datafile_orig, info.Value.Address, binaryKeyOrig, numparts, new Dictionary<int, string>(), false);
-                        ByteConverter.BigEndian = false;
-                        res = FindMotion(mot, numparts, datafile, binaryKey);
+                            numPartsList.Add(info.Value.Filename, int.Parse(info.Value.CustomProperties["numparts"], NumberStyles.AllowLeadingWhite | NumberStyles.AllowTrailingWhite, NumberFormatInfo.InvariantInfo));
+                        newFiles.Add(info.Key, info.Value);
                         break;
                     case "action":
-                        needcheck = true;
-                        Console.Write(info.Value.Filename + "...");
-                        ByteConverter.BigEndian = iniData.BigEndian;
-                        NJS_ACTION ani = new NJS_ACTION(datafile_orig, info.Value.Address, binaryKeyOrig, ModelFormat.BasicDX, new Dictionary<int, string>(), new Dictionary<int, Attach>());
-                        int a_numparts = ani.Animation.ModelParts;
-                        ByteConverter.BigEndian = false;
-                        res = FindMotion(ani.Animation, a_numparts, datafile, binaryKey);
+                        originalAssetList.Add(new Tuple<int, AssetType, string>(info.Value.Address, AssetType.Action, info.Value.Filename));
+                        newFiles.Add(info.Key, info.Value);
                         break;
                     default:
                         break;
-
-                }
-                if (needcheck)
-                {
-                    iniData.DataFilename = binaryName;
-                    iniData.ImageBase = binaryKey;
-                    iniData.Files[info.Key].Address = -1;
-                    // Not matched
-                    if (res.Count == 0)
-                    {
-                        Console.Write("\r" + info.Value.Filename + ": NOT FOUND");
-                        Console.Write(System.Environment.NewLine);
-                    }
-                    // Unique match
-                    else if (res.Count == 1)
-                    {
-                        Console.Write("\r" + info.Value.Filename + ": FOUND " + res[0].ToString("X"));
-                        Console.Write(System.Environment.NewLine);
-                        iniData.Files[info.Key].Address = (int)res[0];
-                    }
-                    // Multiple matches
-                    else
-                    {
-                        string resstr = "";
-                        for (int v = 0; v < res.Count; v++)
-                        {
-                            resstr += res[v].ToString("X");
-                            if (v < res.Count - 1)
-                                resstr += ", ";
-                        }
-                        Console.Write("\r" + info.Value.Filename + ": MULTIPLE found " + resstr);
-                        iniData.Files[info.Key].Address = 0;
-                        iniData.Files[info.Key].CustomProperties.Add("Multiple", resstr);
-                        Console.Write(System.Environment.NewLine);
-                    }
-                    IniSerializer.Serialize(iniData, Path.Combine("output", Path.GetFileName(iniName)));
                 }
             }
-        }
-        static List<uint> FindMotion(NJS_MOTION src_motion, int numparts, byte[] dataFile, uint imageBase)
-        {
-            List<uint> motion_list = new List<uint>();
-            int step = dataFile.Length / 32;
-            List<Task> tasks = new List<Task>();
-            for (int s = 0; s < 32; s++)
+            iniData.Files = newFiles;
+            // Sort list by address
+            originalAssetList.Sort((y, x) => y.Item1.CompareTo(x.Item1));
+            int dataRange = originalAssetList[originalAssetList.Count - 1].Item1 - originalAssetList[0].Item1;
+            Console.WriteLine("Original data range: " + originalAssetList[0].Item1.ToString("X") + "/" + originalAssetList[originalAssetList.Count - 1].Item1.ToString("X") + " (size " + dataRange.ToString("X") + ")");
+            // Pass 1
+            Console.WriteLine("\n---RESULTS PASS 1---");
+            int currentPosition = 0;
+            foreach (var scanData in originalAssetList)
             {
-                int start = Math.Max(0, step * (s - 1));
-                int end = Math.Min(s * step, dataFile.Length);
-                Task t = new Task(() =>
+                bool updatePos = false;
+                List<int> res = new List<int>();
+                ByteConverter.BigEndian = iniData.BigEndian;
+                Console.Write(scanData.Item3);
+                switch (scanData.Item2)
                 {
-                    for (int i = start; i < end; i += 4)
-                    {
-                        //if (i % 4000 == 0)
-                        //Console.Write("\r{0} ", i.ToString("X8"));
-                        if (!Check.CheckMotion(dataFile, (uint)i, numparts, imageBase, src_motion))
-                            continue;
-                        else
-                        {
-                            try
-                            {
-                                NJS_MOTION dst_motion = new NJS_MOTION(dataFile, (int)i, imageBase, numparts, new Dictionary<int, string>());
-                                if (CompareMotion(src_motion, dst_motion, verbose: false))
-                                    continue;
-                                motion_list.Add((uint)i);
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                });
-                tasks.Add(t);
-                t.Start();
-            }
-            Task.WaitAll(tasks.ToArray());
-            Console.Write("\r");
-            return motion_list;
-        }
-
-        static List<uint> FindModel(NJS_OBJECT src_model, byte[] dataFile, uint imageBase)
-        {
-            List<uint> model_list = new List<uint>();
-            int step = dataFile.Length / 32;
-            List<Task> tasks = new List<Task>();
-            for (int s = 0; s < 32; s++)
-            {
-                int start = Math.Max(0, step * (s - 1));
-                int end = Math.Min(s*step, dataFile.Length);
-                //Console.WriteLine("Start: {0}, End: {1}",start.ToString("X"), end.ToString("X"));
-                Task t = new Task(() => 
+                    case AssetType.Level:
+                        LandTable lt = new LandTable(datafile_orig, scanData.Item1, binaryKeyOrig, LandTableFormat.SADX, new Dictionary<int, string>(), iniData.StartOffset);
+                        ByteConverter.BigEndian = false;
+                        res = FindLandtable(lt, datafile, binaryKey);
+                        updatePos = false;
+                        break;
+                    case AssetType.Model:
+                        NJS_OBJECT mdl = new NJS_OBJECT(datafile_orig, scanData.Item1, binaryKeyOrig, ModelFormat.BasicDX, new Dictionary<int, string>(), new Dictionary<int, Attach>());
+                        ByteConverter.BigEndian = false;
+                        res = FindModel(mdl, datafile, binaryKey, currentPosition, datafile.Length, false);
+                        if (res.Count == 0)
+                            res = FindModel(mdl, datafile, binaryKey, 0, datafile.Length, true);
+                        updatePos = true;
+                        break;
+                    case AssetType.Motion:
+                        int numparts = 1;
+                        if (numPartsList.ContainsKey(scanData.Item3))
+                            numparts = numPartsList[scanData.Item3];
+                        NJS_MOTION mot = new NJS_MOTION(datafile_orig, scanData.Item1, binaryKeyOrig, numparts, new Dictionary<int, string>(), false);
+                        ByteConverter.BigEndian = false;
+                        res = FindMotion(mot, numparts, datafile, binaryKey, currentPosition, datafile.Length);
+                        updatePos = true;
+                        break;
+                    case AssetType.Action:
+                        ByteConverter.BigEndian = iniData.BigEndian;
+                        NJS_ACTION ani = new NJS_ACTION(datafile_orig, scanData.Item1, binaryKeyOrig, ModelFormat.BasicDX, new Dictionary<int, string>(), new Dictionary<int, Attach>());
+                        int a_numparts = ani.Animation.ModelParts;
+                        ByteConverter.BigEndian = false;
+                        res = FindMotion(ani.Animation, a_numparts, datafile, binaryKey, currentPosition, datafile.Length);
+                        updatePos = true;
+                        break;
+                }
+                // Not matched
+                if (res.Count == 0)
                 {
-                    for (int i = start; i < end; i+=4)
-                    {
-                        //if (i % 4000 == 0)
-                            //Console.Write("\r{0} ", i.ToString("X8"));
-                        if (!Check.CheckModel(dataFile, (uint)i, src_model.GetObjects().Length, ModelFormat.BasicDX, imageBase, false, false, src_model))
-                            continue;
-                        else
-                        {
-                            try
-                            {
-                                //Console.WriteLine(i.ToString("X"));
-                                NJS_OBJECT dst_model = new NJS_OBJECT(dataFile, (int)i, imageBase, ModelFormat.BasicDX, new Dictionary<int, Attach>());
-                                if (CompareModel(src_model, dst_model, verbose: false))
-                                    continue;
-                                model_list.Add((uint)i);
-                            }
-                            catch
-                            {
-                                continue;
-                            }
-                        }
-                    }
-                });
-                tasks.Add(t);
-                t.Start();
-            }
-            Task.WaitAll(tasks.ToArray());
-            Console.Write("\r");
-            return model_list;
-        }
-
-        static List<uint> FindLandtable(LandTable land_src, byte[] dataFile, uint imageBase)
-        {
-            List<uint> land_lands = new List<uint>();
-            COL[] arr_src = land_src.COL.ToArray();
-            for (uint i = 0; i < dataFile.Length; i++)
-            {
-                if (i % 4000 == 0)
-                    Console.Write("\r{0} ", i.ToString("X8"));
-                if (!Check.CheckLandTable(dataFile, i, LandTableFormat.SADX, imageBase))
-                    continue;
+                    Console.WriteLine(": NOT FOUND");
+                }
+                // Unique match
+                else if (res.Count == 1)
+                {
+                    if (updatePos)
+                        currentPosition = res[0];
+                    Console.WriteLine(": FOUND " + res[0].ToString("X"));
+                    newAssetList.Add(new Tuple<List<int>, AssetType, string>(res, AssetType.Action, scanData.Item3));
+                }
+                // Multiple matches
                 else
                 {
-                    try
+                    string resstr = "";
+                    for (int v = 0; v < res.Count; v++)
                     {
-                        LandTable land_dst = new LandTable(dataFile, (int)i, imageBase, LandTableFormat.SADX);
-                        if (land_dst.TextureFileName != land_src.TextureFileName)
-                            continue;
-                        if (land_dst.Flags != land_src.Flags)
-                            continue;
-                        if ((short)land_dst.Attributes != (short)land_src.Attributes)
-                            continue;
-                        if (land_dst.FarClipping != land_src.FarClipping)
-                            continue;
-
-                        COL[] arr_dst = land_dst.COL.ToArray();
-
-                        //Console.WriteLine("\nTrying lantable at " + i.ToString("X"));
-                        // Assume the same COL item order, otherwise it's fucked
-                        if (arr_dst.Length != arr_src.Length)
-                        {
-                            continue;
-                        }
-                        // Compare COL items
-                        List<ModelDiffData> col = new();
-                        bool same = true;
-                        for (int c = 0; c < arr_dst.Length; c++)
-                        {
-                            if (!CompareCOL(arr_src[c], arr_dst[c], c, col))
-                            {
-                                same = false;
-                                break;
-                            }
-                        }
-                        if (same)
-                        {
-                            land_lands.Add(i);
-                        }
-                        else
-                            continue;
+                        resstr += res[v].ToString("X");
+                        if (v < res.Count - 1)
+                            resstr += ", ";
                     }
-                    catch
+                    res.Sort();
+                    Console.WriteLine(": MULTIPLE found " + resstr);
+                    newAssetList.Add(new Tuple<List<int>, AssetType, string>(res, AssetType.Action, scanData.Item3));
+                }
+            }
+            Console.WriteLine("\n---RESULTS PASS 2---");
+            // Print final list
+            iniData.DataFilename = binaryName;
+            iniData.ImageBase = binaryKey;
+            foreach (var ini in iniData.Files)
+            {
+                ini.Value.Address = -1;
+            }
+            for (int item = 0; item < newAssetList.Count; item++)
+            {
+                foreach (var ini in iniData.Files)
+                {
+                    if (ini.Value.Filename == newAssetList[item].Item3)
                     {
-                        continue;
+                        // Not found
+                        if (newAssetList[item].Item1.Count == 0)
+                        {
+                            ini.Value.Address = -1;
+                            Console.WriteLine("NOT FOUND: " + newAssetList[item].Item3);
+                        }
+                        // Unique match
+                        else if (newAssetList[item].Item1.Count == 1)
+                        {
+                            ini.Value.Address = newAssetList[item].Item1[0];
+                            Console.WriteLine(newAssetList[item].Item1[0].ToString("X") + ": " + newAssetList[item].Item3);
+                        }
+                        // Multiple matches
+                        else
+                        {
+                            string resstr = "";
+                            for (int v = 0; v < newAssetList[item].Item1.Count; v++)
+                            {
+                                resstr += newAssetList[item].Item1[v].ToString("X");
+                                if (v < newAssetList[item].Item1.Count - 1)
+                                    resstr += ", ";
+                            }
+                            ini.Value.CustomProperties.Add("Multiple", resstr);
+                        }
                     }
                 }
             }
-            return land_lands;
+            IniSerializer.Serialize(iniData, Path.Combine("output", Path.GetFileName(iniName)));
         }
 
         static void ShowHelp()
