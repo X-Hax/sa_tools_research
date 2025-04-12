@@ -19,9 +19,9 @@ namespace splitFromFolder
                 return;
             }
             Dictionary<string, SplitTools.FileInfo> splitData = new Dictionary<string, SplitTools.FileInfo>();
-            log = File.CreateText("output.txt");
             string basePath = args[0];
             string[] files = Directory.GetFiles(args[0], "*.*", SearchOption.AllDirectories);
+            log = File.CreateText(basePath + "_output.txt");
             for (int i = 0; i < files.Length; i++)
             {
                 string filename = Path.GetRelativePath(basePath, files[i]);
@@ -103,6 +103,9 @@ namespace splitFromFolder
             }
             IniData iniData = new IniData();
             iniData.Files = splitData;
+            iniData.DataFilename = basePath + ".dll";
+            iniData.Game = Game.SADX;
+            iniData.ImageBase = 0x10000000;
             IniSerializer.Serialize(iniData, basePath + "_b.ini");
             log.Close();
         }
