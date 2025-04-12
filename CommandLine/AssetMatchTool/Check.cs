@@ -53,6 +53,73 @@ namespace AssetMatchTool
             return true;
         }
 
+        public static void CountHierarchy(byte[] datafile, uint address, uint ImageBase, ref int count)
+        {
+            if (count == -1)
+                return;
+            count++;
+            if (count > 111)
+                return;
+            if (address > (uint)datafile.Length - 20)
+            {
+                count = -1;
+                return;
+            }
+            int flags = ByteConverter.ToInt32(datafile, (int)address);
+            if (flags > 0x3FFF || flags < 0)
+            {
+                count = -1;
+                return;
+            }
+            uint attach = ByteConverter.ToUInt32(datafile, (int)address + 4);
+            if (attach != 0 && attach < ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            ObjectFlags objeflags = (ObjectFlags)flags;
+            if (objeflags.HasFlag(ObjectFlags.NoChildren))
+            {
+                return;
+            }
+            uint child = ByteConverter.ToUInt32(datafile, (int)address + 0x2C);
+            uint sibling = ByteConverter.ToUInt32(datafile, (int)address + 0x30); 
+            if (child > address + ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            if (sibling > address + ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            if (child != 0 && child < ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            if (child > datafile.Length - 52 + ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            if (sibling > datafile.Length - 52 + ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            if (sibling != 0 && sibling < ImageBase)
+            {
+                count = -1;
+                return;
+            }
+            if (child != 0)
+                CountHierarchy(datafile, child - ImageBase, ImageBase, ref count);
+            if (sibling != 0)
+                CountHierarchy(datafile, sibling - ImageBase, ImageBase, ref count);
+        }
+
         public static bool CheckModel(byte[] datafile, uint address, int numhierarchy, ModelFormat modelfmt, uint ImageBase, bool landtable = false, bool verbose = false, NJS_OBJECT obj = null, bool relax = false)
         {
             //Console.WriteLine("Check: {0}", address.ToString("X"));
@@ -135,6 +202,9 @@ namespace AssetMatchTool
             if (child == address + ImageBase || (attach != 0 && child == attach)) return false;
             if (sibling == address + ImageBase || (attach != 0 && sibling == attach)) return false;
             if (child != 0 && child == sibling) return false;
+            int cnt = 0;
+            CountHierarchy(datafile, address, ImageBase, ref cnt);
+            if (cnt == -1) return false;
             if (!relax)
             {
                 if (numhierarchy != -1 && child != 0)
@@ -160,9 +230,6 @@ namespace AssetMatchTool
                 if (attach == 0 && flags == 0) return false;
             }
             //Console.WriteLine("Attach pointer {0}, Vertices count {1}, Mesh count {2}, Center {3} {4} {5}, Radius {6} at {7}", attach.ToString("X"), vert_count, mesh_count, center_x, center_y, center_z, radius, address.ToString("X"));
-            if (numhierarchy != -1)
-                if (verbose)
-                    Console.WriteLine("Trying {0} model at {1}", modelfmt.ToString(), address.ToString("X"));
             return true;
         }
 

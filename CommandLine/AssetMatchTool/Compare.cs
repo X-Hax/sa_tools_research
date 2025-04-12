@@ -342,13 +342,19 @@ namespace AssetMatchTool
                 {
                     return true;
                 }
-                if (mdl_src.GetObjects().Length > 1 || mdl_dst.GetObjects().Length > 1)
+                if (mdl_src.CountAll() > 1 || mdl_dst.CountAll() > 1)
                 {
-                    if (mdl_src.GetObjects().Length != mdl_dst.GetObjects().Length)
+                    if (mdl_src.CountAll() != mdl_dst.CountAll())
                     {
                         return true;
                     }
                 }
+                if (CompareVector(mdl_src.Position, mdl_dst.Position))
+                    return true;
+                if (CompareVector(mdl_src.Scale, mdl_dst.Scale))
+                    return true;
+                if (CompareRotation(mdl_dst.Rotation, mdl_src.Rotation))
+                    return true;
                 int flags_src = (int)mdl_src.GetFlags();
                 int flags_dst = (int)mdl_dst.GetFlags();
                 if (flags_src != flags_dst)

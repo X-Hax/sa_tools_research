@@ -115,9 +115,10 @@ namespace AssetMatchTool
                     case AssetType.Model:
                         NJS_OBJECT mdl = new NJS_OBJECT(datafile_orig, scanData.Item1, binaryKeyOrig, ModelFormat.BasicDX, new Dictionary<int, string>(), new Dictionary<int, Attach>());
                         ByteConverter.BigEndian = false;
-                        res = FindModel(mdl, datafile, binaryKey, currentPosition, datafile.Length, false);
+                        int cnt = mdl.GetObjects().Length;
+                        res = FindModel(mdl, datafile, cnt, binaryKey, currentPosition, datafile.Length, false);
                         if (res.Count == 0)
-                            res = FindModel(mdl, datafile, binaryKey, 0, datafile.Length, true);
+                            res = FindModel(mdl, datafile, cnt, binaryKey, 0, datafile.Length, true);
                         updatePos = true;
                         break;
                     case AssetType.Motion:

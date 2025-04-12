@@ -47,7 +47,7 @@ namespace AssetMatchTool
             return motion_list;
         }
 
-        static List<int> FindModel(NJS_OBJECT src_model, byte[] dataFile, uint imageBase, int startAddr, int endAddr, bool relax)
+        static List<int> FindModel(NJS_OBJECT src_model, byte[] dataFile, int cnt, uint imageBase, int startAddr, int endAddr, bool relax)
         {
             if (endAddr == 0)
                 endAddr = dataFile.Length;
@@ -62,7 +62,7 @@ namespace AssetMatchTool
                 {
                     for (int i = start; i < end; i += 4)
                     {
-                        if (!CheckModel(dataFile, (uint)i, src_model.GetObjects().Length, ModelFormat.BasicDX, imageBase, false, false, src_model, relax))
+                        if (!CheckModel(dataFile, (uint)i, cnt, ModelFormat.BasicDX, imageBase, false, false, src_model, relax))
                             continue;
                         else
                         {
