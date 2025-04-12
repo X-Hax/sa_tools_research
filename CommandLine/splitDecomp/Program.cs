@@ -11,8 +11,14 @@ namespace splitDecomp
     {
         private static TextWriter log;
 
+        private static string ReplaceLabel(string label, string src, string dst)
+        {
+            return dst + label.Substring(src.Length);
+        }
+
         private static void Main(string[] args)
         {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             string startPath = Environment.CurrentDirectory;
             string assetPath = Environment.CurrentDirectory;
             string outputPath = Path.Combine(startPath, "output");
@@ -26,7 +32,7 @@ namespace splitDecomp
                 WriteLogLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
                 // Load labels
                 IniData iniData = IniSerializer.Deserialize<IniData>(iniFiles[i]);
-                Dictionary<int,string> labels = new Dictionary<int,string>();
+                Dictionary<int, string> labels = new Dictionary<int, string>();
                 string labelName = Path.GetFileNameWithoutExtension(iniData.DataFilename) + "_labels.txt";
                 string labelPath = Path.Combine(startPath, "ini", labelName);
                 if (File.Exists(labelPath))
@@ -35,7 +41,7 @@ namespace splitDecomp
                     labels = IniSerializer.Deserialize<Dictionary<int, string>>(Path.Combine(startPath, "ini", labelName));
                 }
                 else
-                    labels = new Dictionary<int,string>();
+                    labels = new Dictionary<int, string>();
                 byte[] datafile = File.ReadAllBytes(Path.Combine(assetPath, iniData.DataFilename));
                 if (iniData.ImageBase == null)
                     iniData.ImageBase = 0x400000;
@@ -44,13 +50,38 @@ namespace splitDecomp
                 {
                     if (!item.Value.Filename.Contains("."))
                         continue;
-                    Console.WriteLine($"{item.Value.Filename}");
                     string outputFile = Path.Combine(outputPath, item.Value.Filename[..item.Value.Filename.LastIndexOf('.')]);
                     string outputFileM = Path.Combine(outputPathMdl, item.Value.Filename);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFileM));
                     switch (item.Value.Type)
                     {
+                        case "texlist":
+                        case "texnamearray":
+                            NJS_TEXLIST texlist = new NJS_TEXLIST(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                texlist.ToNJA(writer, labelsExport);
+                            }
+                            texlist.Save(outputFileM);
+                            break;
+                        case "basicdxattach":
+                            BasicAttach batt = new BasicAttach(datafile, item.Value.Address, (uint)iniData.ImageBase, true, labels);
+                            NJS_OBJECT bobj = new NJS_OBJECT();
+                            bobj.Attach = batt;
+                            if (batt.Name.StartsWith("attach_"))
+                                bobj.Name = ReplaceLabel(batt.Name, "attach", "object");
+                            if (batt.Name.StartsWith("model_"))
+                                bobj.Name = ReplaceLabel(batt.Name, "model", "object");
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                if (!labelsExport.Contains(bobj.Name))
+                                    labelsExport.Add(bobj.Name);
+                                Console.WriteLine(outputFile);
+                                bobj.ToNJA(writer, labelsExport);
+                            }
+                            ModelFile.CreateFile(outputFileM, bobj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            break;
                         case "model":
                         case "basicmodel":
                         case "basicdxmodel":
@@ -85,6 +116,49 @@ namespace splitDecomp
                                 root.ToNJA(writer, labelsExport);
                             }
                             ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            break;
+                        case "motion":
+                        case "animation":
+                            List<int> numverts_list = new List<int>();
+                            int[] numverts = new int[0];
+                            string objName = null;
+                            if (item.Value.CustomProperties.ContainsKey("numverts"))
+                            {
+                                string[] vertlist = item.Value.CustomProperties["numverts"].Split(',');
+                                for (int v = 0; v < vertlist.Length; v++)
+                                {
+                                    numverts_list.Add(int.Parse(vertlist[v]));
+                                    numverts = numverts_list.ToArray();
+                                }
+                            }
+                            else if (item.Value.CustomProperties.ContainsKey("refaddr"))
+                            {
+                                NJS_OBJECT objm = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["refaddr"], NumberStyles.HexNumber), (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                                numverts = objm.GetVertexCounts();
+                                objName = objm.Name;
+                            }
+                            NJS_MOTION mot = new NJS_MOTION(datafile, item.Value.Address, (uint)iniData.ImageBase, int.Parse(item.Value.CustomProperties["numparts"]), labels, item.Value.CustomProperties.ContainsKey("shortrot"), numverts);
+                            if (mot.Name.StartsWith("motion_"))
+                                mot.ActionName = ReplaceLabel(mot.Name, "motion", "action");
+                            else if (mot.Name.StartsWith("animation_"))
+                                mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
+                            if (string.IsNullOrEmpty(mot.ObjectName))
+                                mot.ObjectName = objName;
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                Console.WriteLine(outputFile);
+                                mot.ToNJA(writer, labelsExport);
+                            }
+                            mot.Save(outputFileM);
+                            break;
+                        case "action":
+                            NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, new Dictionary<int, Attach>());
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                Console.WriteLine(outputFile);
+                                action.Animation.ToNJA(writer, labelsExport);
+                            }
+                            action.Animation.Save(outputFileM);
                             break;
                     }
                 }
