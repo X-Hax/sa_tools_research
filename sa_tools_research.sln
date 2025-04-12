@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssetMatchTool", "CommandLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitFromFolder", "CommandLine\splitFromFolder\splitFromFolder.csproj", "{D7E8EC20-2F2D-41C8-A1B0-7A5A107E601F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitDecomp", "CommandLine\splitDecomp\splitDecomp.csproj", "{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -353,6 +355,14 @@ Global
 		{D7E8EC20-2F2D-41C8-A1B0-7A5A107E601F}.Release|x64.Build.0 = Release|x64
 		{D7E8EC20-2F2D-41C8-A1B0-7A5A107E601F}.Release|x86.ActiveCfg = Release|x86
 		{D7E8EC20-2F2D-41C8-A1B0-7A5A107E601F}.Release|x86.Build.0 = Release|x86
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Debug|x64.ActiveCfg = Debug|x64
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Debug|x64.Build.0 = Debug|x64
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Debug|x86.ActiveCfg = Debug|x86
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Debug|x86.Build.0 = Debug|x86
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x64.ActiveCfg = Release|x64
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x64.Build.0 = Release|x64
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x86.ActiveCfg = Release|x86
+		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
