@@ -15,7 +15,7 @@ namespace splitDecomp
             string startPath = Environment.CurrentDirectory;
             string assetPath = Environment.CurrentDirectory;
             string outputPath = Path.Combine(startPath, "output");
-            string outputPathMdl = Path.Combine(startPath, "outputM");
+            string outputPathM = Path.Combine(startPath, "outputM");
             string iniPath = Path.Combine(startPath, "ini");
             string[] iniFiles = Directory.GetFiles(iniPath, "*.ini", SearchOption.TopDirectoryOnly);
             log = File.CreateText(Path.Combine(startPath, "output.txt"));
@@ -67,11 +67,38 @@ namespace splitDecomp
                     if (!item.Value.Filename.Contains("."))
                         continue;
                     string outputFile = Path.Combine(outputPath, item.Value.Filename[..item.Value.Filename.LastIndexOf('.')]);
-                    string outputFileM = Path.Combine(outputPathMdl, item.Value.Filename);
+                    string outputFileM = Path.Combine(outputPathM, item.Value.Filename);
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFileM));
                     switch (item.Value.Type)
                     {
+                        case "deathzone":
+                            List<string> hashes = new List<string>();
+                            int num = 0;
+                            int address = item.Value.Address;
+                            while (ByteConverter.ToUInt32(datafile, address + 4) != 0)
+                            {
+                                string njaFolderLocation = Path.Combine(outputPath, Path.GetDirectoryName(item.Value.Filename));
+                                string modelsFolderLocation = Path.Combine(outputPathM, Path.GetDirectoryName(item.Value.Filename));
+                                Directory.CreateDirectory(modelsFolderLocation);
+                                string file_tosave;
+                                if (item.Value.CustomProperties.ContainsKey("filename" + num.ToString()))
+                                    file_tosave = item.Value.CustomProperties["filename" + num++.ToString()];
+                                else
+                                    file_tosave = num++.ToString(NumberFormatInfo.InvariantInfo) + ".sa1mdl";
+                                ModelFormat modelfmt_death = ModelFormat.BasicDX; // Death zones in all games except SADXPC use Basic non-DX models
+                                NJS_OBJECT deathObj = new NJS_OBJECT(datafile, datafile.GetPointer(address + 4, (uint)iniData.ImageBase), (uint)iniData.ImageBase, modelfmt_death, labels, new Dictionary<int, Attach>());
+                                ModelFile.CreateFile(Path.Combine(modelsFolderLocation, file_tosave), deathObj, null, null, null, null, modelfmt_death);
+                                using (TextWriter writer = File.CreateText(Path.Combine(njaFolderLocation, file_tosave[..file_tosave.LastIndexOf('.')])))
+                                {
+                                    if (!labelsExport.Contains(deathObj.Name))
+                                        labelsExport.Add(deathObj.Name);
+                                    Console.WriteLine(outputFile);
+                                    deathObj.ToNJA(writer, labelsExport);
+                                }
+                                address += 8;
+                            }
+                            break;
                         case "landtable":
                             LandTable landTable = new LandTable(datafile, item.Value.Address, (uint)iniData.ImageBase, LandTableFormat.SADX);
                             landTables.Add(landTable);
