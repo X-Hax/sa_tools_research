@@ -7,15 +7,8 @@ using SplitTools;
 
 namespace splitDecomp
 {
-    internal class Program
+    partial class Program
     {
-        private static TextWriter log;
-
-        private static string ReplaceLabel(string label, string src, string dst)
-        {
-            return dst + label.Substring(src.Length);
-        }
-
         private static void Main(string[] args)
         {
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
@@ -23,15 +16,34 @@ namespace splitDecomp
             string assetPath = Environment.CurrentDirectory;
             string outputPath = Path.Combine(startPath, "output");
             string outputPathMdl = Path.Combine(startPath, "outputM");
-            string[] iniFiles = Directory.GetFiles(Path.Combine(startPath, "ini"), "*.ini", SearchOption.TopDirectoryOnly);
+            string iniPath = Path.Combine(startPath, "ini");
+            string[] iniFiles = Directory.GetFiles(iniPath, "*.ini", SearchOption.TopDirectoryOnly);
             log = File.CreateText(Path.Combine(startPath, "output.txt"));
             Directory.CreateDirectory(outputPath);
             Console.WriteLine("Log started");
             for (int i = 0; i < iniFiles.Length; i++)
             {
                 WriteLogLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
-                // Load labels
+                // Create a list to keep track of exported labels
+                List<string> labelsExport = new List<string>();
+                // Load INI file
                 IniData iniData = IniSerializer.Deserialize<IniData>(iniFiles[i]);
+                // Create an empty landtable list for dupmodel checking
+                List<LandTable> landTables = new List<LandTable>();
+                // Load the dupmodel paths list if it exists
+                string duplistpath = Path.Combine(iniPath, "duppath.txt");
+                Dictionary<string, string> duplist;
+                if (File.Exists(duplistpath))
+                {
+                    duplist = IniSerializer.Deserialize<Dictionary<string, string>>(duplistpath);
+                    Console.WriteLine("Using duplist path: " + duplistpath);
+                }
+                else
+                {
+                    duplist = new Dictionary<string, string>();
+                    Console.WriteLine("Duplist path not found");
+                }
+                // Load labels
                 Dictionary<int, string> labels = new Dictionary<int, string>();
                 string labelName = Path.GetFileNameWithoutExtension(iniData.DataFilename) + "_labels.txt";
                 string labelPath = Path.Combine(startPath, "ini", labelName);
@@ -41,11 +53,15 @@ namespace splitDecomp
                     labels = IniSerializer.Deserialize<Dictionary<int, string>>(Path.Combine(startPath, "ini", labelName));
                 }
                 else
+                {
+                    Console.WriteLine("Labels file not found");
                     labels = new Dictionary<int, string>();
+                }
+                // Load binary file
                 byte[] datafile = File.ReadAllBytes(Path.Combine(assetPath, iniData.DataFilename));
+                // Set default key
                 if (iniData.ImageBase == null)
                     iniData.ImageBase = 0x400000;
-                List<string> labelsExport = new List<string>();
                 foreach (var item in iniData.Files)
                 {
                     if (!item.Value.Filename.Contains("."))
@@ -56,6 +72,19 @@ namespace splitDecomp
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFileM));
                     switch (item.Value.Type)
                     {
+                        case "landtable":
+                            LandTable landTable = new LandTable(datafile, item.Value.Address, (uint)iniData.ImageBase, LandTableFormat.SADX);
+                            landTables.Add(landTable);
+                            // Duplist
+                            string landFilename = Path.GetFileName(item.Value.Filename);
+                            string landLocation = Path.GetDirectoryName(item.Value.Filename);
+                            Console.WriteLine("Generating duplist for " + landFilename);
+                            if (duplist.ContainsKey(landFilename))
+                            {
+                                string dupShortLocation = duplist[landFilename];
+                                GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation));
+                            }
+                            break;
                         case "texlist":
                         case "texnamearray":
                             NJS_TEXLIST texlist = new NJS_TEXLIST(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
@@ -85,7 +114,9 @@ namespace splitDecomp
                         case "model":
                         case "basicmodel":
                         case "basicdxmodel":
-                            NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                        case "chunkmodel":
+                            bool chunk = item.Value.Type == "chunkmodel";
+                            NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, chunk ? ModelFormat.Chunk : ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 if (!labelsExport.Contains(obj.Name))
@@ -93,7 +124,7 @@ namespace splitDecomp
                                 Console.WriteLine(outputFile);
                                 obj.ToNJA(writer, labelsExport);
                             }
-                            ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), chunk ? ModelFormat.Chunk : ModelFormat.BasicDX);
                             break;
                         case "multidxmodel":
                             string[] modelshex = item.Value.CustomProperties["addresses"].Split(',');
@@ -168,26 +199,15 @@ namespace splitDecomp
 
         private static void ShowHelp()
         {
-            Console.WriteLine("This program scans a folder and outputs an INI file in a SplitBinary compatible format.");
-            Console.WriteLine("The last 8 characters in the labels for levels, models (basic/chunk) and animations are parsed as binary addresses.");
-            Console.WriteLine("The purpose of the tool is to provide a quick way to reconstruct data output by splitDLL as a SplitBinary INI file.");
-            Console.WriteLine("Usage: splitFromFolder <relative_path>");
             Console.WriteLine("Press any key to exit.");
             Console.ReadLine();
         }
 
-        private static void WriteLogSingle(string msg)
+        // Replaces the first part of a label with a different part (e.g. turn "model_00000000" into "object_00000000"
+        private static string ReplaceLabel(string label, string src, string dst)
         {
-            log.Write(msg);
-            Console.Write(msg);
-            log.Flush();
+            return dst + label.Substring(src.Length);
         }
 
-        private static void WriteLogLine(string msg)
-        {
-            log.WriteLine(msg);
-            Console.WriteLine(msg);
-            log.Flush();
-        }
     }
 }
