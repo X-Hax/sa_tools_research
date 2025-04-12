@@ -28,6 +28,19 @@ namespace splitFromFolder
                 string ext = Path.GetExtension(filename).ToLowerInvariant();
                 switch (ext)
                 {
+                    case ".satex":
+                        {
+                            NJS_TEXLIST texlist = NJS_TEXLIST.Load(files[i]);
+                            int addr = int.Parse(texlist.Name.Substring(texlist.Name.Length - 8, 8), NumberStyles.HexNumber);
+                            splitData.Add(addr.ToString("X8"), new SplitTools.FileInfo
+                            {
+                                Address = addr,
+                                Filename = filename,
+                                Type = "texlist"
+                            });
+                            WriteLogLine("TEXLIST " + addr.ToString("X8") + ":" + filename);
+                            break;
+                        }
                     case ".sa1lvl":
                         {
                             LandTable landTable = LandTable.LoadFromFile(files[i]);
@@ -87,7 +100,7 @@ namespace splitFromFolder
                             {
                                 int addr = int.Parse(motion.Name.Substring(motion.Name.Length - 8, 8), NumberStyles.HexNumber);
                                 Dictionary<string, string> props = new Dictionary<string, string>();
-                                props.Add("numparts", motion.ModelParts.ToString());
+                                props.Add("numparts", motion.ModelParts.ToString());                                
                                 splitData.Add(addr.ToString("X8"), new SplitTools.FileInfo
                                 {
                                     Address = addr,
