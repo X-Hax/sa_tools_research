@@ -127,7 +127,7 @@ namespace splitDecomp
                             bobj.Attach = batt;
                             if (batt.Name.StartsWith("attach_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "attach", "object");
-                            if (batt.Name.StartsWith("model_"))
+                            else if (batt.Name.StartsWith("model_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "model", "object");
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
@@ -137,6 +137,34 @@ namespace splitDecomp
                                 bobj.ToNJA(writer, labelsExport);
                             }
                             ModelFile.CreateFile(outputFileM, bobj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            break;
+                        case "multidxattach":
+                            string[] attsshex = item.Value.CustomProperties["addresses"].Split(',');
+                            List<NJS_OBJECT> modelsa = new List<NJS_OBJECT>();
+                            for (int m = 0; m < attsshex.Length; m++)
+                            {
+                                int maddr = int.Parse(attsshex[m], NumberStyles.HexNumber);
+                                BasicAttach attm = new BasicAttach(datafile, maddr, (uint)iniData.ImageBase, true, labels);
+                                NJS_OBJECT att_head = new NJS_OBJECT();
+                                att_head.Attach = attm;
+                                if (attm.Name.StartsWith("attach_"))
+                                    att_head.Name = ReplaceLabel(attm.Name, "attach", "object");
+                                else if (attm.Name.StartsWith("model_"))
+                                    att_head.Name = ReplaceLabel(attm.Name, "model", "object");
+                                NJS_OBJECT rootm = new NJS_OBJECT();
+                                rootm.AddChild(att_head);
+                                rootm.Name = "DO_NOT_EXPORT_" + rootm.Name;
+                                modelsa.Add(rootm);
+                            }
+                            NJS_OBJECT roota = new NJS_OBJECT();
+                            roota.AddChildren(modelsa);
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                Console.WriteLine(outputFile);
+                                roota.Name = "DO_NOT_EXPORT";
+                                roota.ToNJA(writer, labelsExport);
+                            }
+                            ModelFile.CreateFile(outputFileM, roota, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
                         case "model":
                         case "basicmodel":
@@ -178,24 +206,34 @@ namespace splitDecomp
                         case "motion":
                         case "animation":
                             List<int> numverts_list = new List<int>();
-                            int[] numverts = new int[0];
                             string objName = null;
-                            if (item.Value.CustomProperties.ContainsKey("numverts"))
-                            {
-                                string[] vertlist = item.Value.CustomProperties["numverts"].Split(',');
-                                for (int v = 0; v < vertlist.Length; v++)
-                                {
-                                    numverts_list.Add(int.Parse(vertlist[v]));
-                                    numverts = numverts_list.ToArray();
-                                }
-                            }
-                            else if (item.Value.CustomProperties.ContainsKey("refaddr"))
+                            int[] numverts = new int[0];
+                            int numparts = 0;
+                            if (item.Value.CustomProperties.ContainsKey("refaddr"))
                             {
                                 NJS_OBJECT objm = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["refaddr"], NumberStyles.HexNumber), (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
-                                numverts = objm.GetVertexCounts();
                                 objName = objm.Name;
+                                numverts = objm.GetVertexCounts();
+                                if (item.Value.Filename.Contains("shape") || (item.Value.Filename.Contains(".nas.saanim")))
+                                    numparts = objm.CountMorph();
+                                else
+                                    numparts = objm.CountAnimated();
                             }
-                            NJS_MOTION mot = new NJS_MOTION(datafile, item.Value.Address, (uint)iniData.ImageBase, int.Parse(item.Value.CustomProperties["numparts"]), labels, item.Value.CustomProperties.ContainsKey("shortrot"), numverts);
+                            else
+                            { 
+                                if (item.Value.CustomProperties.ContainsKey("numparts"))
+                                    numparts = int.Parse(item.Value.CustomProperties["numparts"]);
+                                if (item.Value.CustomProperties.ContainsKey("numverts"))
+                                {
+                                    string[] vertlist = item.Value.CustomProperties["numverts"].Split(',');
+                                    for (int v = 0; v < vertlist.Length; v++)
+                                    {
+                                        numverts_list.Add(int.Parse(vertlist[v]));
+                                        numverts = numverts_list.ToArray();
+                                    }
+                                }
+                            }
+                            NJS_MOTION mot = new NJS_MOTION(datafile, item.Value.Address, (uint)iniData.ImageBase, numparts, labels, item.Value.CustomProperties.ContainsKey("shortrot"), numverts);
                             if (mot.Name.StartsWith("motion_"))
                                 mot.ActionName = ReplaceLabel(mot.Name, "motion", "action");
                             else if (mot.Name.StartsWith("animation_"))
