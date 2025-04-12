@@ -62,19 +62,23 @@ namespace splitDecomp
             if (dupmodels_result.Count > 0)
             {
                 TextWriter tw_nja = File.CreateText(Path.Combine(outpath, "dupmodel.dup"));
-                foreach (NJS_OBJECT obj in dupmodels_result)
+               foreach (NJS_OBJECT obj in dupmodels_result)
                 {
+                    if (dupmodels_result.IndexOf(obj) > 0)
+                        tw_nja.WriteLine();
                     ObjectToNJA(obj, tw_nja);
                 }
                 tw_nja.Flush();
                 tw_nja.Close();
             }
-            // Write dupmotion.dup
+            // Write dupmotion.dum
             if (dupactions_result.Count > 0)
             {
                 TextWriter twa_nja = File.CreateText(Path.Combine(outpath, "dupmotion.dup"));
                 foreach (NJS_ACTION act in dupactions_result)
                 {
+                    if (dupactions_result.IndexOf(act) > 0)
+                        twa_nja.WriteLine();
                     ActionToNJA(act, twa_nja);
                 }
                 twa_nja.Flush();
@@ -105,7 +109,7 @@ namespace splitDecomp
             writer.WriteLine("OScale     {0},", obj.Scale.ToNJA());
             writer.WriteLine("Child       " + (obj.Children.Count > 0 ? obj.Children[0].Name : "NULL") + ",");
             writer.WriteLine("Sibling     " + (obj.Sibling != null ? obj.Sibling.Name : "NULL") + ",");
-            writer.WriteLine("END" + Environment.NewLine);
+            writer.WriteLine("END");
         }
 
     }
