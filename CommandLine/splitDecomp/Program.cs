@@ -18,12 +18,11 @@ namespace splitDecomp
             string outputPathM = Path.Combine(startPath, "outputM");
             string iniPath = Path.Combine(startPath, "ini");
             string[] iniFiles = Directory.GetFiles(iniPath, "*.ini", SearchOption.TopDirectoryOnly);
-            log = File.CreateText(Path.Combine(startPath, "output.txt"));
             Directory.CreateDirectory(outputPath);
             Console.WriteLine("Log started");
             for (int i = 0; i < iniFiles.Length; i++)
             {
-                WriteLogLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
+                Console.WriteLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
                 // Create a list to keep track of exported labels
                 List<string> labelsExport = new List<string>();
                 // Load INI file
@@ -119,6 +118,7 @@ namespace splitDecomp
                             {
                                 texlist.ToNJA(writer, labelsExport);
                             }
+                            Console.WriteLine(outputFile);
                             texlist.Save(outputFileM);
                             break;
                         case "basicdxattach":
@@ -248,7 +248,7 @@ namespace splitDecomp
                             mot.Save(outputFileM);
                             break;
                         case "action":
-                            NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, new Dictionary<int, Attach>());
+                            NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
@@ -259,7 +259,6 @@ namespace splitDecomp
                     }
                 }
             }
-            log.Close();
         }
 
         private static void ShowHelp()
