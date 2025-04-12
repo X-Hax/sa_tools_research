@@ -34,3 +34,4 @@
 /CommandLine/PointerPatchMaker/obj
 /CommandLine/ExportRawBinary/obj
 /CommandLine/AssetMatchTool/obj
+/CommandLine/splitFromFolder/obj
