@@ -59,8 +59,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SADXSourceView", "SADXSourc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetargetAnim", "CommandLine\RetargetAnim\RetargetAnim.csproj", "{4918A952-11A2-4B65-953B-7E064D1D3051}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DupmodelMaker", "CommandLine\DupmodelMaker\DupmodelMaker.csproj", "{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GBIXTool", "CommandLine\GBIXScan\GBIXTool.csproj", "{5838CA79-C21D-4048-8BA3-1E2702220F89}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TextFinder", "CommandLine\TextFinder\TextFinder.csproj", "{C758A496-6AEC-47B2-8BC1-7953CCC569C9}"
@@ -76,6 +74,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitDecomp", "CommandLine\splitDecomp\splitDecomp.csproj", "{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabelGen", "CommandLine\LabelGen\LabelGen.csproj", "{28B24B18-C423-AF12-4228-499034149BE4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScanAction", "CommandLine\ScanAction\ScanAction.csproj", "{D70D7009-EE68-CCBF-725A-6201582ED752}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -301,14 +301,6 @@ Global
 		{4918A952-11A2-4B65-953B-7E064D1D3051}.Release|x64.Build.0 = Release|x64
 		{4918A952-11A2-4B65-953B-7E064D1D3051}.Release|x86.ActiveCfg = Release|x86
 		{4918A952-11A2-4B65-953B-7E064D1D3051}.Release|x86.Build.0 = Release|x86
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Debug|x64.ActiveCfg = Debug|x64
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Debug|x64.Build.0 = Debug|x64
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Debug|x86.ActiveCfg = Debug|x86
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Debug|x86.Build.0 = Debug|x86
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x64.ActiveCfg = Release|x64
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x64.Build.0 = Release|x64
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x86.ActiveCfg = Release|x86
-		{BFF6EFFD-EC49-42F0-9FAB-8DED843DB409}.Release|x86.Build.0 = Release|x86
 		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x64.ActiveCfg = Debug|x64
 		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x64.Build.0 = Debug|x64
 		{5838CA79-C21D-4048-8BA3-1E2702220F89}.Debug|x86.ActiveCfg = Debug|x86
@@ -373,6 +365,14 @@ Global
 		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x64.Build.0 = Release|x64
 		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x86.ActiveCfg = Release|x86
 		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x86.Build.0 = Release|x86
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Debug|x64.ActiveCfg = Debug|x64
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Debug|x64.Build.0 = Debug|x64
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Debug|x86.ActiveCfg = Debug|x86
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Debug|x86.Build.0 = Debug|x86
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x64.ActiveCfg = Release|x64
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x64.Build.0 = Release|x64
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x86.ActiveCfg = Release|x86
+		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
