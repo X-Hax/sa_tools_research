@@ -1,11 +1,7 @@
 ﻿using SAModel;
-using SplitTools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ScanAction
 {
@@ -19,6 +15,7 @@ namespace ScanAction
             List<int> numverts_list = new List<int>();
             int[] numverts = new int[0];
             int numparts = 0;
+            bool shape = false;
             if (fileInfo.CustomProperties.ContainsKey("refaddr"))
             {
                 objectPointer = imageBase + uint.Parse(fileInfo.CustomProperties["refaddr"], NumberStyles.HexNumber);
@@ -29,6 +26,8 @@ namespace ScanAction
                     numparts = int.Parse(fileInfo.CustomProperties["numparts"]);
                 if (fileInfo.CustomProperties.ContainsKey("numverts"))
                 {
+                    return result; // Stop on shape motions for now
+                    shape = true;
                     string[] vertlist = fileInfo.CustomProperties["numverts"].Split(',');
                     for (int v = 0; v < vertlist.Length; v++)
                     {
@@ -37,7 +36,7 @@ namespace ScanAction
                     }
                 }
             }
-            for (int i = 0; i < datafile.Length - 4; i++)
+            for (int i = 0; i < datafile.Length - 4; i+=4)
             {
                 if (BitConverter.ToUInt32(datafile, i) == motionPointer)
                 {
@@ -53,8 +52,15 @@ namespace ScanAction
                             continue;
                         int modeladdr = (int)(pointer - imageBase);
                         NJS_OBJECT obj = new NJS_OBJECT(datafile, modeladdr, imageBase, ModelFormat.BasicDX, new Dictionary<int, Attach>());
-                        if (obj.CountAnimated() == numparts)
+                        
+                        if (!shape && obj.CountAnimated() == numparts)
                             result.Add(i - 4);
+                        else if (shape)
+                            return result; // Stop on shape motions for now
+                        /*
+                        if (shape && obj.GetVertexCounts() == numverts)
+                            result.Add(i - 4);
+                        */
                     }
 
                 }

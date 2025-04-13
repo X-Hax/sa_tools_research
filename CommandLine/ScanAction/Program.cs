@@ -64,6 +64,12 @@ namespace ScanAction
                             break;
                         case "motion":
                         case "animation":
+                            if (item.Value.Filename.Contains(".nas"))
+                            {
+                                Console.WriteLine("SHAPE: " + item.Value.Filename);
+                                newdata.Files.Add(item.Key, item.Value);
+                                break;
+                            }
                             List<int> numverts_list = new List<int>();
                             string objName = null;
                             int[] numverts = new int[0];
@@ -112,6 +118,7 @@ namespace ScanAction
                             else
                             {
                                 Console.WriteLine("NOT FOUND: " + item.Value.Filename);
+                                newdata.Files.Add(item.Key, item.Value);
                             }
                             break;
                     }
