@@ -38,10 +38,6 @@ namespace LabelTool
                 case "-ida":
                     LabelGen_IdaAndPointers(args);
                     return;
-                // Generate labels
-                case "-g":
-                    LabelGen_Main(args);
-                    return;
                 // Create match list
                 case "-cm":
                     LabelMatchList(args);

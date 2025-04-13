@@ -75,6 +75,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitFromFolder", "CommandL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitDecomp", "CommandLine\splitDecomp\splitDecomp.csproj", "{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabelGen", "CommandLine\LabelGen\LabelGen.csproj", "{28B24B18-C423-AF12-4228-499034149BE4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -363,6 +365,14 @@ Global
 		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x64.Build.0 = Release|x64
 		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x86.ActiveCfg = Release|x86
 		{7BD573F7-BB26-B43C-4A04-DBC4C22F9DCD}.Release|x86.Build.0 = Release|x86
+		{28B24B18-C423-AF12-4228-499034149BE4}.Debug|x64.ActiveCfg = Debug|x64
+		{28B24B18-C423-AF12-4228-499034149BE4}.Debug|x64.Build.0 = Debug|x64
+		{28B24B18-C423-AF12-4228-499034149BE4}.Debug|x86.ActiveCfg = Debug|x86
+		{28B24B18-C423-AF12-4228-499034149BE4}.Debug|x86.Build.0 = Debug|x86
+		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x64.ActiveCfg = Release|x64
+		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x64.Build.0 = Release|x64
+		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x86.ActiveCfg = Release|x86
+		{28B24B18-C423-AF12-4228-499034149BE4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
