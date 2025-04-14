@@ -181,7 +181,7 @@ namespace splitDecomp
                                 {
                                     NJS_TEXLIST tx = new NJS_TEXLIST(datafile, int.Parse(item.Value.CustomProperties["texlist"], NumberStyles.HexNumber), (uint)iniData.ImageBase, labels);
                                     tx.ToNJA(writer, labelsExport);
-                            }
+                                }
                                 obj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), chunk ? ModelFormat.Chunk : ModelFormat.BasicDX);
@@ -254,6 +254,14 @@ namespace splitDecomp
                             break;
                         case "action":
                             NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                            if (!labels.ContainsKey(item.Value.Address))
+                            {
+                                if (action.Animation.Name.StartsWith("motion_"))
+                                    action.Name = ReplaceLabel(action.Animation.Name, "motion", "action");
+                                else if (action.Animation.Name.StartsWith("animation_"))
+                                    action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
+                                Console.WriteLine(string.Format("Warning: label for action at {0} missing, using '{1}'", item.Value.Address.ToString("X"), action.Name));
+                            }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
