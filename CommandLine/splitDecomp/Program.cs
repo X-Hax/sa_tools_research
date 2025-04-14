@@ -93,7 +93,7 @@ namespace splitDecomp
                                     if (!labelsExport.Contains(deathObj.Name))
                                         labelsExport.Add(deathObj.Name);
                                     Console.WriteLine(outputFile);
-                                    deathObj.ToNJA(writer, labelsExport);
+                                    deathObj.ToNJA(writer, labelsExport, exportDefaults: false);
                                 }
                                 address += 8;
                             }
@@ -134,7 +134,7 @@ namespace splitDecomp
                                 if (!labelsExport.Contains(bobj.Name))
                                     labelsExport.Add(bobj.Name);
                                 Console.WriteLine(outputFile);
-                                bobj.ToNJA(writer, labelsExport);
+                                bobj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             ModelFile.CreateFile(outputFileM, bobj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
@@ -162,7 +162,7 @@ namespace splitDecomp
                             {
                                 Console.WriteLine(outputFile);
                                 roota.Name = "DO_NOT_EXPORT";
-                                roota.ToNJA(writer, labelsExport);
+                                roota.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             ModelFile.CreateFile(outputFileM, roota, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
@@ -177,7 +177,12 @@ namespace splitDecomp
                                 if (!labelsExport.Contains(obj.Name))
                                     labelsExport.Add(obj.Name);
                                 Console.WriteLine(outputFile);
-                                obj.ToNJA(writer, labelsExport);
+                                if (item.Value.CustomProperties.ContainsKey("texlist"))
+                                {
+                                    NJS_TEXLIST tx = new NJS_TEXLIST(datafile, int.Parse(item.Value.CustomProperties["texlist"], NumberStyles.HexNumber), (uint)iniData.ImageBase, labels);
+                                    tx.ToNJA(writer, labelsExport);
+                            }
+                                obj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), chunk ? ModelFormat.Chunk : ModelFormat.BasicDX);
                             break;
@@ -199,7 +204,7 @@ namespace splitDecomp
                             {
                                 Console.WriteLine(outputFile);
                                 root.Name = "DO_NOT_EXPORT";
-                                root.ToNJA(writer, labelsExport);
+                                root.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
@@ -243,7 +248,7 @@ namespace splitDecomp
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
-                                mot.ToNJA(writer, labelsExport);
+                                mot.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             mot.Save(outputFileM);
                             break;
@@ -252,7 +257,7 @@ namespace splitDecomp
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
-                                action.Animation.ToNJA(writer, labelsExport);
+                                action.Animation.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             action.Animation.Save(outputFileM);
                             break;
