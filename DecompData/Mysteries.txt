@@ -1,9 +1,11 @@
 ADV00MODELS:
-What happened to loadsfin_gards.nja?
+Unknown source file: adv00_stationsquare/place03/loadsfin_gards.nja
 
 ADV01MODELS:
-No source file for the EC_TRANSFORM texlist
+Unknown source file for the EC_TRANSFORM texlist
 
 ADV02MODELS:
-Unused source files: mra_f_road.nja, mr_soft_4plane.nja, mrobj_s_tr2ext.nja (possibly parts of Tornado runway)
+Unknown source files: mra_f_road.nja, mr_soft_4plane.nja, mrobj_s_tr2ext.nja (possibly parts of Tornado runway)
 figure/amy/models/a_headitem_a_headitem.nja could be somewhere in this file (unreferenced)
+95E14 is figure/amy/models/a_itemhanma_a_itemh.nja.sa1mdl (unreferenced, duplicate of the one in ADV01CMODELS)
+ADV02MR02_OBJECTS 173-176 are split as mrobj_s_numakabe.nja
