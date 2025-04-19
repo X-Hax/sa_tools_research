@@ -91,8 +91,9 @@ namespace splitDecomp
                 IniData iniData = IniSerializer.Deserialize<IniData>(iniFiles[i]);
                 // Create a list of LandTable items that will be checked for dupmodels. This will be done after all other items are exported.
                 List<SplitTools.FileInfo> landtableInfo = new List<SplitTools.FileInfo>();
-                // Create a list of NJS_OBJECT names. This is used in dupmodel generation.
+                // Create a list of NJS_OBJECT and NJS_MOTION names. This is used in dupmodel generation.
                 List<string> objLabels = new List<string>();
+                List<string> motLabels = new List<string>();
                 // Load labels
                 Dictionary<int, string> labels = new Dictionary<int, string>();
                 string labelName = Path.GetFileNameWithoutExtension(iniData.DataFilename) + "_labels.txt";
@@ -328,6 +329,7 @@ namespace splitDecomp
                             }
                             if (samodel)
                                 mot.Save(outputFileM);
+                            motLabels.Add(mot.Name);
                             break;
                         case "action":
                             NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
@@ -352,6 +354,7 @@ namespace splitDecomp
                             }
                             if (samodel)
                                 action.Animation.Save(outputFileM);
+                            motLabels.Add(action.Animation.Name);
                             break;
                         // This is left over in case it's needed again in the future
                         /*
@@ -413,7 +416,7 @@ namespace splitDecomp
                         {
                             Console.WriteLine("\nUsing duplist for " + landFilename);
                             string dupShortLocation = duplist[landFilename];
-                            GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation), objLabels);
+                            GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation), objLabels, motLabels);
                         }
                     }
                 }
