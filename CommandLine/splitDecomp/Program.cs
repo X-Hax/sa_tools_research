@@ -389,7 +389,7 @@ namespace splitDecomp
         private static void ShowHelp()
         {
             Console.WriteLine("This tool outputs NJA assets for SADX decomp.");
-            Console.WriteLine("Usage: splitDecomp -ini \"path_ini\" -game \"path_game\" -out \"path_output\" - utmdl \"path_outputmdl\" [-nosamdl]");
+            Console.WriteLine("Usage: splitDecomp -ini \"path_ini\" -game \"path_game\" -out \"path_output\" -outmdl \"path_outputmdl\" [-nosamdl]");
             Console.WriteLine("\npath_to_ini: Location of decomp INI files and labels");
             Console.WriteLine("path_game: Game folder(location of sonic.exe)");
             Console.WriteLine("path_output: Output folder for NJA files (e.g. \"D:\\sadx-decomp\\SonicAdventure\\sonic\\src\")");
