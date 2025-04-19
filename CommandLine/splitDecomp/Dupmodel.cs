@@ -8,7 +8,7 @@ namespace splitDecomp
     partial class Program
     {
         // Generates dupmodel.dup and dupmotion.dum for landtables
-        public static void GenerateDup(LandTable[] lands, string outpath)
+        public static void GenerateDup(LandTable[] lands, string outpath, List<string> objLabels)
         {
             // 'lands' is an array for cases like Ice Cap Act 4
             // It reuses Act 2 models but has some additional dup models, so the counting has to be done for both Acts 2 and 4
@@ -26,11 +26,15 @@ namespace splitDecomp
                 dupactions_result = new List<NJS_ACTION>();
                 foreach (COL col in land.COL)
                 {
-                    //if (CheckDuplicateObject(col.Model) && !dupmodels.Contains(col.Model))
+                    if (objLabels.Contains(col.Model.Name))
+                    {
+                        continue;
+                    }
                     if (atts.Contains(col.Model.Attach))
                     {
                         if (!dupmodels.Contains(col.Model))
                         {
+                            Console.WriteLine("{0} is reusing {1}", col.Model.Name, col.Model.Attach.Name);
                             dupmodels.Add(col.Model);
                             dupmodels_result.Add(col.Model);
                         }

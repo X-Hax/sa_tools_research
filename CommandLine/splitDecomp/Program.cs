@@ -89,8 +89,10 @@ namespace splitDecomp
                 List<string> labelsExport = new List<string>();
                 // Load INI file
                 IniData iniData = IniSerializer.Deserialize<IniData>(iniFiles[i]);
-                // Create an empty landtable list for dupmodel checking
-                List<LandTable> landTables = new List<LandTable>();
+                // Create a list of LandTable items that will be checked for dupmodels. This will be done after all other items are exported.
+                List<SplitTools.FileInfo> landtableInfo = new List<SplitTools.FileInfo>();
+                // Create a list of NJS_OBJECT names. This is used in dupmodel generation.
+                List<string> objLabels = new List<string>();
                 // Load labels
                 Dictionary<int, string> labels = new Dictionary<int, string>();
                 string labelName = Path.GetFileNameWithoutExtension(iniData.DataFilename) + "_labels.txt";
@@ -138,19 +140,7 @@ namespace splitDecomp
                     switch (item.Value.Type)
                     {
                         case "landtable":
-                            LandTable landTable = new LandTable(datafile, item.Value.Address, (uint)iniData.ImageBase, LandTableFormat.SADX, labels);
-                            landTables.Add(landTable);
-                            if (samodel)
-                                landTable.SaveToFile(outputFileM, LandTableFormat.SADX);
-                            // Duplist
-                            string landFilename = Path.GetFileName(item.Value.Filename);
-                            string landLocation = Path.GetDirectoryName(item.Value.Filename);
-                            if (duplist.ContainsKey(landFilename))
-                            {
-                                Console.WriteLine("Using duplist for " + landFilename);
-                                string dupShortLocation = duplist[landFilename];
-                                GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation));
-                            }
+                            landtableInfo.Add(item.Value);
                             break;
                         case "texlist":
                         case "texnamearray":
@@ -170,7 +160,10 @@ namespace splitDecomp
                             // Generate the NJS_OBJECT label from the NJS_MODEL label.
                             // Ideally the object itself should be ripped, but there are cases when the object doesn't exist.
                             if (batt.Name.StartsWith("attach_"))
+                            {
                                 bobj.Name = ReplaceLabel(batt.Name, "attach", "object");
+                                batt.Name = ReplaceLabel(batt.Name, "attach", "model");
+                            }
                             else if (batt.Name.StartsWith("model_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "model", "object");
                             Console.WriteLine("Warning: Using generated object name for '{0}'", batt.Name);
@@ -194,7 +187,10 @@ namespace splitDecomp
                                 NJS_OBJECT att_head = new NJS_OBJECT();
                                 att_head.Attach = attm;
                                 if (attm.Name.StartsWith("attach_"))
+                                {
                                     att_head.Name = ReplaceLabel(attm.Name, "attach", "object");
+                                    attm.Name = ReplaceLabel(attm.Name, "attach", "model");
+                                }
                                 else if (attm.Name.StartsWith("model_"))
                                     att_head.Name = ReplaceLabel(attm.Name, "model", "object");
                                 Console.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
@@ -220,6 +216,7 @@ namespace splitDecomp
                         case "chunkmodel":
                             bool chunk = item.Value.Type == "chunkmodel";
                             NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, chunk ? ModelFormat.Chunk : ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                            objLabels.Add(obj.Name);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 if (!labelsExport.Contains(obj.Name))
@@ -317,7 +314,10 @@ namespace splitDecomp
                             else if (mot.Name.StartsWith("_motion_"))
                                 mot.ActionName = ReplaceLabel(mot.Name, "_motion", "_action");
                             else if (mot.Name.StartsWith("animation_"))
+                            {
                                 mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
+                                mot.Name = ReplaceLabel(mot.Name, "animation", "motion");
+                            }
                             if (string.IsNullOrEmpty(mot.ObjectName))
                                 mot.ObjectName = objName;
                             Console.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
@@ -338,7 +338,10 @@ namespace splitDecomp
                                 else if (action.Animation.Name.StartsWith("_motion_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "_motion", "_action");
                                 else if (action.Animation.Name.StartsWith("animation_"))
+                                {
                                     action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
+                                    action.Animation.Name = ReplaceLabel(action.Animation.Name, "animation", "motion");
+                                }
                                 action.Animation.ActionName = action.Name;
                                 Console.WriteLine(string.Format("Warning: label for action at {0} ({1}) missing, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Name));
                             }
@@ -381,6 +384,37 @@ namespace splitDecomp
                             }
                             break;
                         */
+                    }
+                }
+                // Generate dupmodel for landtables
+                if (landtableInfo.Count > 0)
+                {
+                    // Create an empty landtable list for dupmodel checking
+                    List<LandTable> landTables = new List<LandTable>();
+                    foreach (var item in landtableInfo)
+                    {
+                        // Set output paths
+                        string outputFile = Path.Combine(outputPath, item.Filename[..item.Filename.LastIndexOf('.')]);
+                        string outputFileM = Path.Combine(outputPathM, item.Filename);
+                        // Create output folders
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+                        if (samodel)
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputFileM));
+                        // Load LandTable
+                        LandTable landTable = new LandTable(datafile, item.Address, (uint)iniData.ImageBase, LandTableFormat.SADX, labels);
+                        landTables.Add(landTable);
+                        // Save LandTable
+                        if (samodel)
+                            landTable.SaveToFile(outputFileM, LandTableFormat.SADX);
+                        // Set names
+                        string landFilename = Path.GetFileName(item.Filename);
+                        string landLocation = Path.GetDirectoryName(item.Filename);
+                        if (duplist.ContainsKey(landFilename))
+                        {
+                            Console.WriteLine("\nUsing duplist for " + landFilename);
+                            string dupShortLocation = duplist[landFilename];
+                            GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation), objLabels);
+                        }
                     }
                 }
             }
