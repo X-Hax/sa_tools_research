@@ -1,0 +1,9 @@
+ADV00MODELS:
+What happened to loadsfin_gards.nja?
+
+ADV01MODELS:
+No source file for the EC_TRANSFORM texlist
+
+ADV02MODELS:
+Unused source files: mra_f_road.nja, mr_soft_4plane.nja, mrobj_s_tr2ext.nja (possibly parts of Tornado runway)
+figure/amy/models/a_headitem_a_headitem.nja could be somewhere in this file (unreferenced)
