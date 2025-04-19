@@ -14,6 +14,6 @@
     <ProjectReference Include="..\..\sa_tools\Libraries\SplitTools\SplitTools.csproj" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="rmdir /S /Q $(OutDir)..\DecompData&#xD;&#xA;xcopy /I /E $(SolutionDir)DecompData $(OutDir)..\DecompData" />
+    <Exec Command="rmdir /S /Q &quot;$(OutDir)..\DecompData&quot;&#xD;&#xA;xcopy /I /E &quot;$(SolutionDir)DecompData&quot; &quot;$(OutDir)..\DecompData&quot;" />
   </Target>
 </Project>
