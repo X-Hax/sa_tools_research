@@ -11,15 +11,77 @@ namespace splitDecomp
     {
         private static void Main(string[] args)
         {
+            // Location of the EXE file's parent folder for default INI data
+            string startPath = new DirectoryInfo(AppContext.BaseDirectory).Parent.FullName;
+            // Variables
+            string iniPath = Path.Combine(startPath, "DecompData"); // Location of INI files and labels
+            string assetPath = Environment.CurrentDirectory; // Location of binary files
+            string outputPath = Path.Combine(Environment.CurrentDirectory, "output"); // Output path for source NJA files
+            bool samodel = true; // Whether to output sa1mdl, saanim etc. or not
+            string outputPathM = Path.Combine(Environment.CurrentDirectory, "outputM"); // Output path for sa1mdl, saanim etc. files
+            // Process arguments
+            if (args.Length > 0)
+            {
+                for (int arg = 0; arg < args.Length; arg++)
+                {
+                    switch (args[arg].ToLowerInvariant())
+                    {
+                        case "-?":
+                        case "/?":
+                            ShowHelp();
+                            return;
+                        case "-ini":
+                            iniPath = Path.GetFullPath(args[arg + 1]);
+                            break;
+                        case "-out":
+                            outputPath = Path.GetFullPath(args[arg + 1]);
+                            break;
+                        case "-outmdl":
+                            outputPathM = Path.GetFullPath(args[arg + 1]);
+                            break;
+                        case "-nosamdl":
+                            samodel = false;
+                            break;
+                        case "-game":
+                            assetPath = Path.GetFullPath(args[arg + 1]);
+                            break;
+                    }
+                }
+            }
+            // Clear screen
+            Console.Clear();
+            Console.Write("\x1b[3J");
+            // Set text encoder for 932 (required for NJA export)
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-            string startPath = Environment.CurrentDirectory;
-            string assetPath = Environment.CurrentDirectory;
-            string outputPath = Path.Combine(startPath, "output");
-            string outputPathM = Path.Combine(startPath, "outputM");
-            string iniPath = Path.Combine(startPath, "ini");
-            string[] iniFiles = Directory.GetFiles(iniPath, "*.ini", SearchOption.TopDirectoryOnly);
+            // Print out parameters
+            Console.WriteLine("Using INI data from folder: {0}", iniPath);
+            Console.WriteLine("Using assets in folder: {0}", assetPath);
+            Console.WriteLine("NJA output path: {0}", outputPath);
+            if (samodel)
+                Console.WriteLine("SAModel output path: {0}", outputPathM);
+            // Load the dupmodel paths list if it exists
+            string duplistpath = Path.Combine(iniPath, "duppath.txt");
+            Dictionary<string, string> duplist;
+            if (File.Exists(duplistpath))
+            {
+                duplist = IniSerializer.Deserialize<Dictionary<string, string>>(duplistpath);
+                Console.WriteLine("Using duplist path: " + duplistpath);
+            }
+            else
+            {
+                duplist = new Dictionary<string, string>();
+                Console.WriteLine("Duplist path not found");
+            }
+            // Create output folder
             Directory.CreateDirectory(outputPath);
-            Console.WriteLine("Log started");
+            // Start scanning for split files
+            string[] iniFiles = Directory.GetFiles(iniPath, "*.ini", SearchOption.TopDirectoryOnly);
+            if (iniFiles.Length == 0)
+            {
+                Console.WriteLine("Error: No INI files found. See help below.");
+                ShowHelp();
+                return;
+            }
             for (int i = 0; i < iniFiles.Length; i++)
             {
                 Console.WriteLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
@@ -29,84 +91,63 @@ namespace splitDecomp
                 IniData iniData = IniSerializer.Deserialize<IniData>(iniFiles[i]);
                 // Create an empty landtable list for dupmodel checking
                 List<LandTable> landTables = new List<LandTable>();
-                // Load the dupmodel paths list if it exists
-                string duplistpath = Path.Combine(iniPath, "duppath.txt");
-                Dictionary<string, string> duplist;
-                if (File.Exists(duplistpath))
-                {
-                    duplist = IniSerializer.Deserialize<Dictionary<string, string>>(duplistpath);
-                    Console.WriteLine("Using duplist path: " + duplistpath);
-                }
-                else
-                {
-                    duplist = new Dictionary<string, string>();
-                    Console.WriteLine("Duplist path not found");
-                }
                 // Load labels
                 Dictionary<int, string> labels = new Dictionary<int, string>();
                 string labelName = Path.GetFileNameWithoutExtension(iniData.DataFilename) + "_labels.txt";
-                string labelPath = Path.Combine(startPath, "ini", labelName);
+                string labelPath = Path.Combine(iniPath, labelName);
                 if (File.Exists(labelPath))
                 {
-                    Console.WriteLine("Using labels from " + labelName);
-                    labels = IniSerializer.Deserialize<Dictionary<int, string>>(Path.Combine(startPath, "ini", labelName));
+                    Console.WriteLine("Using labels from: " + labelPath);
+                    labels = IniSerializer.Deserialize<Dictionary<int, string>>(labelPath);
                 }
                 else
                 {
-                    Console.WriteLine("Labels file not found");
+                    Console.WriteLine("Labels file not found for {0}", iniData.DataFilename);
                     labels = new Dictionary<int, string>();
                 }
-                // Load binary file
-                byte[] datafile = File.ReadAllBytes(Path.Combine(assetPath, iniData.DataFilename));
+                // Load binary file from the 'system' folder
+                string binaryFilePath = Path.Combine(assetPath, "system", iniData.DataFilename);
+                // If that didn't work, load the binary file from the parent folder
+                if (!File.Exists(binaryFilePath))
+                    binaryFilePath = Path.Combine(assetPath, iniData.DataFilename);
+                // If that didn't work either, assume an error
+                if (!File.Exists(binaryFilePath))
+                {
+                    Console.WriteLine("Error: Binary file {0} not found. See help below.", binaryFilePath);
+                    ShowHelp();
+                    return;
+                }
+                byte[] datafile = File.ReadAllBytes(binaryFilePath);
                 // Set default key
                 if (iniData.ImageBase == null)
                     iniData.ImageBase = 0x400000;
+                // Scan through split entries
                 foreach (var item in iniData.Files)
                 {
+                    // Ignore items that have no extension
                     if (!item.Value.Filename.Contains("."))
                         continue;
+                    // Set output paths
                     string outputFile = Path.Combine(outputPath, item.Value.Filename[..item.Value.Filename.LastIndexOf('.')]);
                     string outputFileM = Path.Combine(outputPathM, item.Value.Filename);
+                    // Create output folders
                     Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
-                    Directory.CreateDirectory(Path.GetDirectoryName(outputFileM));
+                    if (samodel)
+                        Directory.CreateDirectory(Path.GetDirectoryName(outputFileM));
+                    // Parse items
                     switch (item.Value.Type)
                     {
-                        case "deathzone":
-                            List<string> hashes = new List<string>();
-                            int num = 0;
-                            int address = item.Value.Address;
-                            while (ByteConverter.ToUInt32(datafile, address + 4) != 0)
-                            {
-                                string njaFolderLocation = Path.Combine(outputPath, Path.GetDirectoryName(item.Value.Filename));
-                                string modelsFolderLocation = Path.Combine(outputPathM, Path.GetDirectoryName(item.Value.Filename));
-                                Directory.CreateDirectory(modelsFolderLocation);
-                                string file_tosave;
-                                if (item.Value.CustomProperties.ContainsKey("filename" + num.ToString()))
-                                    file_tosave = item.Value.CustomProperties["filename" + num++.ToString()];
-                                else
-                                    file_tosave = num++.ToString(NumberFormatInfo.InvariantInfo) + ".sa1mdl";
-                                ModelFormat modelfmt_death = ModelFormat.BasicDX; // Death zones in all games except SADXPC use Basic non-DX models
-                                NJS_OBJECT deathObj = new NJS_OBJECT(datafile, datafile.GetPointer(address + 4, (uint)iniData.ImageBase), (uint)iniData.ImageBase, modelfmt_death, labels, new Dictionary<int, Attach>());
-                                ModelFile.CreateFile(Path.Combine(modelsFolderLocation, file_tosave), deathObj, null, null, null, null, modelfmt_death);
-                                using (TextWriter writer = File.CreateText(Path.Combine(njaFolderLocation, file_tosave[..file_tosave.LastIndexOf('.')])))
-                                {
-                                    if (!labelsExport.Contains(deathObj.Name))
-                                        labelsExport.Add(deathObj.Name);
-                                    Console.WriteLine(outputFile);
-                                    deathObj.ToNJA(writer, labelsExport, exportDefaults: false);
-                                }
-                                address += 8;
-                            }
-                            break;
                         case "landtable":
                             LandTable landTable = new LandTable(datafile, item.Value.Address, (uint)iniData.ImageBase, LandTableFormat.SADX);
                             landTables.Add(landTable);
+                            if (samodel)
+                                landTable.SaveToFile(outputFileM, LandTableFormat.SADX);
                             // Duplist
                             string landFilename = Path.GetFileName(item.Value.Filename);
                             string landLocation = Path.GetDirectoryName(item.Value.Filename);
-                            Console.WriteLine("Generating duplist for " + landFilename);
                             if (duplist.ContainsKey(landFilename))
                             {
+                                Console.WriteLine("Using duplist for " + landFilename);
                                 string dupShortLocation = duplist[landFilename];
                                 GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation));
                             }
@@ -119,16 +160,20 @@ namespace splitDecomp
                                 texlist.ToNJA(writer, labelsExport);
                             }
                             Console.WriteLine(outputFile);
-                            texlist.Save(outputFileM);
+                            if (samodel)
+                                texlist.Save(outputFileM);
                             break;
                         case "basicdxattach":
                             BasicAttach batt = new BasicAttach(datafile, item.Value.Address, (uint)iniData.ImageBase, true, labels);
                             NJS_OBJECT bobj = new NJS_OBJECT();
                             bobj.Attach = batt;
+                            // Generate the NJS_OBJECT label from the NJS_MODEL label.
+                            // Ideally the object itself should be ripped, but there are cases when the object doesn't exist.
                             if (batt.Name.StartsWith("attach_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "attach", "object");
                             else if (batt.Name.StartsWith("model_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "model", "object");
+                            Console.WriteLine("Warning: Using generated object name for '{0}'", batt.Name);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 if (!labelsExport.Contains(bobj.Name))
@@ -136,7 +181,8 @@ namespace splitDecomp
                                 Console.WriteLine(outputFile);
                                 bobj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
-                            ModelFile.CreateFile(outputFileM, bobj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            if (samodel)
+                                ModelFile.CreateFile(outputFileM, bobj, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
                         case "multidxattach":
                             string[] attsshex = item.Value.CustomProperties["addresses"].Split(',');
@@ -151,6 +197,7 @@ namespace splitDecomp
                                     att_head.Name = ReplaceLabel(attm.Name, "attach", "object");
                                 else if (attm.Name.StartsWith("model_"))
                                     att_head.Name = ReplaceLabel(attm.Name, "model", "object");
+                                Console.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
                                 NJS_OBJECT rootm = new NJS_OBJECT();
                                 rootm.AddChild(att_head);
                                 rootm.Name = "DO_NOT_EXPORT_" + rootm.Name;
@@ -164,7 +211,8 @@ namespace splitDecomp
                                 roota.Name = "DO_NOT_EXPORT";
                                 roota.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
-                            ModelFile.CreateFile(outputFileM, roota, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            if (samodel)
+                                ModelFile.CreateFile(outputFileM, roota, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
                         case "model":
                         case "basicmodel":
@@ -184,7 +232,8 @@ namespace splitDecomp
                                 }
                                 obj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
-                            ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), chunk ? ModelFormat.Chunk : ModelFormat.BasicDX);
+                            if (samodel)
+                                ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), chunk ? ModelFormat.Chunk : ModelFormat.BasicDX);
                             break;
                         case "multidxmodel":
                             string[] modelshex = item.Value.CustomProperties["addresses"].Split(',');
@@ -206,7 +255,8 @@ namespace splitDecomp
                                 root.Name = "DO_NOT_EXPORT";
                                 root.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
-                            ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            if (samodel)
+                                ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
                         case "motion":
                         case "animation":
@@ -242,13 +292,13 @@ namespace splitDecomp
                                 NJS_OBJECT objm = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["refaddr"], NumberStyles.HexNumber), (uint)iniData.ImageBase, fmt, labels, new Dictionary<int, Attach>());
                                 objName = objm.Name;
                                 numverts = objm.GetVertexCounts();
-                                if (item.Value.Filename.Contains("shape") || (item.Value.Filename.Contains(".nas.saanim")))
+                                if (item.Value.Filename.Contains("shape") || item.Value.Filename.Contains(".nas.saanim") || item.Value.Filename.Contains(".cut.saanim"))
                                     numparts = objm.CountMorph();
                                 else
                                     numparts = objm.CountAnimated();
                             }
                             else
-                            { 
+                            {
                                 if (item.Value.CustomProperties.ContainsKey("numparts"))
                                     numparts = int.Parse(item.Value.CustomProperties["numparts"]);
                                 if (item.Value.CustomProperties.ContainsKey("numverts"))
@@ -270,12 +320,14 @@ namespace splitDecomp
                                 mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
                             if (string.IsNullOrEmpty(mot.ObjectName))
                                 mot.ObjectName = objName;
+                            Console.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
                                 mot.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
-                            mot.Save(outputFileM);
+                            if (samodel)
+                                mot.Save(outputFileM);
                             break;
                         case "action":
                             NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
@@ -288,15 +340,47 @@ namespace splitDecomp
                                 else if (action.Animation.Name.StartsWith("animation_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
                                 action.Animation.ActionName = action.Name;
-                                Console.WriteLine(string.Format("Warning: label for action at {0} missing, using '{1}'", item.Value.Address.ToString("X"), action.Name));
+                                Console.WriteLine(string.Format("Warning: label for action at {0} ({1}) missing, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Name));
                             }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
                                 action.Animation.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
-                            action.Animation.Save(outputFileM);
+                            if (samodel)
+                                action.Animation.Save(outputFileM);
                             break;
+                        // This is left over in case it's needed again in the future
+                        /*
+                        case "deathzone":
+                            List<string> hashes = new List<string>();
+                            int num = 0;
+                            int address = item.Value.Address;
+                            while (ByteConverter.ToUInt32(datafile, address + 4) != 0)
+                            {
+                                string njaFolderLocation = Path.Combine(outputPath, Path.GetDirectoryName(item.Value.Filename));
+                                string modelsFolderLocation = Path.Combine(outputPathM, Path.GetDirectoryName(item.Value.Filename));
+                                Directory.CreateDirectory(modelsFolderLocation);
+                                string file_tosave;
+                                if (item.Value.CustomProperties.ContainsKey("filename" + num.ToString()))
+                                    file_tosave = item.Value.CustomProperties["filename" + num++.ToString()];
+                                else
+                                    file_tosave = num++.ToString(NumberFormatInfo.InvariantInfo) + ".sa1mdl";
+                                ModelFormat modelfmt_death = ModelFormat.BasicDX; // Death zones in all games except SADXPC use Basic non-DX models
+                                NJS_OBJECT deathObj = new NJS_OBJECT(datafile, datafile.GetPointer(address + 4, (uint)iniData.ImageBase), (uint)iniData.ImageBase, modelfmt_death, labels, new Dictionary<int, Attach>());
+                                if (samodel)
+                                    ModelFile.CreateFile(Path.Combine(modelsFolderLocation, file_tosave), deathObj, null, null, null, null, modelfmt_death);
+                                using (TextWriter writer = File.CreateText(Path.Combine(njaFolderLocation, file_tosave[..file_tosave.LastIndexOf('.')])))
+                                {
+                                    if (!labelsExport.Contains(deathObj.Name))
+                                        labelsExport.Add(deathObj.Name);
+                                    Console.WriteLine(outputFile);
+                                    deathObj.ToNJA(writer, labelsExport, exportDefaults: false);
+                                }
+                                address += 8;
+                            }
+                            break;
+                        */
                     }
                 }
             }
@@ -304,7 +388,14 @@ namespace splitDecomp
 
         private static void ShowHelp()
         {
-            Console.WriteLine("Press any key to exit.");
+            Console.WriteLine("This tool outputs NJA assets for SADX decomp.");
+            Console.WriteLine("Usage: splitDecomp -ini \"path_ini\" -game \"path_game\" -out \"path_output\" - utmdl \"path_outputmdl\" [-nosamdl]");
+            Console.WriteLine("\npath_to_ini: Location of decomp INI files and labels");
+            Console.WriteLine("path_game: Game folder(location of sonic.exe)");
+            Console.WriteLine("path_output: Output folder for NJA files (e.g. \"D:\\sadx-decomp\\SonicAdventure\\sonic\\src\")");
+            Console.WriteLine("path_outputmdl: Output folder for sa1mdl, saanim and sa1lvl files");
+            Console.WriteLine("\n-nosamdl: do not output sa1mdl, saanim and sa1lvl files");
+            Console.Write("\nPress any key to exit.");
             Console.ReadLine();
         }
 

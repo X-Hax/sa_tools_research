@@ -2,7 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/build/bin
+/build
 /CommandLine/CompareTool/obj/
 /CommandLine/FunctionListGenerator/obj/
 /CommandLine/LabelTool/obj/
