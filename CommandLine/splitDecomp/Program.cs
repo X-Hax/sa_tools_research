@@ -179,10 +179,7 @@ namespace splitDecomp
                             // Generate the NJS_OBJECT label from the NJS_MODEL label.
                             // Ideally the object itself should be ripped, but there are cases when the object doesn't exist.
                             if (batt.Name.StartsWith("attach_"))
-                            {
                                 bobj.Name = ReplaceLabel(batt.Name, "attach", "object");
-                                batt.Name = ReplaceLabel(batt.Name, "attach", "model");
-                            }
                             else if (batt.Name.StartsWith("model_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "model", "object");
                             Console.WriteLine("Warning: Using generated object name for '{0}'", batt.Name);
@@ -206,10 +203,7 @@ namespace splitDecomp
                                 NJS_OBJECT att_head = new NJS_OBJECT();
                                 att_head.Attach = attm;
                                 if (attm.Name.StartsWith("attach_"))
-                                {
                                     att_head.Name = ReplaceLabel(attm.Name, "attach", "object");
-                                    attm.Name = ReplaceLabel(attm.Name, "attach", "model");
-                                }
                                 else if (attm.Name.StartsWith("model_"))
                                     att_head.Name = ReplaceLabel(attm.Name, "model", "object");
                                 Console.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
@@ -333,10 +327,7 @@ namespace splitDecomp
                             else if (mot.Name.StartsWith("_motion_"))
                                 mot.ActionName = ReplaceLabel(mot.Name, "_motion", "_action");
                             else if (mot.Name.StartsWith("animation_"))
-                            {
                                 mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
-                                mot.Name = ReplaceLabel(mot.Name, "animation", "motion");
-                            }
                             if (string.IsNullOrEmpty(mot.ObjectName))
                                 mot.ObjectName = objName;
                             Console.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
@@ -358,10 +349,7 @@ namespace splitDecomp
                                 else if (action.Animation.Name.StartsWith("_motion_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "_motion", "_action");
                                 else if (action.Animation.Name.StartsWith("animation_"))
-                                {
                                     action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
-                                    action.Animation.Name = ReplaceLabel(action.Animation.Name, "animation", "motion");
-                                }
                                 action.Animation.ActionName = action.Name;
                                 Console.WriteLine(string.Format("Warning: label for action at {0} ({1}) missing, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Name));
                             }
