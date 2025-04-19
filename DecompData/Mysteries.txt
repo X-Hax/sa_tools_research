@@ -13,5 +13,5 @@ ADV02MR02_OBJECTS 173-176 are split as mrobj_s_numakabe.nja
 CHRMODELS:
 The filenames for Tails' tail morphs are difficult. I went with the following assumptions, which could be entirely wrong:
 miles_tail_s contains data for the left tail (as in "sa", a possible reading of 左)
-miles_tail_u contains data for the left tail (as in "u", a possible reading of 右)
+miles_tail_u contains data for the right tail (as in "u", a possible reading of 右)
 The last model that doesn't have a pair is in miles_tails_t
