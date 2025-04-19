@@ -16,7 +16,7 @@ namespace splitDecomp
             List<NJS_MOTION> mots = new List<NJS_MOTION>(); // List of NJS_MOTIONs that builds progressively
             List<NJS_OBJECT> dupmodels = new List<NJS_OBJECT>(); // List of all NJS_OBJECTS that reuse any NJS_MODEL
             List<NJS_ACTION> dupactions = new List<NJS_ACTION>();// List of all NJS_ACTIONS that reuse any NJS_MOTION
-            List<NJS_OBJECT> dupmodels_result = new List<NJS_OBJECT>(); // List of dup objecs found in the current landtable only
+            List<NJS_OBJECT> dupmodels_result = new List<NJS_OBJECT>(); // List of dup objects found in the current landtable only
             List<NJS_ACTION> dupactions_result = new List<NJS_ACTION>(); // List of dup mtions found in the current landtable only
             // Make a list of duplicate models and actions
             foreach (LandTable land in lands)

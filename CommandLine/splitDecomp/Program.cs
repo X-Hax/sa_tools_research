@@ -138,7 +138,7 @@ namespace splitDecomp
                     switch (item.Value.Type)
                     {
                         case "landtable":
-                            LandTable landTable = new LandTable(datafile, item.Value.Address, (uint)iniData.ImageBase, LandTableFormat.SADX);
+                            LandTable landTable = new LandTable(datafile, item.Value.Address, (uint)iniData.ImageBase, LandTableFormat.SADX, labels);
                             landTables.Add(landTable);
                             if (samodel)
                                 landTable.SaveToFile(outputFileM, LandTableFormat.SADX);
