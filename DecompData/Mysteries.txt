@@ -1,17 +1,16 @@
 ADV00MODELS:
-Unknown source file: adv00_stationsquare/place03/loadsfin_gards.nja
+- Unknown source file: adv00_stationsquare/place03/loadsfin_gards.nja
 
 ADV01MODELS:
-Unknown source file for the EC_TRANSFORM texlist
+- Unknown source file for the EC_TRANSFORM texlist
 
 ADV02MODELS:
-Unknown source files: mra_f_road.nja, mr_soft_4plane.nja, mrobj_s_tr2ext.nja (possibly parts of Tornado runway)
-figure/amy/models/a_headitem_a_headitem.nja could be somewhere in this file (unreferenced)
-95E14 is figure/amy/models/a_itemhanma_a_itemh.nja.sa1mdl (unreferenced, duplicate of the one in ADV01CMODELS)
-ADV02MR02_OBJECTS 173-176 are split as mrobj_s_numakabe.nja
+- Unknown source files: mra_f_road.nja, mr_soft_4plane.nja, mrobj_s_tr2ext.nja (possibly parts of Tornado runway)
+- Assumption: 95E14 is figure/amy/models/a_headitem_a_headitem.nja, a clone of figure/amy/models/a_itemhanma_a_itemh.nja.sa1mdl that is normally split from ADV1CMODELS. "a_headitem" seems like the wrong name to call a hammer, but there are no other Amy powerups in ADV02MODELS, so I decided to take that name.
+- ADV02MR02_OBJECTS 173-176 are split as mrobj_s_numakabe.nja
 
 CHRMODELS:
-The filenames for Tails' tail morphs are difficult. I went with the following assumptions, which could be entirely wrong:
+-The filenames for Tails' tail morphs are difficult. I went with the following assumptions, which could be entirely wrong:
 miles_tail_s contains data for the left tail (as in "sa", a possible reading of 左)
 miles_tail_u contains data for the right tail (as in "u", a possible reading of 右)
 The last model that doesn't have a pair is in miles_tails_t
