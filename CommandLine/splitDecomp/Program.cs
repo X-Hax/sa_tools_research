@@ -143,6 +143,24 @@ namespace splitDecomp
                         case "landtable":
                             landtableInfo.Add(item.Value);
                             break;
+                        case "multitexlist":
+                            string[] addrtexs = item.Value.CustomProperties["addresses"].Split(',');
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                for (int m = 0; m < addrtexs.Length; m++)
+                                {
+                                    int taddr = int.Parse(addrtexs[m], NumberStyles.HexNumber);
+                                    NJS_TEXLIST txl = new NJS_TEXLIST(datafile, taddr, (uint)iniData.ImageBase, labels);
+                                    txl.ToNJA(writer, labelsExport);
+                                    if (samodel)
+                                    {
+                                        string outputFileM2 = Path.Combine(Path.GetDirectoryName(outputFileM), Path.GetFileNameWithoutExtension(outputFileM) + "_" + m.ToString() + ".tls.satex");
+                                        txl.Save(outputFileM2);
+                                    }
+                                }
+                                Console.WriteLine(outputFile);    
+                            }
+                            break;
                         case "texlist":
                         case "texnamearray":
                             NJS_TEXLIST texlist = new NJS_TEXLIST(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
