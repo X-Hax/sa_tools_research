@@ -216,7 +216,30 @@ namespace splitDecomp
                             int numparts = 0;
                             if (item.Value.CustomProperties.ContainsKey("refaddr"))
                             {
-                                NJS_OBJECT objm = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["refaddr"], NumberStyles.HexNumber), (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                                ModelFormat fmt = ModelFormat.BasicDX;
+                                if (item.Value.CustomProperties.ContainsKey("format"))
+                                {
+                                    switch (item.Value.CustomProperties["format"].ToLowerInvariant())
+                                    {
+                                        case "chunk":
+                                            fmt = ModelFormat.Chunk;
+                                            break;
+                                        case "gc":
+                                            fmt = ModelFormat.GC;
+                                            break;
+                                        case "xj":
+                                            fmt = ModelFormat.XJ;
+                                            break;
+                                        case "basic":
+                                            fmt = ModelFormat.Basic;
+                                            break;
+                                        case "basicdx":
+                                        default:
+                                            fmt = ModelFormat.BasicDX;
+                                            break;
+                                    }
+                                }
+                                NJS_OBJECT objm = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["refaddr"], NumberStyles.HexNumber), (uint)iniData.ImageBase, fmt, labels, new Dictionary<int, Attach>());
                                 objName = objm.Name;
                                 numverts = objm.GetVertexCounts();
                                 if (item.Value.Filename.Contains("shape") || (item.Value.Filename.Contains(".nas.saanim")))
@@ -241,6 +264,8 @@ namespace splitDecomp
                             NJS_MOTION mot = new NJS_MOTION(datafile, item.Value.Address, (uint)iniData.ImageBase, numparts, labels, item.Value.CustomProperties.ContainsKey("shortrot"), numverts);
                             if (mot.Name.StartsWith("motion_"))
                                 mot.ActionName = ReplaceLabel(mot.Name, "motion", "action");
+                            else if (mot.Name.StartsWith("_motion_"))
+                                mot.ActionName = ReplaceLabel(mot.Name, "_motion", "_action");
                             else if (mot.Name.StartsWith("animation_"))
                                 mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
                             if (string.IsNullOrEmpty(mot.ObjectName))
@@ -258,8 +283,11 @@ namespace splitDecomp
                             {
                                 if (action.Animation.Name.StartsWith("motion_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "motion", "action");
+                                else if (action.Animation.Name.StartsWith("_motion_"))
+                                    action.Name = ReplaceLabel(action.Animation.Name, "_motion", "_action");
                                 else if (action.Animation.Name.StartsWith("animation_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
+                                action.Animation.ActionName = action.Name;
                                 Console.WriteLine(string.Format("Warning: label for action at {0} missing, using '{1}'", item.Value.Address.ToString("X"), action.Name));
                             }
                             using (TextWriter writer = File.CreateText(outputFile))
