@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace SADXSourceView
@@ -8,14 +10,21 @@ namespace SADXSourceView
     public partial class Form1 : Form
     {
         public string modfolder = "D:/GitHub/SADX-Decomp-Mod";
-        //public string outfolder = "D:/GitHub/sa_tools_research/SADXSourceView/out";
+        public bool suspend = true;
+        private List<string> missing;
 
         public Form1()
         {
             InitializeComponent();
             string iniPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SA Tools", "SADXSourceView.ini");
             if (File.Exists(iniPath))
-                modfolder = File.ReadAllText(iniPath);
+            {
+                string[] lines = File.ReadAllLines(iniPath);
+                modfolder = lines[0];
+                if (lines.Length > 1 && lines[1].ToLowerInvariant().Contains("true"))
+                    checkBoxAssets.Checked = SourceUtils.assetsOnly = true;
+            }
+            suspend = false;
             textBox1.Text = modfolder;
             RebuildTreeView();
             RecolorTreeView();
@@ -40,6 +49,8 @@ namespace SADXSourceView
         private void ColorTreeNodes(TreeNode node)
         {
             // Check if it's a folder; if not, compare files
+            if (node.FullPath.Contains("<") || node.FullPath.Contains(">"))
+                MessageBox.Show(node.FullPath);
             if (Path.GetExtension(node.FullPath) != string.Empty)
             {
                 if (node.FullPath.Length > 7)
@@ -48,7 +59,10 @@ namespace SADXSourceView
                     if (File.Exists(file_mod))
                         node.BackColor = Color.Green;
                     else
+                    {
+                        missing.Add(node.FullPath);
                         node.BackColor = Color.Red;
+                    }
                     SetNodeParentColor(node.Parent, node.BackColor);
                 }
             }
@@ -61,12 +75,12 @@ namespace SADXSourceView
         private void RebuildTreeView()
         {
             treeView.Nodes.Clear();
-            //PopulateTreeViewFromFolder(outfolder);
             SourceUtils.PopulateTreeview(treeView);
         }
 
         private void RecolorTreeView()
         {
+            missing = new List<string>();
             ResetTreeViewColor();
             for (int i = 0; i < treeView.Nodes.Count; i++)
             {
@@ -129,7 +143,7 @@ namespace SADXSourceView
 
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
-            //exportToXml2(treeView1, "test.xml");
+            modfolder = textBox1.Text;
             RecolorTreeView();
         }
 
@@ -138,17 +152,28 @@ namespace SADXSourceView
             string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SA Tools", "SADXSourceView.ini");
             if (!Directory.Exists(Path.GetDirectoryName(logPath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(logPath));
-            File.WriteAllText(logPath, modfolder);
+            TextWriter logWriter = File.CreateText(logPath);
+            logWriter.WriteLine(modfolder);
+            logWriter.WriteLine(SourceUtils.assetsOnly.ToString());
+            logWriter.Flush();
+            logWriter.Close();
         }
 
-        // Old
-        private void PopulateTreeViewFromFolder(string directory)
+        private void checkBoxAssets_CheckedChanged(object sender, EventArgs e)
         {
-            DirectoryInfo info = new DirectoryInfo(directory);
-            if (info.Exists)
-            {
-                GetDirectoriesForTreeView(info.GetDirectories(), null);
-            }
+            if (suspend)
+                return;
+            SourceUtils.assetsOnly = checkBoxAssets.Checked;
+            MessageBox.Show("Pls restart");
+        }
+
+        private void buttonCopy_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in missing)
+                sb.AppendLine(item);
+            Clipboard.SetText(sb.ToString());
+            MessageBox.Show("Copied to clipboard");
         }
     }
 }

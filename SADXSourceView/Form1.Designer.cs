@@ -28,75 +28,104 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.treeView = new System.Windows.Forms.TreeView();
-            this.buttonSetLocation = new System.Windows.Forms.Button();
-            this.buttonRefresh = new System.Windows.Forms.Button();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.panel1.SuspendLayout();
-            this.SuspendLayout();
+            treeView = new System.Windows.Forms.TreeView();
+            buttonSetLocation = new System.Windows.Forms.Button();
+            buttonRefresh = new System.Windows.Forms.Button();
+            panel1 = new System.Windows.Forms.Panel();
+            checkBoxAssets = new System.Windows.Forms.CheckBox();
+            textBox1 = new System.Windows.Forms.TextBox();
+            buttonCopy = new System.Windows.Forms.Button();
+            panel1.SuspendLayout();
+            SuspendLayout();
             // 
             // treeView
             // 
-            this.treeView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.treeView.Location = new System.Drawing.Point(0, 64);
-            this.treeView.Name = "treeView";
-            this.treeView.Size = new System.Drawing.Size(800, 581);
-            this.treeView.TabIndex = 0;
+            treeView.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            treeView.Location = new System.Drawing.Point(0, 43);
+            treeView.Margin = new System.Windows.Forms.Padding(2);
+            treeView.Name = "treeView";
+            treeView.Size = new System.Drawing.Size(734, 413);
+            treeView.TabIndex = 0;
             // 
             // buttonSetLocation
             // 
-            this.buttonSetLocation.Location = new System.Drawing.Point(653, 12);
-            this.buttonSetLocation.Name = "buttonSetLocation";
-            this.buttonSetLocation.Size = new System.Drawing.Size(135, 34);
-            this.buttonSetLocation.TabIndex = 2;
-            this.buttonSetLocation.Text = "Set Location...";
-            this.buttonSetLocation.UseVisualStyleBackColor = true;
-            this.buttonSetLocation.Click += new System.EventHandler(this.buttonSetLocation_Click);
+            buttonSetLocation.Location = new System.Drawing.Point(374, 7);
+            buttonSetLocation.Margin = new System.Windows.Forms.Padding(2);
+            buttonSetLocation.Name = "buttonSetLocation";
+            buttonSetLocation.Size = new System.Drawing.Size(90, 23);
+            buttonSetLocation.TabIndex = 2;
+            buttonSetLocation.Text = "Set Location...";
+            buttonSetLocation.UseVisualStyleBackColor = true;
+            buttonSetLocation.Click += buttonSetLocation_Click;
             // 
             // buttonRefresh
             // 
-            this.buttonRefresh.Location = new System.Drawing.Point(12, 12);
-            this.buttonRefresh.Name = "buttonRefresh";
-            this.buttonRefresh.Size = new System.Drawing.Size(92, 34);
-            this.buttonRefresh.TabIndex = 3;
-            this.buttonRefresh.Text = "Refresh";
-            this.buttonRefresh.UseVisualStyleBackColor = true;
-            this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
+            buttonRefresh.Location = new System.Drawing.Point(468, 7);
+            buttonRefresh.Margin = new System.Windows.Forms.Padding(2);
+            buttonRefresh.Name = "buttonRefresh";
+            buttonRefresh.Size = new System.Drawing.Size(61, 23);
+            buttonRefresh.TabIndex = 3;
+            buttonRefresh.Text = "Refresh";
+            buttonRefresh.UseVisualStyleBackColor = true;
+            buttonRefresh.Click += buttonRefresh_Click;
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.buttonRefresh);
-            this.panel1.Controls.Add(this.textBox1);
-            this.panel1.Controls.Add(this.buttonSetLocation);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(800, 58);
-            this.panel1.TabIndex = 4;
+            panel1.Controls.Add(buttonCopy);
+            panel1.Controls.Add(checkBoxAssets);
+            panel1.Controls.Add(buttonRefresh);
+            panel1.Controls.Add(textBox1);
+            panel1.Controls.Add(buttonSetLocation);
+            panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            panel1.Location = new System.Drawing.Point(0, 0);
+            panel1.Margin = new System.Windows.Forms.Padding(2);
+            panel1.Name = "panel1";
+            panel1.Size = new System.Drawing.Size(732, 39);
+            panel1.TabIndex = 4;
+            // 
+            // checkBoxAssets
+            // 
+            checkBoxAssets.AutoSize = true;
+            checkBoxAssets.Location = new System.Drawing.Point(534, 9);
+            checkBoxAssets.Name = "checkBoxAssets";
+            checkBoxAssets.Size = new System.Drawing.Size(85, 19);
+            checkBoxAssets.TabIndex = 5;
+            checkBoxAssets.Text = "Assets only";
+            checkBoxAssets.UseVisualStyleBackColor = true;
+            checkBoxAssets.CheckedChanged += checkBoxAssets_CheckedChanged;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(110, 13);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(537, 31);
-            this.textBox1.TabIndex = 4;
+            textBox1.Location = new System.Drawing.Point(11, 7);
+            textBox1.Margin = new System.Windows.Forms.Padding(2);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new System.Drawing.Size(359, 23);
+            textBox1.TabIndex = 4;
+            // 
+            // buttonCopy
+            // 
+            buttonCopy.Location = new System.Drawing.Point(625, 6);
+            buttonCopy.Name = "buttonCopy";
+            buttonCopy.Size = new System.Drawing.Size(97, 23);
+            buttonCopy.TabIndex = 6;
+            buttonCopy.Text = "Copy missing";
+            buttonCopy.UseVisualStyleBackColor = true;
+            buttonCopy.Click += buttonCopy_Click;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(144F, 144F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(800, 645);
-            this.Controls.Add(this.panel1);
-            this.Controls.Add(this.treeView);
-            this.Name = "Form1";
-            this.Text = "SADX Source Tool";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            ClientSize = new System.Drawing.Size(732, 454);
+            Controls.Add(panel1);
+            Controls.Add(treeView);
+            Margin = new System.Windows.Forms.Padding(2);
+            Name = "Form1";
+            Text = "SADX Source Tool";
+            FormClosing += Form1_FormClosing;
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
+            ResumeLayout(false);
 
         }
 
@@ -107,5 +136,7 @@
         private System.Windows.Forms.Button buttonRefresh;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.CheckBox checkBoxAssets;
+        private System.Windows.Forms.Button buttonCopy;
     }
 }

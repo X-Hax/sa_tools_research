@@ -8,6 +8,7 @@ namespace SADXSourceView
     // Most of this is from https://stackoverflow.com/questions/48376642/xml-represantation-of-treeview-nodes
     public static class SourceUtils
     {
+        public static bool assetsOnly = false;
         private static XmlTextWriter? xr;
 
         // Save
@@ -80,47 +81,37 @@ namespace SADXSourceView
 
         public static void PopulateTreeview(TreeView tv)
         {
-            //OpenFileDialog dlg = new OpenFileDialog();
-            //dlg.Title = "Open XML Document";
-            //dlg.Filter = "XML Files (*.xml)|*.xml";
-            //dlg.FileName = Application.StartupPath + "\\..\\..\\example.xml";
+            try
+            {
+                //First, we'll load the Xml document
+                XmlDocument xDoc = new XmlDocument();
+                xDoc.Load(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), assetsOnly ? "source_ass.xml" : "source.xml"));
 
-           // if (dlg.ShowDialog() == DialogResult.OK)
-            //{
-                try
-                {
-                    //First, we'll load the Xml document
-                    XmlDocument xDoc = new XmlDocument();
-                    xDoc.Load(Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "source.xml"));
+                // Now, clear out the treeview, 
+                // and add the first (root) node
+                tv.Nodes.Clear();
 
-                    // Now, clear out the treeview, 
-                    // and add the first (root) node
-                    tv.Nodes.Clear();
+                tv.Nodes.Add(new TreeNode(SourceUtils.ParseXMLNameForTreeView(xDoc.DocumentElement.Name)));
 
-                    tv.Nodes.Add(new TreeNode(SourceUtils.ParseXMLNameForTreeView(xDoc.DocumentElement.Name)));
+                TreeNode tNode = new TreeNode();
+                tNode = (TreeNode)tv.Nodes[0];
 
-                    TreeNode tNode = new TreeNode();
-                    tNode = (TreeNode)tv.Nodes[0];
+                // We make a call to addTreeNode, 
+                // where we'll add all of our nodes
+                addTreeNode(xDoc.DocumentElement, tNode);
 
-                    // We make a call to addTreeNode, 
-                    // where we'll add all of our nodes
-                    addTreeNode(xDoc.DocumentElement, tNode);
-
-                    // Expand the treeview to show all nodes
-                    //tv.ExpandAll();
-                }
-                catch (XmlException xExc)
-                {
-                    // Exception is thrown is there is an error in the Xml
-                    MessageBox.Show(xExc.Message);
-                }
-                catch (Exception ex) //General exception
-                {
-                    MessageBox.Show(ex.Message);
-                }
-            //}
-
-            
+                // Expand the treeview to show all nodes
+                //tv.ExpandAll();
+            }
+            catch (XmlException xExc)
+            {
+                // Exception is thrown is there is an error in the Xml
+                MessageBox.Show(xExc.Message);
+            }
+            catch (Exception ex) //General exception
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         //Open the XML file, and start to populate the treeview
