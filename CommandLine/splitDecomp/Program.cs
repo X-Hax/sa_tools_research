@@ -392,7 +392,7 @@ namespace splitDecomp
             Console.WriteLine("Usage: splitDecomp -ini \"path_ini\" -game \"path_game\" -out \"path_output\" -outmdl \"path_outputmdl\" [-nosamdl]");
             Console.WriteLine("\npath_to_ini: Location of decomp INI files and labels");
             Console.WriteLine("path_game: Game folder(location of sonic.exe)");
-            Console.WriteLine("path_output: Output folder for NJA files (e.g. \"D:\\sadx-decomp\\SonicAdventure\\sonic\\src\")");
+            Console.WriteLine("path_output: Output folder for NJA files (e.g. \"D:\\sadx-decomp\\SonicAdventure\\sonic\")");
             Console.WriteLine("path_outputmdl: Output folder for sa1mdl, saanim and sa1lvl files");
             Console.WriteLine("\n-nosamdl: do not output sa1mdl, saanim and sa1lvl files");
             Console.Write("\nPress any key to exit.");
