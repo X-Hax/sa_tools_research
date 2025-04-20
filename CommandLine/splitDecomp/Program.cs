@@ -127,6 +127,7 @@ namespace splitDecomp
                 // Scan through split entries
                 foreach (var item in iniData.Files)
                 {
+                    //Console.WriteLine("Item: {0}", item.Value.Filename);
                     // Ignore items that have no extension
                     if (!item.Value.Filename.Contains("."))
                         continue;
@@ -158,7 +159,7 @@ namespace splitDecomp
                                         txl.Save(outputFileM2);
                                     }
                                 }
-                                Console.WriteLine(outputFile);    
+                                Console.WriteLine(outputFile);
                             }
                             break;
                         case "texlist":
@@ -338,11 +339,12 @@ namespace splitDecomp
                             }
                             if (samodel)
                                 mot.Save(outputFileM);
+                            motLabels.Add(mot.ActionName);
                             motLabels.Add(mot.Name);
                             break;
                         case "action":
                             NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
-                            if (!labels.ContainsKey(item.Value.Address))
+                            if (!labels.ContainsKey(item.Value.Address) && !LabelIsNumerical(action.Animation.Name))
                             {
                                 if (action.Animation.Name.StartsWith("motion_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "motion", "action");
@@ -361,38 +363,39 @@ namespace splitDecomp
                             if (samodel)
                                 action.Animation.Save(outputFileM);
                             motLabels.Add(action.Animation.Name);
+                            motLabels.Add(action.Name);
                             break;
-                        // This is left over in case it's needed again in the future
-                        /*
-                        case "deathzone":
-                            List<string> hashes = new List<string>();
-                            int num = 0;
-                            int address = item.Value.Address;
-                            while (ByteConverter.ToUInt32(datafile, address + 4) != 0)
-                            {
-                                string njaFolderLocation = Path.Combine(outputPath, Path.GetDirectoryName(item.Value.Filename));
-                                string modelsFolderLocation = Path.Combine(outputPathM, Path.GetDirectoryName(item.Value.Filename));
-                                Directory.CreateDirectory(modelsFolderLocation);
-                                string file_tosave;
-                                if (item.Value.CustomProperties.ContainsKey("filename" + num.ToString()))
-                                    file_tosave = item.Value.CustomProperties["filename" + num++.ToString()];
-                                else
-                                    file_tosave = num++.ToString(NumberFormatInfo.InvariantInfo) + ".sa1mdl";
-                                ModelFormat modelfmt_death = ModelFormat.BasicDX; // Death zones in all games except SADXPC use Basic non-DX models
-                                NJS_OBJECT deathObj = new NJS_OBJECT(datafile, datafile.GetPointer(address + 4, (uint)iniData.ImageBase), (uint)iniData.ImageBase, modelfmt_death, labels, new Dictionary<int, Attach>());
-                                if (samodel)
-                                    ModelFile.CreateFile(Path.Combine(modelsFolderLocation, file_tosave), deathObj, null, null, null, null, modelfmt_death);
-                                using (TextWriter writer = File.CreateText(Path.Combine(njaFolderLocation, file_tosave[..file_tosave.LastIndexOf('.')])))
+                            // This is left over in case it's needed again in the future
+                            /*
+                            case "deathzone":
+                                List<string> hashes = new List<string>();
+                                int num = 0;
+                                int address = item.Value.Address;
+                                while (ByteConverter.ToUInt32(datafile, address + 4) != 0)
                                 {
-                                    if (!labelsExport.Contains(deathObj.Name))
-                                        labelsExport.Add(deathObj.Name);
-                                    Console.WriteLine(outputFile);
-                                    deathObj.ToNJA(writer, labelsExport, exportDefaults: false);
+                                    string njaFolderLocation = Path.Combine(outputPath, Path.GetDirectoryName(item.Value.Filename));
+                                    string modelsFolderLocation = Path.Combine(outputPathM, Path.GetDirectoryName(item.Value.Filename));
+                                    Directory.CreateDirectory(modelsFolderLocation);
+                                    string file_tosave;
+                                    if (item.Value.CustomProperties.ContainsKey("filename" + num.ToString()))
+                                        file_tosave = item.Value.CustomProperties["filename" + num++.ToString()];
+                                    else
+                                        file_tosave = num++.ToString(NumberFormatInfo.InvariantInfo) + ".sa1mdl";
+                                    ModelFormat modelfmt_death = ModelFormat.BasicDX; // Death zones in all games except SADXPC use Basic non-DX models
+                                    NJS_OBJECT deathObj = new NJS_OBJECT(datafile, datafile.GetPointer(address + 4, (uint)iniData.ImageBase), (uint)iniData.ImageBase, modelfmt_death, labels, new Dictionary<int, Attach>());
+                                    if (samodel)
+                                        ModelFile.CreateFile(Path.Combine(modelsFolderLocation, file_tosave), deathObj, null, null, null, null, modelfmt_death);
+                                    using (TextWriter writer = File.CreateText(Path.Combine(njaFolderLocation, file_tosave[..file_tosave.LastIndexOf('.')])))
+                                    {
+                                        if (!labelsExport.Contains(deathObj.Name))
+                                            labelsExport.Add(deathObj.Name);
+                                        Console.WriteLine(outputFile);
+                                        deathObj.ToNJA(writer, labelsExport, exportDefaults: false);
+                                    }
+                                    address += 8;
                                 }
-                                address += 8;
-                            }
-                            break;
-                        */
+                                break;
+                            */
                     }
                 }
                 // Generate dupmodel for landtables
@@ -448,5 +451,14 @@ namespace splitDecomp
             return dst + label.Substring(src.Length);
         }
 
+        // Checks whether a label ends with a hex number (e.g. "object_00000000")
+        private static bool LabelIsNumerical(string label)        
+        {
+            if (label.Length < 8)
+                return false;
+            string number = label.Substring(label.Length-8, 8);
+            bool res = int.TryParse(number, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int test);
+            return res;
+        }
     }
 }
