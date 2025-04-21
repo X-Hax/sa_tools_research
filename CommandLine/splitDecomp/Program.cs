@@ -220,6 +220,11 @@ namespace splitDecomp
                                 Console.WriteLine(outputFile);
                                 roota.Name = "DO_NOT_EXPORT";
                                 roota.ToNJA(writer, labelsExport, exportDefaults: false);
+                                if (item.Value.CustomProperties.ContainsKey("object"))
+                                {
+                                    NJS_OBJECT njso = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["object"], NumberStyles.HexNumber), (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                                    njso.ToNJA(writer, labelsExport, exportDefaults: false);
+                                }
                             }
                             if (samodel)
                                 ModelFile.CreateFile(outputFileM, roota, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
