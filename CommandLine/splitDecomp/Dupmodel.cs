@@ -12,7 +12,7 @@ namespace splitDecomp
         {
             // 'lands' is an array for cases like Ice Cap Act 4
             // It reuses Act 2 models but has some additional dup models, so the counting has to be done for both Acts 2 and 4
-            List<Attach> atts = new List<Attach>(); // List of NJS_MODELs that builds progressively
+            List<string> atts = new List<string>(); // List of NJS_MODELs that builds progressively
             List<string> mots = new List<string>(); // List of NJS_MOTIONs that builds progressively (by name)
             List<NJS_OBJECT> dupmodels = new List<NJS_OBJECT>(); // List of all NJS_OBJECTS that reuse any NJS_MODEL
             List<NJS_ACTION> dupactions = new List<NJS_ACTION>();// List of all NJS_ACTIONS that reuse any NJS_MOTION
@@ -26,22 +26,29 @@ namespace splitDecomp
                 dupactions_result = new List<NJS_ACTION>();
                 foreach (COL col in land.COL)
                 {
+                    Console.Write("Object {0}: ", col.Model.Name);
                     if (objLabels.Contains(col.Model.Name))
                     {
-                        atts.Add(col.Model.Attach);
+                        Console.Write("Original\n");
+                        atts.Add(col.Model.Attach.Name);
                         continue;
                     }
-                    if (atts.Contains(col.Model.Attach))
+                    if (atts.Contains(col.Model.Attach.Name) || objLabels.Contains(col.Model.Attach.Name))
                     {
                         if (!dupmodels.Contains(col.Model))
                         {
-                            Console.WriteLine("Object {0} is reusing {1}", col.Model.Name, col.Model.Attach.Name);
+                            Console.Write("Reusing {1}\n", col.Model.Name, col.Model.Attach.Name);
                             dupmodels.Add(col.Model);
                             dupmodels_result.Add(col.Model);
                         }
+                        else
+                            Console.Write("Already in dupmodels");
                     }
                     else
-                        atts.Add(col.Model.Attach);
+                    {
+                        Console.Write("Attach First\n");
+                        atts.Add(col.Model.Attach.Name);
+                    }
                 }
                 if (land.Anim != null)
                 {
