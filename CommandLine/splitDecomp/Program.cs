@@ -293,6 +293,14 @@ namespace splitDecomp
                             if (samodel)
                                 ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
+                        case "camera":
+                            NinjaCamera cam = new NinjaCamera(datafile, item.Value.Address, labels);
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                Console.WriteLine(outputFile);
+                                cam.ToNJA(writer, labelsExport);
+                            }
+                            break;
                         case "caction":
                             NinjaCameraAction camAction = new NinjaCameraAction(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
                             using (TextWriter writer = File.CreateText(outputFile))
@@ -375,7 +383,10 @@ namespace splitDecomp
                             motLabels.Add(mot.Name);
                             break;
                         case "action":
-                            NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                            int np = 0;
+                            if (item.Value.CustomProperties.ContainsKey("numparts"))
+                                np = int.Parse(item.Value.CustomProperties["numparts"]);
+                            NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>(), np);
                             if (!labels.ContainsKey(item.Value.Address) && !LabelIsNumerical(action.Animation.Name))
                             {
                                 if (action.Animation.Name.StartsWith("motion_"))
