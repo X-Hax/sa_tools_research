@@ -243,7 +243,8 @@ namespace splitDecomp
                             bool chunk = item.Value.Type == "chunkmodel";
                             NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, chunk ? ModelFormat.Chunk : ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
                             objLabels.Add(obj.Name);
-                            objLabels.Add(obj.Attach.Name); // HACK
+                            if (obj.Attach != null)
+                                objLabels.Add(obj.Attach.Name); // HACK
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 if (!labelsExport.Contains(obj.Name))
@@ -281,6 +282,9 @@ namespace splitDecomp
                             }
                             if (samodel)
                                 ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
+                            break;
+                        case "caction":
+                            //NJS_CAMERA cam = new NJS_CAMERA();
                             break;
                         case "motion":
                         case "animation":
