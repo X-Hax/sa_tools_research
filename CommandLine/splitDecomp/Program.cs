@@ -383,9 +383,12 @@ namespace splitDecomp
                             motLabels.Add(mot.Name);
                             break;
                         case "action":
-                            int np = 0;
+                            int np = 0; // For cases when the size of the MDATA array is wrong
+                            ushort mdatas = 0; // For cases when the MDATA type is wrong (MDATA2 instead of MDATA3 etc.)
                             if (item.Value.CustomProperties.ContainsKey("numparts"))
                                 np = int.Parse(item.Value.CustomProperties["numparts"]);
+                            if (item.Value.CustomProperties.ContainsKey("mdata"))
+                                mdatas = ushort.Parse(item.Value.CustomProperties["mdata"]);
                             NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>(), np);
                             if (!labels.ContainsKey(item.Value.Address) && !LabelIsNumerical(action.Animation.Name))
                             {
@@ -401,7 +404,7 @@ namespace splitDecomp
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Console.WriteLine(outputFile);
-                                action.Animation.ToNJA(writer, labelsExport, exportDefaults: false);
+                                action.Animation.ToNJA(writer, labelsExport, exportDefaults: false, mdatatype: mdatas);
                             }
                             if (samodel)
                                 action.Animation.Save(outputFileM);
