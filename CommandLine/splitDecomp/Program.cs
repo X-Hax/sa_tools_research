@@ -284,7 +284,12 @@ namespace splitDecomp
                                 ModelFile.CreateFile(outputFileM, root, null, null, null, new Dictionary<uint, byte[]>(), ModelFormat.BasicDX);
                             break;
                         case "caction":
-                            //NJS_CAMERA cam = new NJS_CAMERA();
+                            NinjaCameraAction camAction = new NinjaCameraAction(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
+                            using (TextWriter writer = File.CreateText(outputFile))
+                            {
+                                Console.WriteLine(outputFile);
+                                camAction.ToNJA(writer, labelsExport);
+                            }
                             break;
                         case "motion":
                         case "animation":
