@@ -223,7 +223,11 @@ namespace splitDecomp
                                 if (item.Value.CustomProperties.ContainsKey("object"))
                                 {
                                     NJS_OBJECT njso = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["object"], NumberStyles.HexNumber), (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
-                                    njso.ToNJA(writer, labelsExport, exportDefaults: false);
+                                    if (!labelsExport.Contains(njso.Name))
+                                    {
+                                        labelsExport.Add(njso.Name);
+                                        njso.ToNJA(writer, labelsExport, exportDefaults: false);
+                                    }
                                 }
                             }
                             if (samodel)
