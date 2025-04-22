@@ -207,7 +207,14 @@ namespace splitDecomp
                                     att_head.Name = ReplaceLabel(attm.Name, "attach", "object");
                                 else if (attm.Name.StartsWith("model_"))
                                     att_head.Name = ReplaceLabel(attm.Name, "model", "object");
-                                Console.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
+                                if (!item.Value.CustomProperties.ContainsKey("object"))
+                                {
+                                    Console.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
+                                }
+                                else
+                                {
+                                    att_head.Name = "DO_NOT_EXPORT_" + att_head.Name;
+                                }
                                 NJS_OBJECT rootm = new NJS_OBJECT();
                                 rootm.AddChild(att_head);
                                 rootm.Name = "DO_NOT_EXPORT_" + rootm.Name;
@@ -223,11 +230,7 @@ namespace splitDecomp
                                 if (item.Value.CustomProperties.ContainsKey("object"))
                                 {
                                     NJS_OBJECT njso = new NJS_OBJECT(datafile, int.Parse(item.Value.CustomProperties["object"], NumberStyles.HexNumber), (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
-                                    if (!labelsExport.Contains(njso.Name))
-                                    {
-                                        labelsExport.Add(njso.Name);
                                         njso.ToNJA(writer, labelsExport, exportDefaults: false);
-                                    }
                                 }
                             }
                             if (samodel)
