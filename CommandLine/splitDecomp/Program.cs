@@ -66,6 +66,16 @@ namespace splitDecomp
             {
                 duplist = IniSerializer.Deserialize<Dictionary<string, string>>(duplistpath);
                 Console.WriteLine("Using duplist path: " + duplistpath);
+                string[] oldDupFiles = Directory.GetFiles(outputPath, "dupmo*.dup", SearchOption.AllDirectories);
+                if (oldDupFiles != null && oldDupFiles.Length > 0)
+                {
+                    Console.WriteLine("Deleting old dup files...");
+                    foreach (string old in oldDupFiles)
+                    {
+                        Console.WriteLine("Deleting {0}", old);
+                        File.Delete(old);
+                    }
+                }
             }
             else
             {

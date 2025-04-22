@@ -54,24 +54,56 @@ namespace splitDecomp
                 {
                     foreach (GeoAnimData geo in land.Anim)
                     {
+                        // Object
+                        Console.Write("Object in action {0}: ", geo.Model.Name);
+                        if (objLabels.Contains(geo.Model.Name))
+                        {
+                            Console.Write("Original\n");
+                            if (geo.Model.Attach != null)
+                                atts.Add(geo.Model.Attach.Name);
+                            continue;
+                        }
+                        if (geo.Model.Attach != null)
+                        {
+                            if (atts.Contains(geo.Model.Attach.Name) || objLabels.Contains(geo.Model.Attach.Name))
+                            {
+                                if (!dupmodels.Contains(geo.Model))
+                                {
+                                    Console.Write("Reusing {0}\n", geo.Model.Attach.Name);
+                                    dupmodels.Add(geo.Model);
+                                    dupmodels_result.Add(geo.Model);
+                                }
+                                else
+                                    Console.Write("Already in dupmodels");
+                            }
+                            else
+                            {
+                                Console.Write("Attach First\n");
+                                atts.Add(geo.Model.Attach.Name);
+                            }
+                        }
+                        // Motion
+                        Console.Write("Motion in action {0}: ", geo.Animation.ActionName);
                         if (motLabels.Contains(geo.Animation.ActionName))
                         {
+                            Console.Write("Original\n");
                             mots.Add(geo.Animation.Name);
                             continue;
                         }
-                        if (mots.Contains(geo.Animation.Name))
+                        if (mots.Contains(geo.Animation.Name) || motLabels.Contains(geo.Animation.Name))
                         {
                             NJS_ACTION act = new NJS_ACTION(geo.Model, geo.Animation);
                             act.Name = geo.Animation.ActionName;
                             if (!dupactions.Contains(act))
                             {
-                                Console.WriteLine("Action {0} is reusing {1}", act.Name, act.Animation.Name);
+                                Console.Write("Reusing {0}\n", act.Animation.Name);
                                 dupactions.Add(act);
                                 dupactions_result.Add(act);
                             }
                         }
                         else
                         {
+                            Console.Write("Motion first\n");
                             mots.Add(geo.Animation.Name);
                         }
                     }
@@ -81,7 +113,7 @@ namespace splitDecomp
             // Write dupmodel.dup
             if (dupmodels_result.Count > 0)
             {
-                TextWriter tw_nja = File.CreateText(Path.Combine(outpath, "dupmodel.dup"));
+                StreamWriter tw_nja = new StreamWriter(Path.Combine(outpath, "dupmodel.dup"));
                 foreach (NJS_OBJECT obj in dupmodels_result)
                 {
                     if (dupmodels_result.IndexOf(obj) > 0)
@@ -94,9 +126,10 @@ namespace splitDecomp
             // Write dupmotion.dup
             if (dupactions_result.Count > 0)
             {
-                TextWriter twa_nja = File.CreateText(Path.Combine(outpath, "dupmotion.dup"));
+                StreamWriter twa_nja = new StreamWriter(Path.Combine(outpath, "dupmotion.dup"));
                 foreach (NJS_ACTION act in dupactions_result)
                 {
+                    //Console.WriteLine("Export {0}", act.Name);
                     if (dupactions_result.IndexOf(act) > 0)
                         twa_nja.WriteLine();
                     ActionToNJA(act, twa_nja);
