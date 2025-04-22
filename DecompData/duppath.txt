@@ -64,6 +64,7 @@ landtable0702.c.sa1lvl=act03/models
 landtable0800.c.sa1lvl=act01/models
 landtable0801.c.sa1lvl=act02/models
 landtable0802.c.sa1lvl=act03/models
+landtable0803.c.sa1lvl=act02/models
 landtable0900.c.sa1lvl=act01/models
 landtable0901.c.sa1lvl=act02/models
 landtable0902.c.sa1lvl=act03/models
