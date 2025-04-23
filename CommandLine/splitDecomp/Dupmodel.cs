@@ -26,10 +26,10 @@ namespace splitDecomp
                 dupactions_result = new List<NJS_ACTION>();
                 foreach (COL col in land.COL)
                 {
-                    Console.Write("Object {0}: ", col.Model.Name);
+                    Log.Write("Object {0}: ", col.Model.Name);
                     if (objLabels.Contains(col.Model.Name))
                     {
-                        Console.Write("Original\n");
+                        Log.Write("Original\n");
                         atts.Add(col.Model.Attach.Name);
                         continue;
                     }
@@ -37,16 +37,16 @@ namespace splitDecomp
                     {
                         if (!dupmodels.Contains(col.Model))
                         {
-                            Console.Write("Reusing {1}\n", col.Model.Name, col.Model.Attach.Name);
+                            Log.Write("Reusing {1}\n", col.Model.Name, col.Model.Attach.Name);
                             dupmodels.Add(col.Model);
                             dupmodels_result.Add(col.Model);
                         }
                         else
-                            Console.Write("Already in dupmodels");
+                            Log.Write("Already in dupmodels");
                     }
                     else
                     {
-                        Console.Write("Attach First\n");
+                        Log.Write("Attach First\n");
                         atts.Add(col.Model.Attach.Name);
                     }
                 }
@@ -55,10 +55,10 @@ namespace splitDecomp
                     foreach (GeoAnimData geo in land.Anim)
                     {
                         // Object
-                        Console.Write("Object in action {0}: ", geo.Model.Name);
+                        Log.Write("Object in action {0}: ", geo.Model.Name);
                         if (objLabels.Contains(geo.Model.Name))
                         {
-                            Console.Write("Original\n");
+                            Log.Write("Original\n");
                             if (geo.Model.Attach != null)
                                 atts.Add(geo.Model.Attach.Name);
                             continue;
@@ -69,24 +69,24 @@ namespace splitDecomp
                             {
                                 if (!dupmodels.Contains(geo.Model))
                                 {
-                                    Console.Write("Reusing {0}\n", geo.Model.Attach.Name);
+                                    Log.Write("Reusing {0}\n", geo.Model.Attach.Name);
                                     dupmodels.Add(geo.Model);
                                     dupmodels_result.Add(geo.Model);
                                 }
                                 else
-                                    Console.Write("Already in dupmodels");
+                                    Log.Write("Already in dupmodels");
                             }
                             else
                             {
-                                Console.Write("Attach First\n");
+                                Log.Write("Attach First\n");
                                 atts.Add(geo.Model.Attach.Name);
                             }
                         }
                         // Motion
-                        Console.Write("Motion in action {0}: ", geo.Animation.ActionName);
+                        Log.Write("Motion in action {0}: ", geo.Animation.ActionName);
                         if (motLabels.Contains(geo.Animation.ActionName))
                         {
-                            Console.Write("Original\n");
+                            Log.Write("Original\n");
                             mots.Add(geo.Animation.Name);
                             continue;
                         }
@@ -96,14 +96,14 @@ namespace splitDecomp
                             act.Name = geo.Animation.ActionName;
                             if (!dupactions.Contains(act))
                             {
-                                Console.Write("Reusing {0}\n", act.Animation.Name);
+                                Log.Write("Reusing {0}\n", act.Animation.Name);
                                 dupactions.Add(act);
                                 dupactions_result.Add(act);
                             }
                         }
                         else
                         {
-                            Console.Write("Motion first\n");
+                            Log.Write("Motion first\n");
                             mots.Add(geo.Animation.Name);
                         }
                     }
@@ -129,7 +129,7 @@ namespace splitDecomp
                 StreamWriter twa_nja = new StreamWriter(Path.Combine(outpath, "dupmotion.dup"));
                 foreach (NJS_ACTION act in dupactions_result)
                 {
-                    //Console.WriteLine("Export {0}", act.Name);
+                    //Log.WriteLine("Export {0}", act.Name);
                     if (dupactions_result.IndexOf(act) > 0)
                         twa_nja.WriteLine();
                     ActionToNJA(act, twa_nja);

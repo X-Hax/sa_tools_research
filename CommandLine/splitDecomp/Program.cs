@@ -48,31 +48,33 @@ namespace splitDecomp
                     }
                 }
             }
+            // Initialize logger
+            Log.Init(Path.Combine(Environment.CurrentDirectory, "splitDecomp.log"));
             // Clear screen
             Console.Clear();
             Console.Write("\x1b[3J");
             // Set text encoder for 932 (required for NJA export)
             System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             // Print out parameters
-            Console.WriteLine("Using INI data from folder: {0}", iniPath);
-            Console.WriteLine("Using assets in folder: {0}", assetPath);
-            Console.WriteLine("NJA output path: {0}", outputPath);
+            Log.WriteLine("Using INI data from folder: {0}", iniPath);
+            Log.WriteLine("Using assets in folder: {0}", assetPath);
+            Log.WriteLine("NJA output path: {0}", outputPath);
             if (samodel)
-                Console.WriteLine("SAModel output path: {0}", outputPathM);
+                Log.WriteLine("SAModel output path: {0}", outputPathM);
             // Load the dupmodel paths list if it exists
             string duplistpath = Path.Combine(iniPath, "duppath.txt");
             Dictionary<string, string> duplist;
             if (File.Exists(duplistpath))
             {
                 duplist = IniSerializer.Deserialize<Dictionary<string, string>>(duplistpath);
-                Console.WriteLine("Using duplist path: " + duplistpath);
+                Log.WriteLine("Using duplist path: " + duplistpath);
                 string[] oldDupFiles = Directory.GetFiles(outputPath, "dupmo*.dup", SearchOption.AllDirectories);
                 if (oldDupFiles != null && oldDupFiles.Length > 0)
                 {
-                    Console.WriteLine("Deleting old dup files...");
+                    Log.WriteLine("Deleting old dup files...");
                     foreach (string old in oldDupFiles)
                     {
-                        Console.WriteLine("Deleting {0}", old);
+                        Log.WriteLine("Deleting {0}", old);
                         File.Delete(old);
                     }
                 }
@@ -80,7 +82,7 @@ namespace splitDecomp
             else
             {
                 duplist = new Dictionary<string, string>();
-                Console.WriteLine("Duplist path not found");
+                Log.WriteLine("Duplist path not found");
             }
             // Create output folder
             Directory.CreateDirectory(outputPath);
@@ -88,13 +90,13 @@ namespace splitDecomp
             string[] iniFiles = Directory.GetFiles(iniPath, "*.ini", SearchOption.TopDirectoryOnly);
             if (iniFiles.Length == 0)
             {
-                Console.WriteLine("Error: No INI files found. See help below.");
+                Log.WriteLine("Error: No INI files found. See help below.");
                 ShowHelp();
                 return;
             }
             for (int i = 0; i < iniFiles.Length; i++)
             {
-                Console.WriteLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
+                Log.WriteLine("\nProcessing split data: " + Path.GetFileName(iniFiles[i]));
                 // Create a list to keep track of exported labels
                 List<string> labelsExport = new List<string>();
                 // Load INI file
@@ -110,12 +112,12 @@ namespace splitDecomp
                 string labelPath = Path.Combine(iniPath, labelName);
                 if (File.Exists(labelPath))
                 {
-                    Console.WriteLine("Using labels from: " + labelPath);
+                    Log.WriteLine("Using labels from: " + labelPath);
                     labels = IniSerializer.Deserialize<Dictionary<int, string>>(labelPath);
                 }
                 else
                 {
-                    Console.WriteLine("Labels file not found for {0}", iniData.DataFilename);
+                    Log.WriteLine("Labels file not found for {0}", iniData.DataFilename);
                     labels = new Dictionary<int, string>();
                 }
                 // Load binary file from the 'system' folder
@@ -126,7 +128,7 @@ namespace splitDecomp
                 // If that didn't work either, assume an error
                 if (!File.Exists(binaryFilePath))
                 {
-                    Console.WriteLine("Error: Binary file {0} not found. See help below.", binaryFilePath);
+                    Log.WriteLine("Error: Binary file {0} not found. See help below.", binaryFilePath);
                     ShowHelp();
                     return;
                 }
@@ -137,7 +139,7 @@ namespace splitDecomp
                 // Scan through split entries
                 foreach (var item in iniData.Files)
                 {
-                    //Console.WriteLine("Item: {0}", item.Value.Filename);
+                    //Log.WriteLine("Item: {0}", item.Value.Filename);
                     // Ignore items that have no extension
                     if (!item.Value.Filename.Contains("."))
                         continue;
@@ -169,7 +171,7 @@ namespace splitDecomp
                                         txl.Save(outputFileM2);
                                     }
                                 }
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                             }
                             break;
                         case "texlist":
@@ -179,7 +181,7 @@ namespace splitDecomp
                             {
                                 texlist.ToNJA(writer, labelsExport);
                             }
-                            Console.WriteLine(outputFile);
+                            Log.WriteLine(outputFile);
                             if (samodel)
                                 texlist.Save(outputFileM);
                             break;
@@ -193,12 +195,12 @@ namespace splitDecomp
                                 bobj.Name = ReplaceLabel(batt.Name, "attach", "object");
                             else if (batt.Name.StartsWith("model_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "model", "object");
-                            Console.WriteLine("Warning: Using generated object name for '{0}'", batt.Name);
+                            Log.WriteLine("Warning: Using generated object name for '{0}'", batt.Name);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 if (!labelsExport.Contains(bobj.Name))
                                     labelsExport.Add(bobj.Name);
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 bobj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             if (samodel)
@@ -219,7 +221,7 @@ namespace splitDecomp
                                     att_head.Name = ReplaceLabel(attm.Name, "model", "object");
                                 if (!item.Value.CustomProperties.ContainsKey("object"))
                                 {
-                                    Console.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
+                                    Log.WriteLine("Warning: Using generated object name for '{0}'", attm.Name);
                                 }
                                 else
                                 {
@@ -234,7 +236,7 @@ namespace splitDecomp
                             roota.AddChildren(modelsa);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 roota.Name = "DO_NOT_EXPORT";
                                 roota.ToNJA(writer, labelsExport, exportDefaults: false);
                                 if (item.Value.CustomProperties.ContainsKey("object"))
@@ -259,7 +261,7 @@ namespace splitDecomp
                             {
                                 if (!labelsExport.Contains(obj.Name))
                                     labelsExport.Add(obj.Name);
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 if (item.Value.CustomProperties.ContainsKey("texlist"))
                                 {
                                     NJS_TEXLIST tx = new NJS_TEXLIST(datafile, int.Parse(item.Value.CustomProperties["texlist"], NumberStyles.HexNumber), (uint)iniData.ImageBase, labels);
@@ -286,7 +288,7 @@ namespace splitDecomp
                             root.AddChildren(models);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 root.Name = "DO_NOT_EXPORT";
                                 root.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
@@ -297,7 +299,7 @@ namespace splitDecomp
                             NinjaCamera cam = new NinjaCamera(datafile, item.Value.Address, labels);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 cam.ToNJA(writer, labelsExport);
                             }
                             break;
@@ -305,7 +307,7 @@ namespace splitDecomp
                             NinjaCameraAction camAction = new NinjaCameraAction(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 camAction.ToNJA(writer, labelsExport);
                             }
                             break;
@@ -371,10 +373,10 @@ namespace splitDecomp
                                 mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
                             if (string.IsNullOrEmpty(mot.ObjectName))
                                 mot.ObjectName = objName;
-                            Console.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
+                            Log.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 mot.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             if (samodel)
@@ -399,11 +401,11 @@ namespace splitDecomp
                                 else if (action.Animation.Name.StartsWith("animation_"))
                                     action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
                                 action.Animation.ActionName = action.Name;
-                                Console.WriteLine(string.Format("Warning: label for action at {0} ({1}) missing, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Name));
+                                Log.WriteLine(string.Format("Warning: label for action at {0} ({1}) missing, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Name));
                             }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
-                                Console.WriteLine(outputFile);
+                                Log.WriteLine(outputFile);
                                 action.Animation.ToNJA(writer, labelsExport, exportDefaults: false, mdatatype: mdatas);
                             }
                             if (samodel)
@@ -435,7 +437,7 @@ namespace splitDecomp
                                     {
                                         if (!labelsExport.Contains(deathObj.Name))
                                             labelsExport.Add(deathObj.Name);
-                                        Console.WriteLine(outputFile);
+                                        Log.WriteLine(outputFile);
                                         deathObj.ToNJA(writer, labelsExport, exportDefaults: false);
                                     }
                                     address += 8;
@@ -469,25 +471,27 @@ namespace splitDecomp
                         string landLocation = Path.GetDirectoryName(item.Filename);
                         if (duplist.ContainsKey(landFilename))
                         {
-                            Console.WriteLine("\nUsing duplist for " + landFilename);
+                            Log.WriteLine("\nUsing duplist for " + landFilename);
                             string dupShortLocation = duplist[landFilename];
                             GenerateDup(landTables.ToArray(), Path.Combine(outputPath, landLocation, dupShortLocation), objLabels, motLabels);
                         }
                     }
                 }
             }
+            // Close log
+            Log.Finish();
         }
 
         private static void ShowHelp()
         {
-            Console.WriteLine("This tool outputs NJA assets for SADX decomp.");
-            Console.WriteLine("Usage: splitDecomp -ini \"path_ini\" -game \"path_game\" -out \"path_output\" -outmdl \"path_outputmdl\" [-nosamdl]");
-            Console.WriteLine("\npath_to_ini: Location of decomp INI files and labels");
-            Console.WriteLine("path_game: Game folder(location of sonic.exe)");
-            Console.WriteLine("path_output: Output folder for NJA files (e.g. \"D:\\sadx-decomp\\SonicAdventure\\sonic\")");
-            Console.WriteLine("path_outputmdl: Output folder for sa1mdl, saanim and sa1lvl files");
-            Console.WriteLine("\n-nosamdl: do not output sa1mdl, saanim and sa1lvl files");
-            Console.Write("\nPress any key to exit.");
+            Log.WriteLine("This tool outputs NJA assets for SADX decomp.");
+            Log.WriteLine("Usage: splitDecomp -ini \"path_ini\" -game \"path_game\" -out \"path_output\" -outmdl \"path_outputmdl\" [-nosamdl]");
+            Log.WriteLine("\npath_to_ini: Location of decomp INI files and labels");
+            Log.WriteLine("path_game: Game folder(location of sonic.exe)");
+            Log.WriteLine("path_output: Output folder for NJA files (e.g. \"D:\\sadx-decomp\\SonicAdventure\\sonic\")");
+            Log.WriteLine("path_outputmdl: Output folder for sa1mdl, saanim and sa1lvl files");
+            Log.WriteLine("\n-nosamdl: do not output sa1mdl, saanim and sa1lvl files");
+            Log.Write("\nPress any key to exit.");
             Console.ReadLine();
         }
 
