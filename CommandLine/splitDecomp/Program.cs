@@ -84,6 +84,8 @@ namespace splitDecomp
                 duplist = new Dictionary<string, string>();
                 Log.WriteLine("Duplist path not found");
             }
+            // Initialize the list of actions that have objects in DLLs
+            InitDLLActionList();
             // Create output folder
             Directory.CreateDirectory(outputPath);
             // Start scanning for split files
@@ -378,6 +380,9 @@ namespace splitDecomp
                             {
                                 Log.WriteLine(outputFile);
                                 mot.ToNJA(writer, labelsExport, exportDefaults: false);
+                                // If the motion is in the "actions with object in DLL" list, add an action
+                                if (mot.ActionName != null && ActionsWithObjectsInDLLs.ContainsKey(mot.ActionName))
+                                    ActionToNJAfromText(mot.ActionName, ActionsWithObjectsInDLLs[mot.ActionName], mot.Name, writer);
                             }
                             if (samodel)
                                 mot.Save(outputFileM);
