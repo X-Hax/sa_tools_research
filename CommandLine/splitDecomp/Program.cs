@@ -4,11 +4,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using SAModel;
 using SplitTools;
+using System.Linq;
 
 namespace splitDecomp
 {
     partial class Program
     {
+        static bool generateLabels = false; // Whether or not to generate missing labels for DLLs
+
         private static void Main(string[] args)
         {
             // Location of the EXE file's parent folder for default INI data
@@ -44,6 +47,12 @@ namespace splitDecomp
                             break;
                         case "-game":
                             assetPath = Path.GetFullPath(args[arg + 1]);
+                            break;
+                        case "-gen":
+                            generateLabels = true;
+                            break;
+                        case "-nogen":
+                            generateLabels = false;
                             break;
                     }
                 }
@@ -179,6 +188,11 @@ namespace splitDecomp
                         case "texlist":
                         case "texnamearray":
                             NJS_TEXLIST texlist = new NJS_TEXLIST(datafile, item.Value.Address, (uint)iniData.ImageBase, labels);
+                            if (generateLabels && LabelIsNumerical(texlist.Name))
+                            {
+                                TexLabelsFromFilename(texlist, item.Value.Filename);
+                                Log.WriteLine("Using generated name for texlist at {0}/{1} ({2}): {3}", item.Value.Address.ToString(), item.Value.Address.ToString("X"), (item.Value.Address+ (uint)iniData.ImageBase).ToString("X"), texlist.Name);
+                            }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 texlist.ToNJA(writer, labelsExport);
@@ -198,6 +212,11 @@ namespace splitDecomp
                             else if (batt.Name.StartsWith("model_"))
                                 bobj.Name = ReplaceLabel(batt.Name, "model", "object");
                             Log.WriteLine("Warning: Using generated object name for '{0}'", batt.Name);
+                            // Generate labels if the attach doesn't have them
+                            if (generateLabels && !labels.ContainsKey(item.Value.Address))
+                            {
+                                ObjLabelsFromName(bobj, ObjNameFromFilename(item.Value.Filename), labels);
+                            }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 if (!labelsExport.Contains(bobj.Name))
@@ -229,6 +248,10 @@ namespace splitDecomp
                                 {
                                     att_head.Name = "DO_NOT_EXPORT_" + att_head.Name;
                                 }
+                                if (generateLabels && !labels.ContainsKey(maddr))
+                                {
+                                    ObjLabelsFromName(att_head, ObjNameFromFilename(item.Value.Filename) + "_m" + m.ToString("D2"), labels);
+                                }
                                 NJS_OBJECT rootm = new NJS_OBJECT();
                                 rootm.AddChild(att_head);
                                 rootm.Name = "DO_NOT_EXPORT_" + rootm.Name;
@@ -256,6 +279,10 @@ namespace splitDecomp
                         case "chunkmodel":
                             bool chunk = item.Value.Type == "chunkmodel";
                             NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, chunk ? ModelFormat.Chunk : ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                            if (generateLabels && !labels.ContainsKey(item.Value.Address))
+                            {
+                                ObjLabelsFromFilename(obj, Path.GetFileName(item.Value.Filename), labels);
+                            }
                             objLabels.Add(obj.Name);
                             if (obj.Attach != null)
                                 objLabels.Add(obj.Attach.Name); // HACK
@@ -280,9 +307,13 @@ namespace splitDecomp
                             for (int m = 0; m < modelshex.Length; m++)
                             {
                                 int maddr = int.Parse(modelshex[m], NumberStyles.HexNumber);
-                                NJS_OBJECT objm = new NJS_OBJECT(datafile, maddr, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                                NJS_OBJECT objma = new NJS_OBJECT(datafile, maddr, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                                if (generateLabels && LabelIsNumerical(objma.Name))
+                                {
+                                    ObjLabelsFromName(objma, ObjNameFromFilename(item.Value.Filename) + "_m" + m.ToString("D2"), labels);
+                                }
                                 NJS_OBJECT rootm = new NJS_OBJECT();
-                                rootm.AddChild(objm);
+                                rootm.AddChild(objma);
                                 rootm.Name = "DO_NOT_EXPORT_" + rootm.Name;
                                 models.Add(rootm);
                             }
@@ -367,6 +398,12 @@ namespace splitDecomp
                                 }
                             }
                             NJS_MOTION mot = new NJS_MOTION(datafile, item.Value.Address, (uint)iniData.ImageBase, numparts, labels, item.Value.CustomProperties.ContainsKey("shortrot"), numverts);
+                            // If the MOTION doesn't have a label, generate it
+                            if (generateLabels && LabelIsNumerical(mot.Name))
+                            {
+                                mot.Name = MotNameFromFilename(item.Value.Filename, mot.IsShapeMotion());
+                                Log.WriteLine(string.Format("Warning: the name for the motion at {0} ({1}) is generated from filename, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), mot.Name));
+                            }
                             if (mot.Name.StartsWith("motion_"))
                                 mot.ActionName = ReplaceLabel(mot.Name, "motion", "action");
                             else if (mot.Name.StartsWith("_motion_"))
@@ -375,15 +412,21 @@ namespace splitDecomp
                                 mot.ActionName = ReplaceLabel(mot.Name, "animation", "action");
                             if (string.IsNullOrEmpty(mot.ObjectName))
                                 mot.ObjectName = objName;
-                            Log.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
-                            using (TextWriter writer = File.CreateText(outputFile))
+                            if (mot.ActionName != null)
                             {
-                                Log.WriteLine(outputFile);
-                                mot.ToNJA(writer, labelsExport, exportDefaults: false);
-                                // If the motion is in the "actions with object in DLL" list, add an action
-                                if (mot.ActionName != null && ActionsWithObjectsInDLLs.ContainsKey(mot.ActionName))
-                                    ActionToNJAfromText(mot.ActionName, ActionsWithObjectsInDLLs[mot.ActionName], mot.Name, writer);
+                                if (!ActionsWithObjectsInDLLs.ContainsKey(mot.ActionName))
+                                    Log.WriteLine("Warning: Using generated action name for motion {0}", mot.Name);
+                                else
+                                    Log.WriteLine("Using generated action name for motion with object in a DLL: {0}", mot.Name);
                             }
+                            using (TextWriter writer = File.CreateText(outputFile))
+                                {
+                                    Log.WriteLine(outputFile);
+                                    mot.ToNJA(writer, labelsExport, exportDefaults: false);
+                                    // If the motion is in the "actions with object in DLL" list, add an action
+                                    if (mot.ActionName != null && ActionsWithObjectsInDLLs.ContainsKey(mot.ActionName))
+                                        ActionToNJAfromText(mot.ActionName, ActionsWithObjectsInDLLs[mot.ActionName], mot.Name, writer);
+                                }
                             if (samodel)
                                 mot.Save(outputFileM);
                             motLabels.Add(mot.ActionName);
@@ -397,17 +440,63 @@ namespace splitDecomp
                             if (item.Value.CustomProperties.ContainsKey("mdata"))
                                 mdatas = ushort.Parse(item.Value.CustomProperties["mdata"]);
                             NJS_ACTION action = new NJS_ACTION(datafile, item.Value.Address, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>(), np);
-                            if (!labels.ContainsKey(item.Value.Address) && !LabelIsNumerical(action.Animation.Name))
+                            if (generateLabels)
                             {
-                                if (action.Animation.Name.StartsWith("motion_"))
-                                    action.Name = ReplaceLabel(action.Animation.Name, "motion", "action");
-                                else if (action.Animation.Name.StartsWith("_motion_"))
-                                    action.Name = ReplaceLabel(action.Animation.Name, "_motion", "_action");
-                                else if (action.Animation.Name.StartsWith("animation_"))
-                                    action.Name = ReplaceLabel(action.Animation.Name, "animation", "action");
-                                action.Animation.ActionName = action.Name;
-                                Log.WriteLine(string.Format("Warning: label for action at {0} ({1}) missing, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Name));
+                                // If the OBJECT doesn't have a label, generate it
+                                if (LabelIsNumerical(action.Model.Name))
+                                {
+                                    int oa = GetAddressFromLabel(action.Model.Name);
+                                    if (labels.ContainsKey(oa))
+                                    {
+                                        action.Model.Name = action.Animation.ObjectName = labels[oa];
+                                    }
+                                    else
+                                    {
+                                        foreach (var info in iniData.Files)
+                                        {
+                                            if (info.Value.Address == oa)
+                                            {
+
+                                                ObjLabelsFromFilename(action.Model, info.Value.Filename, labels);
+                                                action.Animation.ObjectName = action.Model.Name;
+                                                Log.WriteLine(string.Format("Warning: the object name for action at {0} ({1}) is generated from filename, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Animation.ObjectName));
+                                            }
+                                        }
+                                    }
+                                }
+                                // If the MOTION doesn't have a label, generate it
+                                if (LabelIsNumerical(action.Animation.Name))
+                                {                                    
+                                    //int ma=GetAddressFromLabel(action.Animation.Name);
+                                    string motnewname = MotNameFromFilename(item.Value.Filename, action.Animation.IsShapeMotion());
+                                    //labels.Add(ma, motnewname);
+                                    //action.Animation.Name = motnewname;
+                                    //Log.WriteLine("New name: {0}", motnewname);
+                                    MotLabelsFromMotObjName(action.Animation, action.Model, motnewname, labels);
+                                    action.Name = action.Animation.ActionName = ActNameFromFilename(item.Value.Filename);
+                                    Log.WriteLine(string.Format("Warning: the motion name for action at {0} ({1}) is generated from filename, using '{2}'", item.Value.Address.ToString("X"), ((uint)iniData.ImageBase + item.Value.Address).ToString("X"), action.Animation.Name));
+                                }
                             }
+                            // If the ACTION doesn't have a label, generate it
+                            if (!labels.ContainsKey(item.Value.Address))
+                            {
+                                // If the MOTION has a label, use it to generate the ACTION label
+                                if (!LabelIsNumerical(action.Animation.Name))
+                                {
+                                    if (action.Animation.Name.StartsWith("motion_"))
+                                        action.Animation.ActionName = ReplaceLabel(action.Animation.Name, "motion", "action");
+                                    else if (action.Animation.Name.StartsWith("_motion_"))
+                                        action.Animation.ActionName = ReplaceLabel(action.Animation.Name, "_motion", "_action");
+                                    else if (action.Animation.Name.StartsWith("animation_"))
+                                        action.Animation.ActionName = ReplaceLabel(action.Animation.Name, "animation", "action");
+                                    action.Name = action.Animation.ActionName;
+                                }
+                                else
+                                {
+                                    action.Name = action.Animation.ActionName = ActNameFromFilename(item.Value.Filename);
+                                }
+                                labels.Add(item.Value.Address, action.Name);
+                            }                           
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
                                 Log.WriteLine(outputFile);
@@ -468,10 +557,13 @@ namespace splitDecomp
                         // Load LandTable
                         LandTable landTable = new LandTable(datafile, item.Address, (uint)iniData.ImageBase, LandTableFormat.SADX, labels);
                         landTables.Add(landTable);
+                        // If the LandTable doesn't have labels, generate them
+                        if (generateLabels && LabelIsNumerical(landTable.Name))
+                            GenerateLandtableLabels(landTable, labels);
                         // Save LandTable
                         if (samodel)
                             landTable.SaveToFile(outputFileM, LandTableFormat.SADX);
-                        // Set names
+                        // Set filenames and locations for dup generation
                         string landFilename = Path.GetFileName(item.Filename);
                         string landLocation = Path.GetDirectoryName(item.Filename);
                         if (duplist.ContainsKey(landFilename))
@@ -482,6 +574,20 @@ namespace splitDecomp
                         }
                     }
                 }
+                // Check labels
+                Log.WriteLine("Checking for duplicate labels...");
+                var duplicateValueGroups = labels.GroupBy(x => x.Value).Where(x => x.Count() > 1);
+                foreach (var grp in duplicateValueGroups)
+                {
+                    Log.WriteLine($"Duplicate label={grp.Key}");
+
+                    foreach (var kvp in grp)
+                    {
+                        Log.WriteLine("\tAddress={0}/{1}", kvp.Key.ToString(), (kvp.Key + (uint)iniData.ImageBase).ToString("X"));
+                    }
+                }
+                if (duplicateValueGroups.Count() > 0)
+                    return;
             }
             // Close log
             Log.Finish();
@@ -509,7 +615,7 @@ namespace splitDecomp
         // Checks whether a label ends with a hex number (e.g. "object_00000000")
         private static bool LabelIsNumerical(string label)        
         {
-            if (label.Length < 8)
+            if (label == null || label.Length < 8)
                 return false;
             string number = label.Substring(label.Length-8, 8);
             bool res = int.TryParse(number, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int test);
