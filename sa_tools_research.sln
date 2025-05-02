@@ -77,6 +77,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabelGen", "CommandLine\Lab
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScanAction", "CommandLine\ScanAction\ScanAction.csproj", "{D70D7009-EE68-CCBF-725A-6201582ED752}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabelCUpdate", "CommandLine\LabelCUpdate\LabelCUpdate.csproj", "{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -373,6 +375,14 @@ Global
 		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x64.Build.0 = Release|x64
 		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x86.ActiveCfg = Release|x86
 		{D70D7009-EE68-CCBF-725A-6201582ED752}.Release|x86.Build.0 = Release|x86
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Debug|x64.ActiveCfg = Debug|x64
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Debug|x64.Build.0 = Debug|x64
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Debug|x86.ActiveCfg = Debug|x86
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Debug|x86.Build.0 = Debug|x86
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Release|x64.ActiveCfg = Release|x64
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Release|x64.Build.0 = Release|x64
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Release|x86.ActiveCfg = Release|x86
+		{FF8A06EB-FE87-5E32-BEE3-873C5190AFDA}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
