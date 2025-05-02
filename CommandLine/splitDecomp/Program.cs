@@ -490,6 +490,11 @@ namespace splitDecomp
                                     else if (action.Animation.Name.StartsWith("animation_"))
                                         action.Animation.ActionName = ReplaceLabel(action.Animation.Name, "animation", "action");
                                     action.Name = action.Animation.ActionName;
+                                    if (labels.ContainsValue(action.Name))
+                                    {
+                                        Log.WriteLine("Warning: Action name {0} already exists, generating from filename", action.Name);
+                                        action.Name = action.Animation.ActionName = ActNameFromFilename(item.Value.Filename);
+                                    }
                                 }
                                 else
                                 {
