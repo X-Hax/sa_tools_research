@@ -21,6 +21,7 @@ namespace splitDecomp
             string assetPath = Environment.CurrentDirectory; // Location of binary files
             string outputPath = Path.Combine(Environment.CurrentDirectory, "output"); // Output path for source NJA files
             bool samodel = true; // Whether to output sa1mdl, saanim etc. or not
+            bool outputLabels = false; // Whether to output the updated label list for LabelCUpdate or not
             string outputPathM = Path.Combine(Environment.CurrentDirectory, "outputM"); // Output path for sa1mdl, saanim etc. files
             // Process arguments
             if (args.Length > 0)
@@ -53,6 +54,9 @@ namespace splitDecomp
                             break;
                         case "-nogen":
                             generateLabels = false;
+                            break;
+                        case "-labellist":
+                            outputLabels = true;
                             break;
                     }
                 }
@@ -192,6 +196,8 @@ namespace splitDecomp
                             {
                                 TexLabelsFromFilename(texlist, item.Value.Filename);
                                 Log.WriteLine("Using generated name for texlist at {0}/{1} ({2}): {3}", item.Value.Address.ToString(), item.Value.Address.ToString("X"), (item.Value.Address+ (uint)iniData.ImageBase).ToString("X"), texlist.Name);
+                                if (!labels.ContainsKey(item.Value.Address))
+                                    labels.Add(item.Value.Address, texlist.Name);
                             }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
@@ -215,7 +221,7 @@ namespace splitDecomp
                             // Generate labels if the attach doesn't have them
                             if (generateLabels && !labels.ContainsKey(item.Value.Address))
                             {
-                                ObjLabelsFromName(bobj, ObjNameFromFilename(item.Value.Filename), labels);
+                                AttachLabelsFromName(batt, ObjNameFromFilename(item.Value.Filename), labels);
                             }
                             using (TextWriter writer = File.CreateText(outputFile))
                             {
@@ -250,7 +256,7 @@ namespace splitDecomp
                                 }
                                 if (generateLabels && !labels.ContainsKey(maddr))
                                 {
-                                    ObjLabelsFromName(att_head, ObjNameFromFilename(item.Value.Filename) + "_m" + m.ToString("D2"), labels);
+                                    AttachLabelsFromName(attm, ObjNameFromFilename(item.Value.Filename) + "_m" + m.ToString("D2"), labels);
                                 }
                                 NJS_OBJECT rootm = new NJS_OBJECT();
                                 rootm.AddChild(att_head);
@@ -431,6 +437,8 @@ namespace splitDecomp
                                 mot.Save(outputFileM);
                             motLabels.Add(mot.ActionName);
                             motLabels.Add(mot.Name);
+                            if (!labels.ContainsKey(item.Value.Address))
+                                labels.Add(item.Value.Address, mot.Name);
                             break;
                         case "action":
                             int np = 0; // For cases when the size of the MDATA array is wrong
@@ -593,6 +601,8 @@ namespace splitDecomp
                 }
                 if (duplicateValueGroups.Count() > 0)
                     return;
+                else if (outputLabels)
+                    IniSerializer.Serialize(labels, labelName.Replace("_labels", "_labels_out.txt"));
             }
             // Close log
             Log.Finish();
