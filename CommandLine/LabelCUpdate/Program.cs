@@ -15,8 +15,11 @@ namespace LabelCUpdate
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: LabelCUpdate <C file> <labels file>.");
-                Console.WriteLine("Example: LabelCUpdate bigdll.c chrmodels_orig_labels_new.txt");
+                Console.WriteLine("Usage: LabelCUpdate <C file> <labels file>.\n");
+                Console.WriteLine("Example: LabelCUpdate bigdll.c chrmodels_orig_labels_new.txt\n");
+                Console.WriteLine("Press ENTER to exit.");
+                Console.ReadLine();
+                return;
             }
             List<string> checkItems = new List<string>() { "object_", "attach_", "model_", "material_", "motion_", "animation_", "action_", "texlist_", "shape_", "point_", "points_" };
             string[] lines = File.ReadAllLines(args[0]);
