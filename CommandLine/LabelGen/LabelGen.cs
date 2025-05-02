@@ -1,4 +1,5 @@
 ﻿using SAModel;
+using SplitTools;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -73,22 +74,23 @@ namespace LabelGen
                     {
                         foreach (NJS_MESHSET mesh in batt.Mesh)
                         {
-                            Console.WriteLine("Mesh {0}", batt.Mesh.IndexOf(mesh));
+                            int meshID = batt.Mesh.IndexOf(mesh);
+                            Console.WriteLine("Mesh {0}", meshID);
                             if (mesh.Poly != null)
                             {
-                                mesh.PolyName = AddLabelWithID(mesh.PolyName, label, "pgS", mesh.MaterialID, output);
+                                mesh.PolyName = AddLabelWithID(mesh.PolyName, label, "pgS", meshID, output);
                             }
                             if (mesh.UV != null)
                             {
-                                mesh.UVName = AddLabelWithID(mesh.UVName, label, "vuvS", mesh.MaterialID, output);
+                                mesh.UVName = AddLabelWithID(mesh.UVName, label, "vuvS", meshID, output);
                             }
                             if (mesh.VColor != null)
                             {
-                                mesh.VColorName = AddLabelWithID(mesh.VColorName, label, "vcS", mesh.MaterialID, output);
+                                mesh.VColorName = AddLabelWithID(mesh.VColorName, label, "vcS", meshID, output);
                             }
                             if (mesh.PolyNormal != null)
                             {
-                                mesh.PolyNormalName = AddLabelWithID(mesh.PolyNormalName, label, "pnS", mesh.MaterialID, output);
+                                mesh.PolyNormalName = AddLabelWithID(mesh.PolyNormalName, label, "pnS", meshID, output);
                             }
                         }
                     }
@@ -107,6 +109,43 @@ namespace LabelGen
             if (mkey.ScaleName != null)
                 nodefull = mkey.ScaleName;
             return nodefull.Remove(0, 4 + motname.Length + 1); // Remove "pos_" and "motionname_"
+        }
+
+        // Checks whether a label ends with a hex number (e.g. "object_00000000")
+        private static bool LabelIsNumerical(string label)
+        {
+            if (label == null || label.Length < 8)
+                return false;
+            string number = label.Substring(label.Length - 8, 8);
+            bool res = int.TryParse(number, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int test);
+            return res;
+        }
+
+        // Adds missing UV labels to some Chaos models
+        static void FixUVLabels(NJS_OBJECT obj)
+        {
+            if (obj.Attach != null && obj.Attach is BasicAttach batt)
+            {
+                for (int i = 0; i < batt.Mesh.Count; i++)
+                    if (batt.Mesh[i].UVName != null && LabelIsNumerical(batt.Mesh[i].UVName))
+                        batt.Mesh[i].UVName = batt.Mesh[i].PolyName.Replace("pg", "vuv");
+            }
+        }
+
+        // Generate labels for OBJECT based on another OBJECT
+        static void GenerateLabels(NJS_OBJECT[] src, NJS_OBJECT dst, Dictionary<int, string> output)
+        {
+            Console.WriteLine("M:{0}", src.Length);
+            foreach (NJS_OBJECT obj in src)
+            {
+                foreach (NJS_OBJECT obj2 in obj.GetObjects())
+                FixUVLabels(obj2);
+            }
+            List<LabelOBJECT> list = LabelOBJECT.ExportLabels(src[0]);
+            LabelOBJECT.OutputLabelList(dst, list, output);
+            LabelOBJECT.ImportLabels(dst, list);
+            foreach (var item in output)
+                Console.WriteLine(item.Key.ToString("X") + "=" + item.Value);
         }
 
         // Generate labels for OBJECT based on labels for MOTION (takes an array of MOTION)
