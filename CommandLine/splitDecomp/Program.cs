@@ -602,7 +602,7 @@ namespace splitDecomp
                 if (duplicateValueGroups.Count() > 0)
                     return;
                 else if (outputLabels)
-                    IniSerializer.Serialize(labels, labelName.Replace("_labels", "_labels_out.txt"));
+                    IniSerializer.Serialize(labels, labelName.Replace("_labels.txt", "_labels_out.txt"));
             }
             // Close log
             Log.Finish();
