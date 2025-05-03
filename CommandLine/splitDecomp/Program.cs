@@ -314,7 +314,7 @@ namespace splitDecomp
                             {
                                 int maddr = int.Parse(modelshex[m], NumberStyles.HexNumber);
                                 NJS_OBJECT objma = new NJS_OBJECT(datafile, maddr, (uint)iniData.ImageBase, ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
-                                if (generateLabels && LabelIsNumerical(objma.Name))
+                                if (generateLabels && !labels.ContainsKey(maddr))
                                 {
                                     ObjLabelsFromName(objma, ObjNameFromFilename(item.Value.Filename) + "_m" + m.ToString("D2"), labels);
                                 }
