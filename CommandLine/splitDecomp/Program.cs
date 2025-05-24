@@ -20,6 +20,7 @@ namespace splitDecomp
             string iniPath = Path.Combine(startPath, "DecompData"); // Location of INI files and labels
             string assetPath = Environment.CurrentDirectory; // Location of binary files
             string outputPath = Path.Combine(Environment.CurrentDirectory, "output"); // Output path for source NJA files
+            bool ignoreDLLLabels = false; // Whether to not load labels for binaries other than sonic.exe
             bool samodel = true; // Whether to output sa1mdl, saanim etc. or not
             bool outputLabels = false; // Whether to output the updated label list for LabelCUpdate or not
             string outputPathM = Path.Combine(Environment.CurrentDirectory, "outputM"); // Output path for sa1mdl, saanim etc. files
@@ -57,6 +58,9 @@ namespace splitDecomp
                             break;
                         case "-labellist":
                             outputLabels = true;
+                            break;
+                        case "-nodll":
+                            ignoreDLLLabels = true;
                             break;
                     }
                 }
@@ -125,15 +129,19 @@ namespace splitDecomp
                 Dictionary<int, string> labels = new Dictionary<int, string>();
                 string labelName = Path.GetFileNameWithoutExtension(iniData.DataFilename) + "_labels.txt";
                 string labelPath = Path.Combine(iniPath, labelName);
-                if (File.Exists(labelPath))
+                // Load the labels file for sonic.exe or for the DLLs if the option to ignore DLL labels is disabled
+                if (!ignoreDLLLabels || labelPath.ToLowerInvariant().Contains("sonic"))
                 {
-                    Log.WriteLine("Using labels from: " + labelPath);
-                    labels = IniSerializer.Deserialize<Dictionary<int, string>>(labelPath);
-                }
-                else
-                {
-                    Log.WriteLine("Labels file not found for {0}", iniData.DataFilename);
-                    labels = new Dictionary<int, string>();
+                    if (File.Exists(labelPath))
+                    {
+                        Log.WriteLine("Using labels from: " + labelPath);
+                        labels = IniSerializer.Deserialize<Dictionary<int, string>>(labelPath);
+                    }
+                    else
+                    {
+                        Log.WriteLine("Labels file not found for {0}", iniData.DataFilename);
+                        labels = new Dictionary<int, string>();
+                    }
                 }
                 // Load binary file from the 'system' folder
                 string binaryFilePath = Path.Combine(assetPath, "system", iniData.DataFilename);
@@ -504,7 +512,8 @@ namespace splitDecomp
                                         action.Name = action.Animation.ActionName = ActNameFromFilename(item.Value.Filename);
                                     }
                                 }
-                                else
+                                // If the MOTION doesn't have a label, generate the ACTION and MOTION label from the filename
+                                else if (generateLabels)
                                 {
                                     action.Name = action.Animation.ActionName = ActNameFromFilename(item.Value.Filename);
                                 }
