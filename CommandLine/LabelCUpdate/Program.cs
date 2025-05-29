@@ -21,7 +21,7 @@ namespace LabelCUpdate
                 Console.ReadLine();
                 return;
             }
-            List<string> checkItems = new List<string>() { "object_", "attach_", "model_", "material_", "motion_", "animation_", "action_", "texlist_", "shape_", "point_", "points_" };
+            List<string> checkItems = new List<string>() { "object_", "attach_", "model_", "material_", "matlist_", "motion_", "animation_", "action_", "texlist_", "shape_", "point_", "points_" };
             string[] lines = File.ReadAllLines(args[0]);
             Dictionary<int, string> labels = IniSerializer.Deserialize<Dictionary<int, string>>(args[1]);
             TextWriter output = File.CreateText(Path.GetFileNameWithoutExtension(args[0]) + "_out.c");
