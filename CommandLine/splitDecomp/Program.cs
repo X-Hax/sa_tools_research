@@ -145,7 +145,10 @@ namespace splitDecomp
                 }
                 // Load binary file from the 'system' folder
                 string binaryFilePath = Path.Combine(assetPath, "system", iniData.DataFilename);
-                // If that didn't work, load the binary file from the parent folder
+                // If that didn't work, try without "_orig"
+                if (!File.Exists(binaryFilePath))
+                    binaryFilePath = binaryFilePath.Replace("_orig", "");
+                // If that didn't work, try to load the binary file from the parent folder
                 if (!File.Exists(binaryFilePath))
                     binaryFilePath = Path.Combine(assetPath, iniData.DataFilename);
                 // If that didn't work either, assume an error
@@ -155,6 +158,7 @@ namespace splitDecomp
                     ShowHelp();
                     return;
                 }
+                Console.WriteLine("Binary file: {0}", binaryFilePath);
                 byte[] datafile = File.ReadAllBytes(binaryFilePath);
                 // Set default key
                 if (iniData.ImageBase == null)
