@@ -162,7 +162,7 @@ namespace splitDecomp
                 byte[] datafile = File.ReadAllBytes(binaryFilePath);
                 // Set default key
                 if (iniData.ImageBase == null)
-                    iniData.ImageBase = 0x400000;
+                    iniData.ImageBase = HelperFunctions.SetupEXE(ref datafile) ?? 0x400000;
                 // Scan through split entries
                 foreach (var item in iniData.Files)
                 {
@@ -330,7 +330,7 @@ namespace splitDecomp
                                     NJS_TEXLIST tx = new NJS_TEXLIST(datafile, int.Parse(item.Value.CustomProperties["texlist"], NumberStyles.HexNumber), (uint)iniData.ImageBase, labels);
                                     tx.ToNJA(writer, labelsExport);
                                 }
-                                obj.ToNJA(writer, labelsExport, exportDefaults: false);
+                                obj.ToNJA(writer, labelsExport, exportDefaults: false, isNinja2: iniData.Game == Game.SA2B);
                             }
                             if (samodel)
                                 ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), mfmt);
