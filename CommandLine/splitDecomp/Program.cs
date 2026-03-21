@@ -295,8 +295,24 @@ namespace splitDecomp
                         case "basicmodel":
                         case "basicdxmodel":
                         case "chunkmodel":
-                            bool chunk = item.Value.Type == "chunkmodel";
-                            NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, chunk ? ModelFormat.Chunk : ModelFormat.BasicDX, labels, new Dictionary<int, Attach>());
+                        case "gcmodel":
+                            ModelFormat mfmt = ModelFormat.BasicDX;
+                            switch (item.Value.Type)
+                            {
+                                case "model":
+                                case "basicmodel":
+                                case "basicdxmodel":
+                                default:
+                                    mfmt = ModelFormat.BasicDX;
+                                    break;
+                                case "chunkmodel":
+                                    mfmt = ModelFormat.Chunk;
+                                    break;
+                                case "gcmodel":
+                                    mfmt = ModelFormat.GC;
+                                    break;
+                            }
+                            NJS_OBJECT obj = new NJS_OBJECT(datafile, item.Value.Address, (uint)iniData.ImageBase, mfmt, labels, new Dictionary<int, Attach>());
                             if (generateLabels && !labels.ContainsKey(item.Value.Address))
                             {
                                 ObjLabelsFromFilename(obj, Path.GetFileName(item.Value.Filename), labels);
@@ -317,7 +333,7 @@ namespace splitDecomp
                                 obj.ToNJA(writer, labelsExport, exportDefaults: false);
                             }
                             if (samodel)
-                                ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), chunk ? ModelFormat.Chunk : ModelFormat.BasicDX);
+                                ModelFile.CreateFile(outputFileM, obj, null, null, null, new Dictionary<uint, byte[]>(), mfmt);
                             break;
                         case "multidxmodel":
                             string[] modelshex = item.Value.CustomProperties["addresses"].Split(',');
