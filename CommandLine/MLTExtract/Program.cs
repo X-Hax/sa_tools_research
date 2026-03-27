@@ -67,7 +67,7 @@ namespace MLTExtract
             if (hdr == "gcax")
             {
                 Console.WriteLine("Gamecube MLT detected.");
-                gcaxMLTFile gcaxMLT = new gcaxMLTFile(file, Path.GetFileNameWithoutExtension(filename));
+                gcaxMLTFile gcaxMLT = new gcaxMLTFile(file, 0, Path.GetFileNameWithoutExtension(filename));
                 foreach (gcaxMLTFile.gcaxMLTEntry entry in gcaxMLT.Entries)
                 {
                     File.WriteAllBytes(Path.Combine(dir, entry.Name), entry.Data);
@@ -78,7 +78,7 @@ namespace MLTExtract
             else
             {
                 Console.WriteLine("Assuming Dreamcast MLT.");
-                MLTFile dcmlt = new MLTFile(file, Path.GetFileNameWithoutExtension(filename));
+                MLTFile dcmlt = new MLTFile(file, 0, Path.GetFileNameWithoutExtension(filename));
                 foreach (MLTFile.MLTEntry entry in dcmlt.Entries)
                 {
                     if (entry.Data == null)

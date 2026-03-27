@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using ArchiveLib;
-using VrSharp.Pvr;
+using TextureLib;
 
 // This program:
 // 1) Scans a folder for PVM archives and PVR files, and outputs Global Index information
@@ -213,7 +213,7 @@ namespace GBIXTool
             for (int z = 0; z < f.Entries.Count; z++)
             {
                 PvrTexture pvr = new PvrTexture(f.Entries[z].Data);
-                infos.Add(new GBIXInfo { gbix = pvr.GlobalIndex, pvmName = Path.GetFileName(file), pvrName = f.Entries[z].Name });
+                infos.Add(new GBIXInfo { gbix = pvr.Gbix, pvmName = Path.GetFileName(file), pvrName = f.Entries[z].Name });
             }
             return infos;
         }
@@ -221,7 +221,7 @@ namespace GBIXTool
         static GBIXInfo GetGBIXInfoFromPVR(string file)
         {
             PvrTexture pvr = new PvrTexture(File.ReadAllBytes(file));
-            return new GBIXInfo { gbix = pvr.GlobalIndex, pvmName = "", pvrName = Path.GetFileName(file) };
+            return new GBIXInfo { gbix = pvr.Gbix, pvmName = "", pvrName = Path.GetFileName(file) };
         }
 
     }

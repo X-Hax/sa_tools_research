@@ -125,7 +125,7 @@ namespace RecreatePVM
                 if (prs)
                 {
                     Console.WriteLine("Compressing PRS...");
-                    byte[] prsdata = FraGag.Compression.Prs.Compress(pvm.GetBytes());
+                    byte[] prsdata = PSO.PRS.PRS.Compress(pvm.GetBytes(), 255);
                     File.WriteAllBytes(Path.ChangeExtension(outfile, ".prs"), prsdata);
                 }
                 else
