@@ -301,6 +301,8 @@ namespace splitDecomp
                             {
                                 case "model":
                                 case "basicmodel":
+                                    mfmt = ModelFormat.Basic;
+                                    break;
                                 case "basicdxmodel":
                                 default:
                                     mfmt = ModelFormat.BasicDX;
