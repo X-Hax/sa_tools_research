@@ -37,9 +37,9 @@ namespace PatternPatchMaker
             byte[] file_src = File.ReadAllBytes(filen_src);
             byte[] file_dst = File.ReadAllBytes(filen_dst);
             if (Path.GetExtension(filen_src).ToLowerInvariant() == ".prs")
-                file_src = FraGag.Compression.Prs.Decompress(file_src);
+                file_src = PSO.PRS.PRS.Decompress(file_src);
             if (Path.GetExtension(filen_dst).ToLowerInvariant() == ".prs")
-                file_dst = FraGag.Compression.Prs.Decompress(file_dst);
+                file_dst = PSO.PRS.PRS.Decompress(file_dst);
             if (file_src.Length != file_dst.Length)
             {
                 Console.WriteLine("Source and destination file lengths don't match, resizing source array.");

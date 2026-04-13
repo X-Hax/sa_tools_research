@@ -28,7 +28,7 @@ namespace BlockBitTool
             // Binary file
             byte[] binary = File.ReadAllBytes(args[0]);
             if (Path.GetExtension(args[0].ToLowerInvariant()) == ".prs")
-                binary = FraGag.Compression.Prs.Decompress(binary);
+                binary = PSO.PRS.PRS.Decompress(binary);
             uint key = uint.Parse(args[1], System.Globalization.NumberStyles.HexNumber);
             // Landtable
             int address = int.Parse(args[2], System.Globalization.NumberStyles.HexNumber);

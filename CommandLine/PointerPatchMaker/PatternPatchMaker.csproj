@@ -9,7 +9,7 @@
 		<DebugType>embedded</DebugType>
 		<Platforms>x64;x86</Platforms>
 	</PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\sa_tools\Libraries\FraGag.Compression.Prs\FraGag.Compression.Prs.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="PRS" Version="1.1.2" />
+	</ItemGroup>
 </Project>

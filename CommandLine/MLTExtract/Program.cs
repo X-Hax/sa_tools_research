@@ -58,7 +58,7 @@ namespace MLTExtract
                 return;
             }
             byte[] file = File.ReadAllBytes(filename);
-            if (Path.GetExtension(filename).ToLowerInvariant() == ".prs") file = FraGag.Compression.Prs.Decompress(file);
+            if (Path.GetExtension(filename).ToLowerInvariant() == ".prs") file = PSO.PRS.PRS.Decompress(file);
             Console.WriteLine("Extracting MLT file: {0}", filename);
             string hdr = System.Text.Encoding.ASCII.GetString(file, 0, 4);
             Console.WriteLine("Output folder: {0}", dir);

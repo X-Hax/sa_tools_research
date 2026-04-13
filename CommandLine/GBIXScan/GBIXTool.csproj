@@ -11,6 +11,5 @@
 	</PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\sa_tools\Libraries\ArchiveLib\ArchiveLib.csproj" />
-    <ProjectReference Include="..\..\sa_tools\Libraries\FraGag.Compression.Prs\FraGag.Compression.Prs.csproj" />
   </ItemGroup>
 </Project>

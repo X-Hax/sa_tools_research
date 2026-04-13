@@ -206,7 +206,7 @@ namespace GBIXTool
         static List<GBIXInfo> GetGBIXInfoFromPVM(string file)
         {
             List<GBIXInfo> infos = new List<GBIXInfo>();
-            byte[] data = (Path.GetExtension(file).ToLowerInvariant() == ".prs") ? FraGag.Compression.Prs.Decompress(file) : File.ReadAllBytes(file);
+            byte[] data = (Path.GetExtension(file).ToLowerInvariant() == ".prs") ? PSO.PRS.PRS.Decompress(File.ReadAllBytes(file)) : File.ReadAllBytes(file);
             if (PuyoFile.Identify(data) == PuyoArchiveType.Unknown)
                 return new List<GBIXInfo>();
             PuyoFile f = new PuyoFile(data);

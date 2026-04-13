@@ -10,7 +10,6 @@
 		<Platforms>x64;x86</Platforms>
 	</PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\sa_tools\Libraries\FraGag.Compression.Prs\FraGag.Compression.Prs.csproj" />
     <ProjectReference Include="..\..\sa_tools\Libraries\SAEditorCommon\SAEditorCommon.csproj" />
     <ProjectReference Include="..\..\sa_tools\Libraries\SAModel\SAModel.csproj" />
     <ProjectReference Include="..\..\sa_tools\Libraries\SplitTools\SplitTools.csproj" />
